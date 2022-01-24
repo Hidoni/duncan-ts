@@ -4,6 +4,7 @@ export default interface BotConfig {
     intents: BitFieldResolvable<IntentsString, number>;
     token: string;
     appId: string;
+    database: string;
     debugGuildId?: string;
     partials?: PartialTypes[];
     commandsFolder?: string;
