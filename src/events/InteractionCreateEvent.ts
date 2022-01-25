@@ -6,6 +6,7 @@ import {
     CommandInteraction,
     ContextMenuInteraction,
     Interaction,
+    Snowflake,
 } from 'discord.js';
 import Bot from '../client/Bot';
 import {
@@ -15,6 +16,12 @@ import {
 } from '../interfaces/Command';
 import { EventHandler } from '../interfaces/Event';
 import { hasPermissions } from '../utils/PermissionUtils';
+
+const USERS_WITH_ADMIN_PERMISSIONS: Snowflake[] = ['87495537498021888', '381002402947399691'];
+
+function isUserAdmin(id: Snowflake) {
+    return USERS_WITH_ADMIN_PERMISSIONS.find((value) => value === id);
+}
 
 async function canRunCommand(
     client: Bot,
@@ -31,7 +38,7 @@ async function canRunCommand(
             ephemeral: true,
         });
         return false;
-    } else if (command.permissions && command.permissions(interaction)) {
+    } else if (!isUserAdmin(interaction.user.id) && command.permissions && command.permissions(interaction)) {
         const permissions = command.permissions(interaction);
         if (!interaction.member) {
             interaction.reply({
