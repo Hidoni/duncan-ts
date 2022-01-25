@@ -126,3 +126,8 @@ dist
 
 # TS Output
 bin/
+
+# Database
+duncan.sqlite
+questions.json
+gimmickpoints.json
