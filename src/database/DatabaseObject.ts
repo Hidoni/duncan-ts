@@ -24,14 +24,14 @@ export default class Database {
     }
 
     public async getUnusedQuestions(): Promise<QuestionInstance[]> {
-        return this.questions.findAll({ where: { used: false } });
+        return await this.questions.findAll({ where: { used: false } });
     }
 
     public async insertQuestion(
         question: string,
         authorName: string
     ): Promise<void> {
-        this.questions.create({ question: question, authorName: authorName, addedAt: new Date() });
+        await this.questions.create({ question: question, authorName: authorName, addedAt: new Date() });
     }
 
     public async getRandomQuestion() {

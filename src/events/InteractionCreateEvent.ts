@@ -71,16 +71,16 @@ async function canRunCommand(
     return true;
 }
 
-function handleCommandCall(
+async function handleCommandCall(
     command: Command<CommandBuilderType>,
     client: Bot,
     interaction: CommandInteraction | ContextMenuInteraction
-): void {
+): Promise<void> {
     if (
         interaction.isContextMenu() &&
         command.builder instanceof ContextMenuCommandBuilder
     ) {
-        (command as Command<ContextMenuCommandBuilder>).handler(
+        await (command as Command<ContextMenuCommandBuilder>).handler(
             client,
             interaction
         );
@@ -88,7 +88,7 @@ function handleCommandCall(
         interaction.isCommand() &&
         command.builder instanceof SlashCommandBuilder
     ) {
-        (command as Command<SlashCommandBuilder>).handler(client, interaction);
+        await (command as Command<SlashCommandBuilder>).handler(client, interaction);
     } else {
         throw new Error(
             `Mismatch between interaction type and command type in command ${command.builder.name}`
@@ -106,7 +106,7 @@ export const handler: EventHandler = async (
         if (command) {
             if (await canRunCommand(client, interaction, command)) {
                 try {
-                    handleCommandCall(command, client, interaction);
+                    await handleCommandCall(command, client, interaction);
                 } catch (error) {
                     client.logger?.error(
                         `Got the following error while executing ${interaction.commandName} command: ${error}`
@@ -117,7 +117,7 @@ export const handler: EventHandler = async (
                     replyFunction({
                         content: UNKNOWN_ERROR_MESSAGE,
                         ephemeral: true,
-                    });
+                    }).catch(() => client.logger?.debug('Could not reply to interaction'));
                 }
             }
         } else {
