@@ -26,7 +26,7 @@ export function setChannel(channel: string) {
 }
 
 export function capitalizeQuestion(question: string) {
-    return question.charAt(0).toUpperCase() + question.slice(1);
+    return question.charAt(0).toUpperCase() + question.slice(1).toLowerCase();    
 }
 
 function isFriday() {
@@ -42,7 +42,7 @@ function daysSinceDate(date: Date) {
 
 export async function changeQuestion(client: Bot) {
     client.logger?.debug('Changing question of the day...');
-    const channel = await client.channels.fetch(getChannel());
+    const channel = await client.channels.fetch(getChannel()).catch(() => undefined);
     if (!channel) {
         throw new Error(`Channel ${getChannel()} not found`);
     }
@@ -51,11 +51,11 @@ export async function changeQuestion(client: Bot) {
     }
     let message = `**QotD #${getDays()}: {}**`;
     if (isFriday()) {
-        message.replace('{}', FLURRY_OF_QUESTIONS_MESSAGE);
+        message = message.replace('{}', FLURRY_OF_QUESTIONS_MESSAGE);
     } else {
         const question = await client.database.getRandomQuestion();
         if (question) {
-            message.replace('{}', question.question);
+            message = message.replace('{}', question.question);
             client.logger?.info(
                 `Using question "${question.question}" by ${
                     question.authorName
@@ -64,7 +64,7 @@ export async function changeQuestion(client: Bot) {
             question.used = true;
             question.save();
         } else {
-            message.replace('{}', FLURRY_OF_QUESTIONS_MESSAGE);
+            message = message.replace('{}', FLURRY_OF_QUESTIONS_MESSAGE);
         }
     }
     await channel.send(message).then(async (msg: Message) => {
@@ -80,7 +80,7 @@ export async function changeQuestion(client: Bot) {
                 )
             );
     });
-    client.database.getUnusedQuestions().then((questions) => {
+    await client.database.getUnusedQuestions().then((questions) => {
         if (questions.length <= 5) {
             client.users
                 .fetch(JAKEMI_USER_ID)
