@@ -31,7 +31,11 @@ export default class Database {
         question: string,
         authorName: string
     ): Promise<void> {
-        await this.questions.create({ question: question, authorName: authorName, addedAt: new Date() });
+        await this.questions.create({
+            question: question,
+            authorName: authorName,
+            addedAt: new Date(),
+        });
     }
 
     public async getRandomQuestion() {
@@ -47,16 +51,15 @@ export default class Database {
                 Math.floor(
                     (now - question.addedAt.getTime()) / MILLISECONDS_IN_DAY
                 );
-            return 1 / daysSinceCreated;
+            return daysSinceCreated;
         });
         const totalWeight = weights.reduce((a, b) => a + b);
-        const randomWeight = Math.random() * totalWeight;
-        let currentWeight = 0;
+        let randomWeight = Math.random() * totalWeight;
         for (let i = 0; i < weights.length; i++) {
-            currentWeight += weights[i];
-            if (randomWeight < currentWeight) {
+            if (randomWeight < weights[i]) {
                 return questions[i];
             }
+            randomWeight -= weights[i];
         }
 
         return null;
