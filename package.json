@@ -1,9 +1,9 @@
 {
-  "name": "discord_bot_template",
+  "name": "duncan",
   "version": "1.0.0",
-  "description": "Template for a Discord Bot using discord.js that is easily expandable",
+  "description": "Discord bot for the cult",
   "main": "index.js",
-  "repository": "https://github.com/Hidoni/discord-template-bot",
+  "repository": "https://github.com/Hidoni/duncan-ts",
   "author": "Hidoni",
   "license": "MIT",
   "private": false,
