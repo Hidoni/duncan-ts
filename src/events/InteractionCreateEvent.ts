@@ -17,7 +17,12 @@ import {
 import { EventHandler } from '../interfaces/Event';
 import { hasPermissions } from '../utils/PermissionUtils';
 
-const USERS_WITH_ADMIN_PERMISSIONS: Snowflake[] = ['87495537498021888', '381002402947399691'];
+const USERS_WITH_ADMIN_PERMISSIONS: Snowflake[] = [
+    '87495537498021888',
+    '381002402947399691',
+];
+const UNKNOWN_ERROR_MESSAGE =
+    'Aw heck! Something went wrong here and I dunno what it is! ;w; Let’s go ask Hidoni about it!';
 
 function isUserAdmin(id: Snowflake) {
     return USERS_WITH_ADMIN_PERMISSIONS.find((value) => value === id);
@@ -34,15 +39,19 @@ async function canRunCommand(
         !interaction.guild
     ) {
         interaction.reply({
-            content: 'This command can only be used in a server.',
+            content: 'Oh wait! Send that command to me in the server instead! It gets covered in chocolate and sprinkles here in our messages so I don’t really see it! ',
             ephemeral: true,
         });
         return false;
-    } else if (!isUserAdmin(interaction.user.id) && command.permissions && command.permissions(interaction)) {
+    } else if (
+        !isUserAdmin(interaction.user.id) &&
+        command.permissions &&
+        command.permissions(interaction)
+    ) {
         const permissions = command.permissions(interaction);
         if (!interaction.member) {
             interaction.reply({
-                content: 'An error has occured during handling of the command',
+                content: 'What the..! The sprinkles spell out ‘404’! Not sure what happened there..',
                 ephemeral: true,
             });
             client.logger?.error(
@@ -51,7 +60,7 @@ async function canRunCommand(
             return false;
         } else if (!hasPermissions(interaction.member, permissions)) {
             interaction.reply({
-                content: `You must have the following permissions to use this command: ${permissions.join(
+                content: `Uh oh… you’re not allowed to do that! I think you might need the following permission${permissions.length > 1 ? '(s)' : ''}: ${permissions.join(
                     ', '
                 )}`,
                 ephemeral: true,
@@ -106,8 +115,7 @@ export const handler: EventHandler = async (
                         ? interaction.followUp.bind(interaction)
                         : interaction.reply.bind(interaction);
                     replyFunction({
-                        content:
-                            'An unknown error has occured and has been logged, please contact the developer to report this.',
+                        content: UNKNOWN_ERROR_MESSAGE,
                         ephemeral: true,
                     });
                 }
@@ -130,8 +138,7 @@ export const handler: EventHandler = async (
                     ? interaction.followUp.bind(interaction)
                     : interaction.reply.bind(interaction);
                 replyFunction({
-                    content:
-                        'An unknown error has occured and has been logged, please contact the developer to report this.',
+                    content: UNKNOWN_ERROR_MESSAGE,
                     ephemeral: true,
                 });
             });
