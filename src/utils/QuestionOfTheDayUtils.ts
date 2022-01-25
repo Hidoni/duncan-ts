@@ -72,7 +72,7 @@ export async function changeQuestion(client: Bot) {
             .fetchPinned()
             .then(async (messages) => {
                 await messages.last()?.unpin();
-                msg.pin();
+                await msg.pin();
             })
             .catch(() =>
                 client.logger?.debug(
