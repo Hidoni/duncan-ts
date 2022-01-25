@@ -45,7 +45,7 @@ export default class Database {
             const daysSinceCreated =
                 1 +
                 Math.floor(
-                    (now - question.createdAt.getTime()) / MILLISECONDS_IN_DAY
+                    (now - question.addedAt.getTime()) / MILLISECONDS_IN_DAY
                 );
             return 1 / daysSinceCreated;
         });
