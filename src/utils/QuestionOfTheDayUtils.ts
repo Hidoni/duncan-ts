@@ -41,6 +41,7 @@ function daysSinceDate(date: Date) {
 }
 
 export async function changeQuestion(client: Bot) {
+    client.logger?.debug('Changing question of the day...');
     const channel = await client.channels.fetch(getChannel());
     if (!channel) {
         throw new Error(`Channel ${getChannel()} not found`);
