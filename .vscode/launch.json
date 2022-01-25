@@ -13,6 +13,32 @@
             "outputCapture": "std",
             "sourceMaps": true,
             "smartStep": true
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Init Database",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/src/database/DatabaseInit.ts",
+            "outFiles": ["${workspaceFolder}/bin/**/*.js"],
+            "runtimeArgs": ["-r", "dotenv/config"],
+            "outputCapture": "std",
+            "sourceMaps": true,
+            "smartStep": true
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Import JSON to Database",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/src/old_version_import/Import.ts",
+            "outFiles": ["${workspaceFolder}/bin/**/*.js"],
+            "runtimeArgs": ["-r", "dotenv/config"],
+            "outputCapture": "std",
+            "sourceMaps": true,
+            "smartStep": true
         }
     ]
 }
