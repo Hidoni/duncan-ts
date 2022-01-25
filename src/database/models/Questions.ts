@@ -15,7 +15,7 @@ export const initialize: DatabaseModelInitializer<QuestionInstance> = (
                 allowNull: false,
             },
             question: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 unique: true,
                 allowNull: false,
             },
@@ -25,7 +25,7 @@ export const initialize: DatabaseModelInitializer<QuestionInstance> = (
             },
             authorName: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                allowNull: true,
             },
             used: {
                 type: DataTypes.BOOLEAN,
