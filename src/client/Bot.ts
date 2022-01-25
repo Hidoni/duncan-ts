@@ -116,10 +116,19 @@ export default class Bot extends Client {
     }
 
     private registerEvent(eventName: string, event: Event): void {
+        let wrapper = async function (bot: Bot) {
+            event
+                .handler(bot, ...Array.from(arguments).slice(1))
+                .catch((error) => {
+                    bot.logger?.error(
+                        `Failed to execute event ${eventName}: ${error}`
+                    );
+                });
+        }.bind(null, this);
         if (event.once) {
-            this.once(eventName, event.handler.bind(null, this));
+            this.once(eventName, wrapper);
         } else {
-            this.on(eventName, event.handler.bind(null, this));
+            this.on(eventName, wrapper);
         }
         this.logger?.info(
             `Registered event ${eventName} (once=${!!event.once})`
