@@ -19,3 +19,7 @@ export function getChannel(): string {
 export function setChannel(channel: string) {
     config.set('qotd.channel', channel);
 }
+
+export function capitalizeQuestion(question: string) {
+    return question.charAt(0).toUpperCase() + question.slice(1);
+}
