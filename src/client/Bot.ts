@@ -8,6 +8,7 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import glob from 'glob';
 import { ComponentHandler } from '../interfaces/ComponentHandler';
+import Database from '../database/DatabaseObject';
 
 export default class Bot extends Client {
     public logger?: Logger;
@@ -17,12 +18,14 @@ export default class Bot extends Client {
         new Collection();
     private restAPI: REST;
     private config: BotConfig;
+    public database: Database;
 
     public constructor(config: BotConfig, logger?: Logger) {
         super({ intents: config.intents, partials: config.partials });
         this.config = config;
         this.logger = logger;
         this.restAPI = new REST({ version: '9' }).setToken(config.token);
+        this.database = new Database(config.database);
 
         if (config.commandsFolder) {
             this.loadCommands(config.commandsFolder);
