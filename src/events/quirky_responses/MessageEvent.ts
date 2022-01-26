@@ -34,11 +34,13 @@ async function sendQuirkyResponse(message: Message) {
     ) {
         if (message.channelId === OUIJA_BOARD_CHANNEL) {
             if (Math.random() <= OUIJA_BOARD_CHANCE) {
-                // Send a random uppercase letter
-                const letter = String.fromCharCode(
-                    Math.floor(Math.random() * 26) + 65
-                );
-                await message.channel.send(letter);
+                // Send a random uppercase letter or the word 'Goodbye'
+                const randomNumber = Math.floor(Math.random() * 27);
+                const response =
+                    randomNumber < 26
+                        ? String.fromCharCode(65 + randomNumber)
+                        : 'Goodbye';
+                await message.channel.send(response);
             }
         } else if (message.channelId === NO_VOWELS_CHANNEL) {
             if (Math.random() <= NO_VOWELS_CHANCE) {
