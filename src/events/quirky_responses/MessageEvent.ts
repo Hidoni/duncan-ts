@@ -27,7 +27,7 @@ const WHITELISTED_CHANNELS = [
     '809001007560392714',
 ];
 
-async function sendQuirkyResponse(message: Message) {
+async function sendQuirkyResponse(client: Bot, message: Message) {
     if (
         message.channel instanceof TextChannel &&
         WHITELISTED_CHANNELS.find((value) => value === message.channelId)
@@ -40,6 +40,7 @@ async function sendQuirkyResponse(message: Message) {
                     randomNumber < 26
                         ? String.fromCharCode(65 + randomNumber)
                         : 'Goodbye';
+                client.logger?.info(`Responding to ${message.author.username} in ${message.channel.name} with a quirky response!!`);
                 await message.channel.send(response);
             }
         } else if (message.channelId === NO_VOWELS_CHANNEL) {
@@ -49,6 +50,7 @@ async function sendQuirkyResponse(message: Message) {
                     Math.random() * QUIRKY_RESPONSES.length
                 );
                 const response = QUIRKY_RESPONSES[randomIndex];
+                client.logger?.info(`Responding to ${message.author.username} in ${message.channel.name} with a quirky response!!`);
                 await message.channel.send(response.replace(/[aeiou]/gi, ''));
             }
         } else {
@@ -57,6 +59,7 @@ async function sendQuirkyResponse(message: Message) {
                 const randomIndex = Math.floor(
                     Math.random() * QUIRKY_RESPONSES.length
                 );
+                client.logger?.info(`Responding to ${message.author.username} in ${message.channel.name} with a quirky response!!`);
                 await message.channel.send(QUIRKY_RESPONSES[randomIndex]);
             }
         }
@@ -66,6 +69,6 @@ async function sendQuirkyResponse(message: Message) {
 export const name: string = 'messageCreate';
 export const handler: EventHandler = async (client: Bot, message: Message) => {
     if (message.author.id !== client.user?.id) {
-        await sendQuirkyResponse(message);
+        await sendQuirkyResponse(client, message);
     }
 };
