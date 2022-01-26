@@ -5,6 +5,8 @@ import Bot from '../client/Bot';
 const FLURRY_OF_QUESTIONS_MESSAGE =
     'Flurry of Questions Mode!\n\nAsk any (serious) question and the person below has to answer it. Then they add their own question and the cycle continues.';
 const JAKEMI_USER_ID = '381002402947399691';
+const MAX_PINS_IN_CHANNEL = 50;
+
 const config = new Conf();
 
 export function getDays(): number {
@@ -26,7 +28,7 @@ export function setChannel(channel: string) {
 }
 
 export function capitalizeQuestion(question: string) {
-    return question.charAt(0).toUpperCase() + question.slice(1).toLowerCase();    
+    return question.charAt(0).toUpperCase() + question.slice(1).toLowerCase();
 }
 
 function isFriday() {
@@ -42,7 +44,9 @@ function daysSinceDate(date: Date) {
 
 export async function changeQuestion(client: Bot) {
     client.logger?.debug('Changing question of the day...');
-    const channel = await client.channels.fetch(getChannel()).catch(() => undefined);
+    const channel = await client.channels
+        .fetch(getChannel())
+        .catch(() => undefined);
     if (!channel) {
         throw new Error(`Channel ${getChannel()} not found`);
     }
@@ -71,7 +75,9 @@ export async function changeQuestion(client: Bot) {
         await (channel as TextChannel).messages
             .fetchPinned()
             .then(async (messages) => {
-                await messages.last()?.unpin();
+                if (messages.size === MAX_PINS_IN_CHANNEL) {
+                    await messages.last()?.unpin();
+                }
                 await msg.pin();
             })
             .catch(() =>
