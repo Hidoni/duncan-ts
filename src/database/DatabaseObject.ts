@@ -76,4 +76,8 @@ export default class Database {
         }
         return points;
     }
+
+    public async getAllGimmickPoints(): Promise<GimmickPointsInstance[]> {
+        return await this.gimmickPoints.findAll();
+    }
 }
