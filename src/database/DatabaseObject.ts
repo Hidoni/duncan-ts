@@ -78,6 +78,8 @@ export default class Database {
     }
 
     public async getAllGimmickPoints(): Promise<GimmickPointsInstance[]> {
-        return await this.gimmickPoints.findAll();
+        return await this.gimmickPoints.findAll({
+            order: Sequelize.literal('points DESC'),
+        });
     }
 }
