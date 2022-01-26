@@ -42,5 +42,7 @@ async function giveGimmickPoints(client: Bot, message: Message) {
 
 export const name: string = 'messageCreate';
 export const handler: EventHandler = async (client: Bot, message: Message) => {
-    await giveGimmickPoints(client, message);
+    if (message.author.id !== client.user?.id) {
+        await giveGimmickPoints(client, message);
+    }
 };

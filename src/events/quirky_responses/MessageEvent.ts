@@ -65,5 +65,7 @@ async function sendQuirkyResponse(message: Message) {
 
 export const name: string = 'messageCreate';
 export const handler: EventHandler = async (client: Bot, message: Message) => {
-    await sendQuirkyResponse(message);
+    if (message.author.id !== client.user?.id) {
+        await sendQuirkyResponse(message);
+    }
 };
