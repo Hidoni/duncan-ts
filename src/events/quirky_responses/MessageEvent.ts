@@ -1,9 +1,9 @@
 import { Message, TextChannel } from 'discord.js';
-import { readFileSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
 
-const QUIRKY_RESPONSES = readFileSync('../../../quirky-responses.txt', 'utf8')
+const QUIRKY_RESPONSES = readFileSync('./quirky-responses.txt', 'utf8')
     .trim()
     .split('\n');
 const OUIJA_BOARD_CHANNEL = '809001007560392714';
