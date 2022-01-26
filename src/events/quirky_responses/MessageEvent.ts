@@ -27,7 +27,7 @@ const WHITELISTED_CHANNELS = [
     '809001007560392714',
 ];
 
-async function sendQuirkyResponse(client: Bot, message: Message) {
+async function sendQuirkyResponse(message: Message) {
     if (
         message.channel instanceof TextChannel &&
         WHITELISTED_CHANNELS.find((value) => value === message.channelId)
@@ -63,5 +63,5 @@ async function sendQuirkyResponse(client: Bot, message: Message) {
 
 export const name: string = 'message';
 export const handler: EventHandler = async (client: Bot, message: Message) => {
-    await sendQuirkyResponse(client, message);
+    await sendQuirkyResponse(message);
 };
