@@ -37,7 +37,7 @@ export const handler: ComponentHandlerFunction = async (
     const userId = idInfo![1];
     if (userId !== interaction.user.id) {
         await interaction.reply({
-            content: `OnO, I'm sowwy but this isn't your leaderboard, only <@${userId}> can switch pages on this one!!`,
+            content: `OnO, I'm sowwy, but this isn't your leaderboard!! Only <@${userId}> can switch pages on this one!!`,
             ephemeral: true,
         });
     } else {
