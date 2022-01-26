@@ -15,14 +15,14 @@ import {
 } from '../../utils/LeaderboardUtils';
 
 export const leaderboardEmbedAttributes: EmbedAttributes = {
-    title: 'Gimmick Leaderboard',
+    title: 'Gimmicks Leaderboard',
     color: DEFAULT_EMBED_COLOR,
     keyName: 'User',
     valueName: 'Points',
 };
 export const leaderboardMappingFunction: LeaderboardMap<GimmickPointsInstance> = (
     value
-) => [value.id, value.points.toString()];
+) => [`<@${value.id}>`, value.points.toString()];
 
 async function handleLeaderboardSubcommand(
     client: Bot,
