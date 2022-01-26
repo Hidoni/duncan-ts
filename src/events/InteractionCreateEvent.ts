@@ -15,18 +15,11 @@ import {
     CommandInteractionType,
 } from '../interfaces/Command';
 import { EventHandler } from '../interfaces/Event';
-import { hasPermissions } from '../utils/PermissionUtils';
+import { hasPermissions, isUserAdmin } from '../utils/PermissionUtils';
 
-const USERS_WITH_ADMIN_PERMISSIONS: Snowflake[] = [
-    '87495537498021888',
-    '381002402947399691',
-];
 const UNKNOWN_ERROR_MESSAGE =
     'Aw heck! Something went wrong here and I dunno what it is! ;w; Let’s go ask Hidoni about it!';
 
-function isUserAdmin(id: Snowflake) {
-    return USERS_WITH_ADMIN_PERMISSIONS.find((value) => value === id);
-}
 
 async function canRunCommand(
     client: Bot,

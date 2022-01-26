@@ -1,5 +1,15 @@
 import { APIInteractionGuildMember } from 'discord.js/node_modules/discord-api-types';
-import { GuildMember, PermissionResolvable, Permissions } from 'discord.js';
+import {
+    GuildMember,
+    PermissionResolvable,
+    Permissions,
+    Snowflake,
+} from 'discord.js';
+
+const USERS_WITH_ADMIN_PERMISSIONS: Snowflake[] = [
+    '87495537498021888',
+    '381002402947399691',
+];
 
 export function hasPermissions(
     member: GuildMember | APIInteractionGuildMember,
@@ -11,4 +21,8 @@ export function hasPermissions(
     }
     const userPermissions = BigInt(member.permissions);
     return new Permissions(userPermissions).has(permissions, checkAdmin);
+}
+
+export function isUserAdmin(id: Snowflake) {
+    return USERS_WITH_ADMIN_PERMISSIONS.find((value) => value === id);
 }
