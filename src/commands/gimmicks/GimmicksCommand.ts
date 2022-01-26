@@ -5,11 +5,24 @@ import {
 import { CommandInteraction } from 'discord.js';
 import Bot from '../../client/Bot';
 import { CommandHandler } from '../../interfaces/Command';
+import { GimmickPointsInstance } from '../../interfaces/gimmicks/GimmickPoints';
 import {
     DEFAULT_EMBED_COLOR,
+    EmbedAttributes,
     generateLeaderboardComponentsRow,
     generateLeaderboardEmbed,
+    LeaderboardMap,
 } from '../../utils/LeaderboardUtils';
+
+export const leaderboardEmbedAttributes: EmbedAttributes = {
+    title: 'Gimmick Leaderboard',
+    color: DEFAULT_EMBED_COLOR,
+    keyName: 'User',
+    valueName: 'Points',
+};
+export const leaderboardMappingFunction: LeaderboardMap<GimmickPointsInstance> = (
+    value
+) => [value.id, value.points.toString()];
 
 async function handleLeaderboardSubcommand(
     client: Bot,
@@ -18,14 +31,9 @@ async function handleLeaderboardSubcommand(
     const points = await client.database.getAllGimmickPoints();
     const leaderboardembed = generateLeaderboardEmbed(
         points,
-        (value) => [value.id, value.points.toString()],
+        leaderboardMappingFunction,
         1,
-        {
-            title: 'Gimmick Leaderboard',
-            color: DEFAULT_EMBED_COLOR,
-            keyName: 'User',
-            valueName: 'Points',
-        }
+        leaderboardEmbedAttributes
     );
     const leaderboardComponenetsRow = generateLeaderboardComponentsRow(
         points,
