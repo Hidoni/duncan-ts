@@ -1,6 +1,8 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 
-export const DEFAULT_EMBED_COLOR: readonly [number, number, number] = [251, 177, 189];
+export const DEFAULT_EMBED_COLOR: readonly [number, number, number] = [
+    251, 177, 189,
+];
 
 export interface EmbedAttributes {
     title: string;
@@ -9,9 +11,13 @@ export interface EmbedAttributes {
     valueName: string;
 }
 
+export interface LeaderboardMap<T> {
+    (value: T): readonly [string, string];
+}
+
 export function generateLeaderboardEmbed<T>(
     leaderboard: T[],
-    valueMap: (value: T) => readonly [string, string],
+    valueMap: LeaderboardMap<T>,
     page: number,
     embedAttributes: EmbedAttributes
 ): MessageEmbed {
