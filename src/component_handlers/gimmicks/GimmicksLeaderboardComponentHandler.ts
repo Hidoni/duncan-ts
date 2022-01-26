@@ -36,30 +36,32 @@ export const handler: ComponentHandlerFunction = async (
     const idInfo = interaction.customId.match(pattern);
     const userId = idInfo![1];
     if (userId !== interaction.user.id) {
-        await interaction.reply(
-            `OnO, I'm sowwy but this isn't your leaderboard, only <@${userId}> can switch pages on this one!!`
-        );
-    }
-    const points = await client.database.getAllGimmickPoints();
-    const page = idInfo![2];
-    switch (page) {
-        case 'FIRST':
-            updateMessageLeaderboard(points, 1, interaction);
-            break;
-        case 'LAST':
-            updateMessageLeaderboard(
-                points,
-                Math.ceil(points.length / 10),
-                interaction
-            );
-            break;
-        default:
-            updateMessageLeaderboard(
-                points,
-                Number.parseInt(page),
-                interaction
-            );
-            break;
+        await interaction.reply({
+            content: `OnO, I'm sowwy but this isn't your leaderboard, only <@${userId}> can switch pages on this one!!`,
+            ephemeral: true,
+        });
+    } else {
+        const points = await client.database.getAllGimmickPoints();
+        const page = idInfo![2];
+        switch (page) {
+            case 'FIRST':
+                updateMessageLeaderboard(points, 1, interaction);
+                break;
+            case 'LAST':
+                updateMessageLeaderboard(
+                    points,
+                    Math.ceil(points.length / 10),
+                    interaction
+                );
+                break;
+            default:
+                updateMessageLeaderboard(
+                    points,
+                    Number.parseInt(page),
+                    interaction
+                );
+                break;
+        }
     }
 };
 
