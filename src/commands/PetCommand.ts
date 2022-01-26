@@ -1,6 +1,4 @@
-import {
-    SlashCommandBuilder,
-} from '@discordjs/builders';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import Bot from '../client/Bot';
 import { CommandHandler } from '../interfaces/Command';

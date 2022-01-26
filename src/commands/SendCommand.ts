@@ -9,6 +9,12 @@ import Bot from '../client/Bot';
 import { CommandHandler } from '../interfaces/Command';
 import { isUserAdmin } from '../utils/PermissionUtils';
 
+const TEXT_CHANNEL_TYPES = [
+    0, // GuildText
+    11, // GuildThread
+    12, // GuildThread
+];
+
 export const handler: CommandHandler = async (
     client: Bot,
     interaction: CommandInteraction
@@ -37,11 +43,12 @@ export const handler: CommandHandler = async (
         } else {
             await channel
                 .send(message)
-                .then(async (sent) =>
-                    await interaction.reply({
-                        content: `Message sent, check it out: ${sent.url} ^w^`,
-                        ephemeral: true,
-                    })
+                .then(
+                    async (sent) =>
+                        await interaction.reply({
+                            content: `Message sent, check it out: ${sent.url} ^w^`,
+                            ephemeral: true,
+                        })
                 )
                 .catch(async (err) => {
                     client.logger?.debug(
@@ -62,6 +69,7 @@ export const builder = new SlashCommandBuilder()
         new SlashCommandChannelOption()
             .setName('channel')
             .setDescription('The channel in which to send the message.')
+            .addChannelTypes(TEXT_CHANNEL_TYPES)
             .setRequired(true)
     )
     .addStringOption(
