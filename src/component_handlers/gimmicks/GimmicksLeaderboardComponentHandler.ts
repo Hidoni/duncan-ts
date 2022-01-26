@@ -26,7 +26,7 @@ async function updateMessageLeaderboard(
         page,
         `gimmicks_leaderboard_${interaction.user.id}`
     );
-    interaction.update({ embeds: [embed], components: [pageControlRow] });
+    await interaction.update({ embeds: [embed], components: [pageControlRow] });
 }
 
 export const handler: ComponentHandlerFunction = async (
@@ -45,17 +45,17 @@ export const handler: ComponentHandlerFunction = async (
         const page = idInfo![2];
         switch (page) {
             case 'FIRST':
-                updateMessageLeaderboard(points, 1, interaction);
+                await updateMessageLeaderboard(points, 1, interaction);
                 break;
             case 'LAST':
-                updateMessageLeaderboard(
+                await updateMessageLeaderboard(
                     points,
                     Math.ceil(points.length / 10),
                     interaction
                 );
                 break;
             default:
-                updateMessageLeaderboard(
+                await updateMessageLeaderboard(
                     points,
                     Number.parseInt(page),
                     interaction
