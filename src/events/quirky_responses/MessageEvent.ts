@@ -5,7 +5,6 @@ import { EventHandler } from '../../interfaces/Event';
 
 const QUIRKY_RESPONSES = readFileSync('./quirky-responses.txt', 'utf8')
     .trim()
-    .replace('\r', '')
     .split('\n');
 const OUIJA_BOARD_CHANNEL = '809001007560392714';
 const NO_VOWELS_CHANNEL = '801726137058721792';
