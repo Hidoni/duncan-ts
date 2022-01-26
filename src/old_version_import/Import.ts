@@ -8,10 +8,10 @@ import { setChannel, setDays } from '../utils/QuestionOfTheDayUtils';
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FIRST_QUESTION_TIMESTAMP = 1571917449908;
 
-const questionsJSON = require('../../questions.json');
+const QUESTIONS_JSON = require('../../questions.json');
 const GIMMICK_POINTS_JSON = require('../../gimmickpoints.json');
-setDays(questionsJSON.days);
-setChannel(questionsJSON.channel);
+setDays(QUESTIONS_JSON.days);
+setChannel(QUESTIONS_JSON.channel);
 
 if (process.env.DATABASE_PATH) {
     let sequelize = new Sequelize({
@@ -29,21 +29,21 @@ if (process.env.DATABASE_PATH) {
 }
 
 function importQuestions(questions: ModelCtor<QuestionInstance>) {
-    for (const question in questionsJSON['used']) {
+    for (const question in QUESTIONS_JSON['used']) {
         questions.create({
-            question: questionsJSON['used'][question]['question'],
-            authorName: questionsJSON['used'][question]['author'],
+            question: QUESTIONS_JSON['used'][question]['question'],
+            authorName: QUESTIONS_JSON['used'][question]['author'],
             addedAt: new Date(FIRST_QUESTION_TIMESTAMP),
             used: true,
         });
     }
-    for (const question in questionsJSON['unused']) {
+    for (const question in QUESTIONS_JSON['unused']) {
         questions.create({
-            question: questionsJSON['unused'][question]['question'],
-            authorName: questionsJSON['unused'][question]['author'],
+            question: QUESTIONS_JSON['unused'][question]['question'],
+            authorName: QUESTIONS_JSON['unused'][question]['author'],
             addedAt: new Date(
                 new Date().getTime() -
-                    questionsJSON['unused'][question]['days'] *
+                    QUESTIONS_JSON['unused'][question]['days'] *
                         MILLISECONDS_IN_DAY
             ),
             used: false,
