@@ -9,11 +9,14 @@ import {
 
 export const name: string = 'ready';
 export const handler: EventHandler = async (client: Bot) => {
+    let rule = new schedule.RecurrenceRule(undefined, undefined, undefined, undefined, 12, 0, 0);
+    rule.tz = 'America/New_York';
+    client.logger?.debug(`Setting up the Question Of The Day job, first invocation at ${rule.nextInvocationDate(new Date())}`);
     schedule.scheduleJob(
-        { hour: 12, minute: 0, second: 0, tz: 'EST5EDT' },
+        rule,
         async () => {
             setDays(getDays() + 1);
-            await changeQuestion(client);
+            changeQuestion(client);
         }
     );
 };
