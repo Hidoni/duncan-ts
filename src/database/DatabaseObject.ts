@@ -1,13 +1,16 @@
 import { Logger } from 'log4js';
 import { ModelCtor, Sequelize } from 'sequelize';
 import { QuestionInstance } from '../interfaces/question_of_the_day/Question';
+import { GimmickPointsInstance } from '../interfaces/gimmicks/GimmickPoints';
 import { initialize as initializeQuestions } from './models/Questions';
+import { initialize as initializeGimmickPoints } from './models/GimmickPoints';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
 export default class Database {
     private sequelize: Sequelize;
     private questions: ModelCtor<QuestionInstance>;
+    private gimmickPoints: ModelCtor<GimmickPointsInstance>;
 
     public constructor(database: string, logger?: Logger) {
         this.sequelize = new Sequelize({
@@ -17,6 +20,7 @@ export default class Database {
         });
 
         this.questions = initializeQuestions(this.sequelize);
+        this.gimmickPoints = initializeGimmickPoints(this.sequelize);
     }
 
     public sync(): void {
@@ -63,5 +67,13 @@ export default class Database {
         }
 
         return null;
+    }
+
+    public async getGimmickPoints(id: string): Promise<GimmickPointsInstance> {
+        const points = await this.gimmickPoints.findOne({ where: { id: id } });
+        if (!points) {
+            return this.gimmickPoints.create({ id: id });
+        }
+        return points;
     }
 }
