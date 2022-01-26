@@ -20,7 +20,7 @@ for (const envVar of REQUIRED_ENV_VARS) {
 
 const bot = new Bot(
     {
-        intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+        intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS],
         token: process.env.BOT_TOKEN!,
         appId: process.env.BOT_APPLICATION_ID!,
         database: process.env.DATABASE_PATH!,
