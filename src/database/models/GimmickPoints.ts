@@ -18,6 +18,9 @@ export const initialize: DatabaseModelInitializer<GimmickPointsInstance> = (
                 allowNull: false,
                 defaultValue: 0,
             },
+        },
+        {
+            timestamps: false,
         }
     );
 };
