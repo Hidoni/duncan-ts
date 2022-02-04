@@ -8,6 +8,7 @@ import {
     PermissionString,
 } from 'discord.js';
 import Bot from '../client/Bot';
+import { Loadable } from './Loadable';
 
 export type CommandBuilderType =
     | SlashCommandBuilder
@@ -24,7 +25,7 @@ export interface ContextMenuHandler {
     (client: Bot, interaction: ContextMenuInteraction): Promise<void>;
 }
 
-export interface Command<Builder extends CommandBuilderType> {
+export interface Command<Builder extends CommandBuilderType> extends Loadable {
     handler: Builder extends SlashCommandBuilder
         ? CommandHandler
         : ContextMenuHandler;
