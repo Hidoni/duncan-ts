@@ -46,3 +46,4 @@ export const handler: EventHandler = async (client: Bot, message: Message) => {
         await giveGimmickPoints(client, message);
     }
 };
+export const shoudLoad = () => true;

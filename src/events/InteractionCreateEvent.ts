@@ -20,7 +20,6 @@ import { hasPermissions, isUserAdmin } from '../utils/PermissionUtils';
 const UNKNOWN_ERROR_MESSAGE =
     'Aw heck! Something went wrong here and I dunno what it is! ;w; Let’s go ask Hidoni about it!';
 
-
 async function canRunCommand(
     client: Bot,
     interaction: CommandInteractionType<CommandBuilderType>,
@@ -32,7 +31,8 @@ async function canRunCommand(
         !interaction.guild
     ) {
         interaction.reply({
-            content: 'Oh wait! Send that command to me in the server instead! It gets covered in chocolate and sprinkles here in our messages so I don’t really see it! ',
+            content:
+                'Oh wait! Send that command to me in the server instead! It gets covered in chocolate and sprinkles here in our messages so I don’t really see it! ',
             ephemeral: true,
         });
         return false;
@@ -44,7 +44,8 @@ async function canRunCommand(
         const permissions = command.permissions(interaction);
         if (!interaction.member) {
             interaction.reply({
-                content: 'What the..! The sprinkles spell out ‘404’! Not sure what happened there..',
+                content:
+                    'What the..! The sprinkles spell out ‘404’! Not sure what happened there..',
                 ephemeral: true,
             });
             client.logger?.error(
@@ -53,9 +54,9 @@ async function canRunCommand(
             return false;
         } else if (!hasPermissions(interaction.member, permissions)) {
             interaction.reply({
-                content: `Uh oh… you’re not allowed to do that! I think you might need the following permission${permissions.length > 1 ? '(s)' : ''}: ${permissions.join(
-                    ', '
-                )}`,
+                content: `Uh oh… you’re not allowed to do that! I think you might need the following permission${
+                    permissions.length > 1 ? '(s)' : ''
+                }: ${permissions.join(', ')}`,
                 ephemeral: true,
             });
             return false;
@@ -81,7 +82,10 @@ async function handleCommandCall(
         interaction.isCommand() &&
         command.builder instanceof SlashCommandBuilder
     ) {
-        await (command as Command<SlashCommandBuilder>).handler(client, interaction);
+        await (command as Command<SlashCommandBuilder>).handler(
+            client,
+            interaction
+        );
     } else {
         throw new Error(
             `Mismatch between interaction type and command type in command ${command.builder.name}`
@@ -110,7 +114,9 @@ export const handler: EventHandler = async (
                     replyFunction({
                         content: UNKNOWN_ERROR_MESSAGE,
                         ephemeral: true,
-                    }).catch(() => client.logger?.debug('Could not reply to interaction'));
+                    }).catch(() =>
+                        client.logger?.debug('Could not reply to interaction')
+                    );
                 }
             }
         } else {
@@ -146,3 +152,4 @@ export const handler: EventHandler = async (
         );
     }
 };
+export const shoudLoad = () => true;

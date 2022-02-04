@@ -4,6 +4,7 @@ import schedule from 'node-schedule';
 import {
     changeQuestion,
     getDays,
+    getEnabled,
     setDays,
 } from '../../utils/QuestionOfTheDayUtils';
 
@@ -30,3 +31,4 @@ export const handler: EventHandler = async (client: Bot) => {
     });
 };
 export const once: boolean = true;
+export const shoudLoad = getEnabled;
