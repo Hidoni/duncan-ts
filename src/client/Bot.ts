@@ -43,7 +43,9 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: Command<CommandBuilderType> = require(file);
-                    this.commands.set(handler.builder.name, handler);
+                    if (handler.shoudLoad()) {
+                        this.commands.set(handler.builder.name, handler);
+                    }
                 } catch (error) {
                     this.logger?.error(
                         `Failed to load command at ${file}: ${error}`
@@ -60,7 +62,9 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: Event = require(file);
-                    this.registerEvent(handler.name, handler);
+                    if (handler.shoudLoad()) {
+                        this.registerEvent(handler.name, handler);
+                    }
                 } catch (error) {
                     this.logger?.error(
                         `Failed to load event at ${file}: ${error}`
@@ -77,7 +81,9 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: ComponentHandler = require(file);
-                    this.componentHandlers.set(handler.pattern, handler);
+                    if (handler.shoudLoad()) {
+                        this.componentHandlers.set(handler.pattern, handler);
+                    }
                 } catch (error) {
                     this.logger?.error(
                         `Failed to load component handler at ${file}: ${error}`
