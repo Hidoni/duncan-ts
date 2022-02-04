@@ -39,6 +39,18 @@
             "outputCapture": "std",
             "sourceMaps": true,
             "smartStep": true
-        }
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Fallback Run (No Rebuild)",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/src/index.ts",
+            "outFiles": ["${workspaceFolder}/bin/**/*.js"],
+            "runtimeArgs": ["-r", "dotenv/config"],
+            "outputCapture": "std",
+            "sourceMaps": true,
+            "smartStep": true
+        },
     ]
 }
