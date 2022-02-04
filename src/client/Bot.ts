@@ -118,7 +118,13 @@ export default class Bot extends Client {
 
     public async run() {
         this.login(this.config.token);
-        await this.registerCommands();
+        if (await this.deleteAllCommands()) {
+            await this.registerCommands();
+        } else {
+            this.logger?.error(
+                `Failed to delete all commands, commands will not be registered!`
+            );
+        }
     }
 
     private registerEvent(eventName: string, event: Event): void {
@@ -141,13 +147,53 @@ export default class Bot extends Client {
         );
     }
 
-    private async registerCommands(): Promise<void> {
-        let route = this.config.debugGuildId
+    private getCommandsRoute():
+        | `/applications/${string}/guilds/${string}/commands`
+        | `/applications/${string}/commands` {
+        return this.config.debugGuildId
             ? Routes.applicationGuildCommands(
                   this.config.appId,
                   this.config.debugGuildId
               )
             : Routes.applicationCommands(this.config.appId);
+    }
+
+    private getCommandRoute(
+        commandId: string
+    ):
+        | `/applications/${string}/guilds/${string}/commands/${string}`
+        | `/applications/${string}/commands/${string}` {
+        return this.config.debugGuildId
+            ? Routes.applicationGuildCommand(
+                  this.config.appId,
+                  this.config.debugGuildId,
+                  commandId
+              )
+            : Routes.applicationCommand(this.config.appId, commandId);
+    }
+
+    private async deleteAllCommands(): Promise<boolean> {
+        let route = this.getCommandsRoute();
+        try {
+            const commands = await this.restAPI.get(route);
+            let promises: Promise<unknown>[] = [];
+            if (commands instanceof Array && commands.length > 0) {
+                for (const command of commands) {
+                    promises.push(
+                        this.restAPI.delete(this.getCommandRoute(command.id))
+                    );
+                }
+            }
+            await Promise.all(promises);
+            return true;
+        } catch (error) {
+            this.logger?.error(`Failed to delete all commands: ${error}`);
+        }
+        return false;
+    }
+
+    private async registerCommands(): Promise<void> {
+        let route = this.getCommandsRoute();
         try {
             const commandsJSON = this.commands.map((command) =>
                 command.builder.toJSON()
