@@ -45,3 +45,5 @@ export const builder = new SlashCommandBuilder()
 export const guildOnly = (interaction: CommandInteraction) => false;
 
 export const permissions = (interaction: CommandInteraction) => false;
+
+export const shoudLoad = () => true;

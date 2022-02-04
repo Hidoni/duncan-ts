@@ -10,6 +10,7 @@ import { CommandHandler } from '../../interfaces/Command';
 import {
     capitalizeQuestion,
     changeQuestion,
+    getEnabled,
 } from '../../utils/QuestionOfTheDayUtils';
 
 interface QuestionOfTheDayCommandAttributes {
@@ -135,3 +136,5 @@ export const permissions = (interaction: CommandInteraction) => {
     }
     return undefined;
 };
+
+export const shoudLoad = getEnabled;

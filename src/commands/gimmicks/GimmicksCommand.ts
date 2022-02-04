@@ -20,9 +20,9 @@ export const leaderboardEmbedAttributes: EmbedAttributes = {
     keyName: 'User',
     valueName: 'Points',
 };
-export const leaderboardMappingFunction: LeaderboardMap<GimmickPointsInstance> = (
-    value
-) => [`<@${value.id}>`, value.points.toString()];
+export const leaderboardMappingFunction: LeaderboardMap<
+    GimmickPointsInstance
+> = (value) => [`<@${value.id}>`, value.points.toString()];
 
 async function handleLeaderboardSubcommand(
     client: Bot,
@@ -75,3 +75,5 @@ export const builder = new SlashCommandBuilder()
 export const guildOnly = (interaction: CommandInteraction) => true;
 
 export const permissions = (interaction: CommandInteraction) => false;
+
+export const shoudLoad = () => true;
