@@ -27,6 +27,11 @@ export function setChannel(channel: string) {
     config.set('qotd.channel', channel);
 }
 
+export function getEnabled(): boolean {
+    const enabled = config.get('qotd.enabled');
+    return typeof enabled === 'boolean' ? enabled : false;
+}
+
 export function capitalizeQuestion(question: string) {
     return question.charAt(0).toUpperCase() + question.slice(1).toLowerCase();
 }
