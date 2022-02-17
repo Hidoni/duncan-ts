@@ -146,6 +146,26 @@ export const handler: EventHandler = async (
                 `Ignoring unknown component with ID ${interaction.customId}`
             );
         }
+    } else if (interaction.isModalSubmit()) {
+        const modalHandler = client.getModalHandler(interaction.customId);
+        if (modalHandler) {
+            modalHandler.handler(client, interaction).catch((error) => {
+                client.logger?.error(
+                    `Got the following error while handling a modal with id ${interaction.customId}: ${error}`
+                );
+                const replyFunction = interaction.replied
+                    ? interaction.followUp.bind(interaction)
+                    : interaction.reply.bind(interaction);
+                replyFunction({
+                    content: UNKNOWN_ERROR_MESSAGE,
+                    ephemeral: true,
+                });
+            });
+        } else {
+            client.logger?.debug(
+                `Ignoring unknown modal with ID ${interaction.customId}`
+            );
+        }
     } else {
         client.logger?.debug(
             `Ignoring unknown interaction of type: ${interaction.type}`

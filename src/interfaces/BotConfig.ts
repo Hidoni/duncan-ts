@@ -10,4 +10,5 @@ export default interface BotConfig {
     commandsFolder?: string;
     eventsFolder?: string;
     componentHandlersFolder?: string;
+    modalHandlersFolder?: string;
 }

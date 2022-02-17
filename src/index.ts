@@ -28,6 +28,7 @@ const bot = new Bot(
         commandsFolder: path.join(__dirname, 'commands/'),
         eventsFolder: path.join(__dirname, 'events/'),
         componentHandlersFolder: path.join(__dirname, 'component_handlers/'),
+        modalHandlersFolder: path.join(__dirname, 'modal_handlers/'),
     },
     logger
 );

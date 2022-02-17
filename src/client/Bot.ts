@@ -9,6 +9,7 @@ import { Routes } from 'discord-api-types/v9';
 import glob from 'glob';
 import { ComponentHandler } from '../interfaces/ComponentHandler';
 import Database from '../database/DatabaseObject';
+import { ModalHandler } from '../interfaces/ModalHandler';
 
 export default class Bot extends Client {
     public logger?: Logger;
@@ -16,6 +17,7 @@ export default class Bot extends Client {
         new Collection();
     private componentHandlers: Collection<RegExp, ComponentHandler> =
         new Collection();
+    private modalHandlers: Collection<RegExp, ModalHandler> = new Collection();
     private restAPI: REST;
     private config: BotConfig;
     public database: Database;
@@ -35,6 +37,9 @@ export default class Bot extends Client {
         }
         if (config.componentHandlersFolder) {
             this.loadComponentHandlers(config.componentHandlersFolder);
+        }
+        if (config.modalHandlersFolder) {
+            this.loadModalHandlers(config.modalHandlersFolder);
         }
     }
 
@@ -98,6 +103,28 @@ export default class Bot extends Client {
         }
     }
 
+    private loadModalHandlers(folder: string) {
+        try {
+            glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
+                try {
+                    const handler: ModalHandler = require(file);
+                    if (handler.shoudLoad()) {
+                        this.modalHandlers.set(handler.pattern, handler);
+                    }
+                } catch (error) {
+                    this.logger?.error(
+                        `Failed to load modal handler at ${file}: ${error}`
+                    );
+                }
+            });
+            this.logger?.info(
+                `Succesfully registered ${this.modalHandlers.size} modal handlers`
+            );
+        } catch (error) {
+            this.logger?.error(`Failed to load modal handlers: ${error}`);
+        }
+    }
+
     public getCommand(
         commandName: string
     ): Command<CommandBuilderType> | undefined {
@@ -111,6 +138,15 @@ export default class Bot extends Client {
             .componentHandlers) {
             if (idPattern.test(componentId)) {
                 return componentHandler;
+            }
+        }
+        return undefined;
+    }
+
+    public getModalHandler(modalId: string): ModalHandler | undefined {
+        for (const { 0: idPattern, 1: modalHandler } of this.modalHandlers) {
+            if (idPattern.test(modalId)) {
+                return modalHandler;
             }
         }
         return undefined;
