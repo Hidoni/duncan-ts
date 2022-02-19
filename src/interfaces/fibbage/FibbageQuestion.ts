@@ -13,7 +13,6 @@ export enum FibbageQuestionState {
 export interface FibbageQuestionInstance extends Model {
     id: number;
     question: string;
-    answer: string;
     user: Snowflake;
     state: FibbageQuestionState;
     message: Snowflake;

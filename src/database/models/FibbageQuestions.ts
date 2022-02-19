@@ -18,10 +18,6 @@ export const initialize: DatabaseModelInitializer<FibbageQuestionInstance> = (
                 type: DataTypes.TEXT,
                 allowNull: false,
             },
-            answer: {
-                type: DataTypes.TEXT,
-                allowNull: true,
-            },
             user: {
                 type: DataTypes.STRING,
                 allowNull: false,
