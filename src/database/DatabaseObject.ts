@@ -7,11 +7,13 @@ import {
     FibbageQuestionState,
 } from '../interfaces/fibbage/FibbageQuestion';
 import { FibbageAnswerInstance } from '../interfaces/fibbage/FibbageAnswer';
+import { FibbageGuessInstance } from '../interfaces/fibbage/FibbageGuess';
 import { FibbageStatsInstance } from '../interfaces/fibbage/FibbageStats';
 import { initialize as initializeQuestions } from './models/Questions';
 import { initialize as initializeGimmickPoints } from './models/GimmickPoints';
 import { initialize as initializeFibbageQuestions } from './models/FibbageQuestions';
 import { initialize as initializeFibbageAnswers } from './models/FibbageAnswers';
+import { initialize as initializeFibbageGuesses } from './models/FibbageGuesses';
 import { initialize as initializeFibbageStats } from './models/FibbageStats';
 import { Snowflake } from 'discord.js';
 
@@ -23,6 +25,7 @@ export default class Database {
     private gimmickPoints: ModelCtor<GimmickPointsInstance>;
     private fibbageQuestions: ModelCtor<FibbageQuestionInstance>;
     private fibbageAnswers: ModelCtor<FibbageAnswerInstance>;
+    private fibbageGuesses: ModelCtor<FibbageGuessInstance>;
     private fibbageStats: ModelCtor<FibbageStatsInstance>;
 
     public constructor(database: string, logger?: Logger) {
@@ -36,8 +39,11 @@ export default class Database {
         this.gimmickPoints = initializeGimmickPoints(this.sequelize);
         this.fibbageQuestions = initializeFibbageQuestions(this.sequelize);
         this.fibbageAnswers = initializeFibbageAnswers(this.sequelize);
-        this.fibbageQuestions.hasMany(this.fibbageAnswers, {'sourceKey': 'id', 'foreignKey': 'questionId', as: 'Answers'});
-        this.fibbageAnswers.belongsTo(this.fibbageQuestions, {targetKey: 'id', 'foreignKey': 'questionId', as: 'Question'});
+        this.fibbageQuestions.hasMany(this.fibbageAnswers, {sourceKey: 'id', foreignKey: 'questionId', as: 'Answer'});
+        this.fibbageAnswers.belongsTo(this.fibbageQuestions, {targetKey: 'id', foreignKey: 'questionId', as: 'Question'});
+        this.fibbageGuesses = initializeFibbageGuesses(this.sequelize);
+        this.fibbageAnswers.hasMany(this.fibbageGuesses, {sourceKey: 'id', foreignKey: 'answerId', as: {singular: 'Guess', plural: 'Guesses'}});
+        this.fibbageGuesses.belongsTo(this.fibbageAnswers, {targetKey: 'id', foreignKey: 'answerId', as: 'Answer'});
         this.fibbageStats = initializeFibbageStats(this.sequelize);
     }
 
