@@ -45,6 +45,7 @@ export default class Database {
         this.fibbageAnswers.hasMany(this.fibbageGuesses, {sourceKey: 'id', foreignKey: 'answerId', as: {singular: 'Guess', plural: 'Guesses'}});
         this.fibbageGuesses.belongsTo(this.fibbageAnswers, {targetKey: 'id', foreignKey: 'answerId', as: 'Answer'});
         this.fibbageStats = initializeFibbageStats(this.sequelize);
+        this.sync();
     }
 
     public sync(): void {
@@ -187,5 +188,9 @@ export default class Database {
         return await this.fibbageQuestions.findAll({
             where: { state: FibbageQuestionState.ANSWERED },
         });
+    }
+
+    public async getAllFibbageQuestions(): Promise<FibbageQuestionInstance[]> {
+        return await this.fibbageQuestions.findAll();
     }
 }
