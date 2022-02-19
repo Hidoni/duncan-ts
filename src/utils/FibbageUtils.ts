@@ -12,7 +12,10 @@ import {
     FibbagePrompt,
     FibbagePrompts,
 } from '../interfaces/fibbage/FibbagePrompts';
-import { FibbageQuestionInstance } from '../interfaces/fibbage/FibbageQuestion';
+import {
+    FibbageQuestionInstance,
+    FibbageQuestionState,
+} from '../interfaces/fibbage/FibbageQuestion';
 
 const MAX_ALLOWED_CHARS_IN_BUTTON = 80;
 
@@ -177,9 +180,15 @@ export async function promptUsersWithQuestions(client: Bot) {
         return;
     }
     const askedQuestions = await client.database.getAllFibbageQuestions();
-    const usersWithQuestion = askedQuestions.map((question) => {
-        return question.user;
-    });
+    const usersWithQuestion = askedQuestions
+        .filter(
+            (question) =>
+                question.state != FibbageQuestionState.DONE &&
+                question.state != FibbageQuestionState.SKIPPED
+        )
+        .map((question) => {
+            return question.user;
+        });
     const usersWithoutQuestion = users.filter(
         (user) => !usersWithQuestion.includes(user.id)
     );
