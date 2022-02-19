@@ -22,6 +22,10 @@ export const initialize: DatabaseModelInitializer<FibbageAnswerInstance> = (
                 type: DataTypes.STRING,
                 allowNull: false,
             },
+            isCorrect: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+            },
         },
         {
             timestamps: false,

@@ -5,5 +5,6 @@ export interface FibbageAnswerInstance extends Model {
     id: number;
     answer: string;
     user: Snowflake;
+    isCorrect: boolean;
     questionId: number;
 }
