@@ -1,7 +1,7 @@
-export type FibbagePrompt = {
+export type FibbagePrompts = {
     [prompt: string]: {
         question: string;
-        answer: readonly [
+        answers: readonly [
             string,
             string,
             string,
@@ -11,4 +11,5 @@ export type FibbagePrompt = {
             string
         ];
     };
+
 };
