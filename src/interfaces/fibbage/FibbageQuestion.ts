@@ -16,4 +16,5 @@ export interface FibbageQuestionInstance extends Model {
     answer: string;
     user: Snowflake;
     state: FibbageQuestionState;
+    message: Snowflake;
 }

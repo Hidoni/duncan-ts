@@ -38,6 +38,10 @@ export const initialize: DatabaseModelInitializer<FibbageQuestionInstance> = (
                 allowNull: false,
                 defaultValue: 'ASKED',
             },
+            message: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
         },
         {
             timestamps: false,
