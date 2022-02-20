@@ -11,6 +11,8 @@ import {
     capitalizeQuestion,
     changeQuestion,
     getEnabled,
+    setDays,
+    getDays,
 } from '../../utils/QuestionOfTheDayUtils';
 
 interface QuestionOfTheDayCommandAttributes {
@@ -75,7 +77,35 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
             );
             interaction
                 .reply({ content: 'Oki, skipping!!', ephemeral: true })
-                .catch(() => client.logger?.debug('Could not reply to interaction when skipping!'));
+                .catch(() =>
+                    client.logger?.debug(
+                        'Could not reply to interaction when skipping!'
+                    )
+                );
+            await changeQuestion(client);
+        },
+    },
+    next: {
+        guildOnly: true,
+        permissions: ['ADMINISTRATOR'],
+        handler: async (
+            client: Bot,
+            interaction: CommandInteraction
+        ): Promise<void> => {
+            client.logger?.info(
+                `Forced next prompt, triggered by ${interaction.user.username}`
+            );
+            interaction
+                .reply({
+                    content: 'Oki, Sending next question!!',
+                    ephemeral: true,
+                })
+                .catch(() =>
+                    client.logger?.debug(
+                        'Could not reply to interaction when skipping!'
+                    )
+                );
+            setDays(getDays() + 1);
             await changeQuestion(client);
         },
     },
@@ -117,6 +147,11 @@ export const builder = new SlashCommandBuilder()
         new SlashCommandSubcommandBuilder()
             .setName('skip')
             .setDescription('Skip the current question.')
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
+            .setName('next')
+            .setDescription("Send the next day's question manually.")
     );
 
 export const guildOnly = (interaction: CommandInteraction) => {
