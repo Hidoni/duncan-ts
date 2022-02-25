@@ -1,3 +1,4 @@
+import { FibbageQuestionState } from '../../database/models/FibbageQuestion';
 import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
 import { generateQuestionModal, getEnabled } from '../../utils/FibbageUtils';
 
@@ -17,6 +18,10 @@ export const handler: ComponentHandlerFunction = async (
         await interaction.reply({
             content: `OnO, I'm sowwy, but I couldn't find your question, please let Hidoni know ASAP!!`,
         });
+    } else if (question.state != FibbageQuestionState.ASKED) {
+        await interaction.reply(
+            "Nice try, but you've already answered this question!"
+        );
     } else {
         await interaction.showModal(
             generateQuestionModal(question.question, question.id)
