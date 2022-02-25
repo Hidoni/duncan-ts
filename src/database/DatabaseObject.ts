@@ -146,14 +146,7 @@ export default class Database {
             if (!question) {
                 throw new Error('Question not found');
             }
-            question.$add(
-                'answer',
-                await FibbageAnswer.create({
-                    answer: answer,
-                    user: user,
-                    isCorrect: isCorrect,
-                })
-            );
+            await this.insertFibbageAnswer(answer, user, isCorrect, question);
         });
     }
 
