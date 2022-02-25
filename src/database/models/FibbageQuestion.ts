@@ -49,9 +49,9 @@ export class FibbageQuestion extends Model {
     @Column(DataType.ENUM(...Object.keys(FibbageQuestionState)))
     state!: FibbageQuestionState;
 
-    @AllowNull(false)
-    @Column
-    message!: string;
+    @AllowNull(true)
+    @Column(DataType.TEXT)
+    message!: string | null;
 
     @HasMany(() => FibbageAnswer, 'questionId')
     answers!: FibbageAnswer[];
