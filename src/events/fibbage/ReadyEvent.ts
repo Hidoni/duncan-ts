@@ -1,7 +1,7 @@
 import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
 import schedule from 'node-schedule';
-import { getEnabled, promptUsersWithQuestions } from '../../utils/FibbageUtils';
+import { getEnabled, promptUsersForFibs, promptUsersWithQuestions } from '../../utils/FibbageUtils';
 
 export const name: string = 'ready';
 export const handler: EventHandler = async (client: Bot) => {
@@ -24,6 +24,7 @@ export const handler: EventHandler = async (client: Bot) => {
         // Resolve existing questions in channel
         // Post new questions
         // Prompt users for fibs for answered questions
+        promptUsersForFibs(client);
         // Prompt users for new questions
         promptUsersWithQuestions(client);
     });

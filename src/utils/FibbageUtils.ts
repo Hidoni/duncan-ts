@@ -19,6 +19,7 @@ import {
 } from '../interfaces/fibbage/FibbagePrompts';
 
 const MAX_ALLOWED_CHARS_IN_BUTTON = 80;
+const MAX_USERS_TO_PROMPT = 7;
 
 const config = new Conf();
 
@@ -208,5 +209,72 @@ export async function promptUsersWithQuestions(client: Bot) {
     }
     for (const user of usersWithoutQuestion) {
         promptUserWithQuestion(client, user, askedQuestions);
+    }
+}
+
+function generateComponentsRowForPrompt(questionId: number) {
+    return new MessageActionRow().addComponents(
+        new MessageButton()
+            .setLabel('Submit a Lie!')
+            .setStyle('PRIMARY')
+            .setCustomId(`fibbage_prompt_button_${questionId}`)
+    );
+}
+
+async function sendButtonWithPromptToUser(
+    question: FibbageQuestion,
+    prompt: string,
+    user: GuildMember | User
+) {
+    await user.send({
+        content: `Hewwo! ^w^\nI need you to put a clever lie to this question that may fool other players!\n\n${prompt}`,
+        components: [generateComponentsRowForPrompt(question.id)],
+    });
+}
+
+async function promptRandomUsersForFibs(
+    client: Bot,
+    question: FibbageQuestion,
+    users: (GuildMember | User)[]
+) {
+    const prompt = getFibbagePrompts()[question.question];
+    const promptFormatted = prompt.prompt.replace(
+        /\{0}/g,
+        `<@${question.user}>`
+    );
+
+    let usersCopy = users.slice();
+    const amountToPrompt =
+        users.length > MAX_USERS_TO_PROMPT ? MAX_USERS_TO_PROMPT : users.length;
+    client.logger?.debug(
+        `Prompting ${amountToPrompt} users for fibs for question ${question.id}`
+    );
+    for (let i = 0; i < amountToPrompt; i++) {
+        const user = usersCopy[Math.floor(Math.random() * usersCopy.length)];
+        usersCopy = usersCopy.filter(
+            (u: GuildMember | User) => u.id !== user.id
+        );
+        client.logger?.info(`Prompting ${user} with prompt ${promptFormatted}`);
+        await sendButtonWithPromptToUser(question, promptFormatted, user);
+    }
+}
+
+export async function promptUsersForFibs(client: Bot) {
+    const users = await getUsersWithFibbageRole(client);
+    if (users.length <= 1) {
+        return;
+    }
+    const askedQuestions = await client.database.getAllFibbageQuestions();
+    const questionsThatNeedFibs = askedQuestions.filter(
+        (question) => question.state === FibbageQuestionState.ANSWERED
+    );
+    if (questionsThatNeedFibs.length === 0) {
+        return;
+    }
+    for (const question of questionsThatNeedFibs) {
+        const eligibleUsers = users.filter((user) => user.id !== question.user);
+        await promptRandomUsersForFibs(client, question, eligibleUsers);
+        question.state = FibbageQuestionState.PROMPTED;
+        await question.save();
     }
 }
