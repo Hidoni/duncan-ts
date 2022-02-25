@@ -29,10 +29,11 @@ export const handler: ComponentHandlerFunction = async (
     } else {
         question.state = FibbageQuestionState.SKIPPED;
         const askedQuestions = await client.database.getAllFibbageQuestions();
+        await interaction.reply('Oki! Lemme get you a new question...');
         await promptUserWithQuestion(client, interaction.user, askedQuestions);
     }
 };
 
-export const pattern: RegExp = /^fibbage_question_button_(\d+)$/;
+export const pattern: RegExp = /^fibbage_question_skip_(\d+)$/;
 
 export const shoudLoad = () => getEnabled;
