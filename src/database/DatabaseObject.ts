@@ -161,7 +161,7 @@ export default class Database {
         answer: string,
         user: Snowflake,
         isCorrect: boolean,
-        question: Question
+        question: FibbageQuestion
     ): Promise<void> {
         await question.$add(
             'answer',
