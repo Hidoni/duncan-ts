@@ -8,14 +8,11 @@ import {
     TextInputComponent,
 } from 'discord.js';
 import Bot from '../client/Bot';
+import { FibbageQuestion, FibbageQuestionState } from '../database/models/FibbageQuestion';
 import {
     FibbagePrompt,
     FibbagePrompts,
 } from '../interfaces/fibbage/FibbagePrompts';
-import {
-    FibbageQuestionInstance,
-    FibbageQuestionState,
-} from '../interfaces/fibbage/FibbageQuestion';
 
 const MAX_ALLOWED_CHARS_IN_BUTTON = 80;
 
@@ -121,11 +118,11 @@ export function generateQuestionModal(question: string, questionId: number) {
 function generateComponentsRowForQuestion(questionId: number) {
     return new MessageActionRow().addComponents(
         new MessageButton()
-            .setLabel('Click here to answer!')
+            .setLabel('Answer Question!')
             .setStyle('PRIMARY')
             .setCustomId(`fibbage_question_button_${questionId}`),
         new MessageButton()
-            .setLabel('Click here to skip!')
+            .setLabel('Skip Question!')
             .setStyle('DANGER')
             .setCustomId(`fibbage_question_skip_${questionId}`)
     );
@@ -156,7 +153,7 @@ export async function giveUserNewQuestion(
 }
 
 function getUnaskedQuestionsForUser(
-    askedQuestions: FibbageQuestionInstance[],
+    askedQuestions: FibbageQuestion[],
     user: GuildMember
 ) {
     const prompts = getFibbagePrompts();

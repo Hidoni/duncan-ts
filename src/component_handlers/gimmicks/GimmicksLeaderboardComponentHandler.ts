@@ -3,15 +3,15 @@ import {
     leaderboardEmbedAttributes,
     leaderboardMappingFunction,
 } from '../../commands/gimmicks/GimmicksCommand';
+import { GimmickPoints } from '../../database/models/GimmickPoints';
 import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
-import { GimmickPointsInstance } from '../../interfaces/gimmicks/GimmickPoints';
 import {
     generateLeaderboardComponentsRow,
     generateLeaderboardEmbed,
 } from '../../utils/LeaderboardUtils';
 
 async function updateMessageLeaderboard(
-    points: GimmickPointsInstance[],
+    points: GimmickPoints[],
     page: number,
     interaction: MessageComponentInteraction
 ): Promise<void> {

@@ -4,8 +4,8 @@ import {
 } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import Bot from '../../client/Bot';
+import { GimmickPoints } from '../../database/models/GimmickPoints';
 import { CommandHandler } from '../../interfaces/Command';
-import { GimmickPointsInstance } from '../../interfaces/gimmicks/GimmickPoints';
 import {
     DEFAULT_EMBED_COLOR,
     EmbedAttributes,
@@ -21,7 +21,7 @@ export const leaderboardEmbedAttributes: EmbedAttributes = {
     valueName: 'Points',
 };
 export const leaderboardMappingFunction: LeaderboardMap<
-    GimmickPointsInstance
+    GimmickPoints
 > = (value) => [`<@${value.id}>`, value.points.toString()];
 
 async function handleLeaderboardSubcommand(

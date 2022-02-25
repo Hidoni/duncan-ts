@@ -1,46 +1,44 @@
-import { DatabaseModelInitializer } from '../../interfaces/DatabaseModel';
-import { FibbageStatsInstance } from '../../interfaces/fibbage/FibbageStats';
-import { DataTypes } from 'sequelize';
+import {
+    Table,
+    Column,
+    Model,
+    AllowNull,
+    PrimaryKey,
+    Default,
+} from 'sequelize-typescript';
 
-export const initialize: DatabaseModelInitializer<FibbageStatsInstance> = (
-    sequelize
-) => {
-    return sequelize.define(
-        'fibbage_stats',
-        {
-            id: {
-                type: DataTypes.STRING,
-                primaryKey: true,
-                allowNull: false,
-            },
-            points: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
-            timesAnsweredCorrectly: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
-            timesFooled: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
-            timesOthersFooled: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
-            timesOthersAnsweredCorrectly: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
-        },
-        {
-            timestamps: false,
-        }
-    );
-};
+@Table({
+    modelName: 'fibbage_stats',
+    timestamps: false,
+})
+export class FibbageStats extends Model {
+    @AllowNull(false)
+    @PrimaryKey
+    @Column
+    id!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    points!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    timesAnsweredCorrectly!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    timesFooled!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    timesOthersFooled!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    timesOthersAnsweredCorrectly!: number;
+}

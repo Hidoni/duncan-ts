@@ -1,26 +1,24 @@
-import { DatabaseModelInitializer } from '../../interfaces/DatabaseModel';
-import { GimmickPointsInstance } from '../../interfaces/gimmicks/GimmickPoints';
-import { DataTypes } from 'sequelize';
+import {
+    Table,
+    Column,
+    Model,
+    AllowNull,
+    PrimaryKey,
+    Default,
+} from 'sequelize-typescript';
 
-export const initialize: DatabaseModelInitializer<GimmickPointsInstance> = (
-    sequelize
-) => {
-    return sequelize.define(
-        'gimmicks_points',
-        {
-            id: {
-                type: DataTypes.STRING,
-                primaryKey: true,
-                allowNull: false,
-            },
-            points: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
-        },
-        {
-            timestamps: false,
-        }
-    );
-};
+@Table({
+    modelName: 'gimmicks_points',
+    timestamps: false,
+})
+export class GimmickPoints extends Model {
+    @AllowNull(false)
+    @PrimaryKey
+    @Column
+    id!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    points!: number;
+}

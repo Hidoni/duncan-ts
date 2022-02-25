@@ -12,6 +12,8 @@
         "strict": true,
         "skipLibCheck": true,
         "sourceMap": true,
-        "importHelpers": true
+        "importHelpers": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
     }
 }

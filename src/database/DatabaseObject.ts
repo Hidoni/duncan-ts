@@ -1,50 +1,28 @@
 import { Logger } from 'log4js';
-import { ModelCtor, Sequelize } from 'sequelize';
-import { QuestionInstance } from '../interfaces/question_of_the_day/Question';
-import { GimmickPointsInstance } from '../interfaces/gimmicks/GimmickPoints';
-import {
-    FibbageQuestionInstance,
-    FibbageQuestionState,
-} from '../interfaces/fibbage/FibbageQuestion';
-import { FibbageAnswerInstance } from '../interfaces/fibbage/FibbageAnswer';
-import { FibbageGuessInstance } from '../interfaces/fibbage/FibbageGuess';
-import { FibbageStatsInstance } from '../interfaces/fibbage/FibbageStats';
-import { initialize as initializeQuestions } from './models/Questions';
-import { initialize as initializeGimmickPoints } from './models/GimmickPoints';
-import { initialize as initializeFibbageQuestions } from './models/FibbageQuestions';
-import { initialize as initializeFibbageAnswers } from './models/FibbageAnswers';
-import { initialize as initializeFibbageGuesses } from './models/FibbageGuesses';
-import { initialize as initializeFibbageStats } from './models/FibbageStats';
+
 import { Snowflake } from 'discord.js';
+import { Sequelize } from 'sequelize-typescript';
+import { Question } from './models/Question';
+import { GimmickPoints } from './models/GimmickPoints';
+import { FibbageStats } from './models/FibbageStats';
+import {
+    FibbageQuestion,
+    FibbageQuestionState,
+} from './models/FibbageQuestion';
+import { FibbageAnswer } from './models/FibbageAnswer';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
 export default class Database {
     private sequelize: Sequelize;
-    private questions: ModelCtor<QuestionInstance>;
-    private gimmickPoints: ModelCtor<GimmickPointsInstance>;
-    private fibbageQuestions: ModelCtor<FibbageQuestionInstance>;
-    private fibbageAnswers: ModelCtor<FibbageAnswerInstance>;
-    private fibbageGuesses: ModelCtor<FibbageGuessInstance>;
-    private fibbageStats: ModelCtor<FibbageStatsInstance>;
 
     public constructor(database: string, logger?: Logger) {
         this.sequelize = new Sequelize({
             dialect: 'sqlite',
             storage: database,
             logging: logger?.debug.bind(logger),
+            models: [__dirname + '/models'],
         });
-
-        this.questions = initializeQuestions(this.sequelize);
-        this.gimmickPoints = initializeGimmickPoints(this.sequelize);
-        this.fibbageQuestions = initializeFibbageQuestions(this.sequelize);
-        this.fibbageAnswers = initializeFibbageAnswers(this.sequelize);
-        this.fibbageQuestions.hasMany(this.fibbageAnswers, {sourceKey: 'id', foreignKey: 'questionId', as: 'Answer'});
-        this.fibbageAnswers.belongsTo(this.fibbageQuestions, {targetKey: 'id', foreignKey: 'questionId', as: 'Question'});
-        this.fibbageGuesses = initializeFibbageGuesses(this.sequelize);
-        this.fibbageAnswers.hasMany(this.fibbageGuesses, {sourceKey: 'id', foreignKey: 'answerId', as: {singular: 'Guess', plural: 'Guesses'}});
-        this.fibbageGuesses.belongsTo(this.fibbageAnswers, {targetKey: 'id', foreignKey: 'answerId', as: 'Answer'});
-        this.fibbageStats = initializeFibbageStats(this.sequelize);
         this.sync();
     }
 
@@ -52,15 +30,15 @@ export default class Database {
         this.sequelize.sync();
     }
 
-    public async getUnusedQuestions(): Promise<QuestionInstance[]> {
-        return await this.questions.findAll({ where: { used: false } });
+    public async getUnusedQuestions(): Promise<Question[]> {
+        return await Question.findAll({ where: { used: false } });
     }
 
     public async insertQuestion(
         question: string,
         authorName: string
     ): Promise<void> {
-        await this.questions.create({
+        await Question.create({
             question: question,
             authorName: authorName,
             addedAt: new Date(),
@@ -94,103 +72,120 @@ export default class Database {
         return null;
     }
 
-    public async getGimmickPoints(id: string): Promise<GimmickPointsInstance> {
-        const points = await this.gimmickPoints.findOne({ where: { id: id } });
+    public async getGimmickPoints(id: string): Promise<GimmickPoints> {
+        const points = await GimmickPoints.findOne({ where: { id: id } });
         if (!points) {
-            return this.gimmickPoints.create({ id: id });
+            return GimmickPoints.create({ id: id });
         }
         return points;
     }
 
-    public async getAllGimmickPoints(): Promise<GimmickPointsInstance[]> {
-        return await this.gimmickPoints.findAll({
+    public async getAllGimmickPoints(): Promise<GimmickPoints[]> {
+        return await GimmickPoints.findAll({
             order: Sequelize.literal('points DESC'),
         });
     }
 
-    public async getFibbageStats(id: Snowflake): Promise<FibbageStatsInstance> {
-        const stats = await this.fibbageStats.findOne({ where: { id: id } });
+    public async getFibbageStats(id: Snowflake): Promise<FibbageStats> {
+        const stats = await FibbageStats.findOne({ where: { id: id } });
         if (!stats) {
-            return this.fibbageStats.create({ id: id });
+            return FibbageStats.create({ id: id });
         }
         return stats;
     }
 
-    public async getAllFibbageStats(): Promise<FibbageStatsInstance[]> {
-        return await this.fibbageStats.findAll({
+    public async getAllFibbageStats(): Promise<FibbageStats[]> {
+        return await FibbageStats.findAll({
             order: Sequelize.literal('points DESC'),
         });
     }
 
     public async getFibbageQuestion(
         id: number
-    ): Promise<FibbageQuestionInstance | null> {
-        const question = await this.fibbageQuestions.findOne({
+    ): Promise<FibbageQuestion | null> {
+        return await FibbageQuestion.findOne({
             where: { id: id },
         });
-        if (!question) {
-            return null;
-        }
-        return question;
     }
 
-    public async getFibbageAnswer(
-        id: number
-    ): Promise<FibbageAnswerInstance | null> {
-        const answer = await this.fibbageAnswers.findOne({
+    public async getFibbageAnswer(id: number): Promise<FibbageAnswer | null> {
+        return await FibbageAnswer.findOne({
             where: { id: id },
         });
-        if (!answer) {
-            return null;
-        }
-        return answer;
     }
 
     public async getFibbageAnswersForQuestion(
         questionId: number
-    ): Promise<FibbageAnswerInstance[]> {
-        return await this.fibbageAnswers.findAll({
-            where: { questionId: questionId },
+    ): Promise<FibbageAnswer[]> {
+        return FibbageQuestion.findByPk(questionId).then((question) => {
+            if (!question) {
+                return [];
+            } else {
+                return question.answers;
+            }
         });
     }
 
     public async insertFibbageQuestion(
         question: string,
         user: Snowflake
-    ): Promise<FibbageQuestionInstance> {
-        return await this.fibbageQuestions.create({
+    ): Promise<FibbageQuestion> {
+        return await FibbageQuestion.create({
             question: question,
             user: user,
+        });
+    }
+
+    public async insertFibbageAnswerByQuestionId(
+        answer: string,
+        user: Snowflake,
+        isCorrect: boolean,
+        questionId: number
+    ): Promise<void> {
+        await this.getFibbageQuestion(questionId).then(async (question) => {
+            if (!question) {
+                throw new Error('Question not found');
+            }
+            question.$add(
+                'answer',
+                await FibbageAnswer.create({
+                    answer: answer,
+                    user: user,
+                    isCorrect: isCorrect,
+                })
+            );
         });
     }
 
     public async insertFibbageAnswer(
         answer: string,
         user: Snowflake,
-        questionId: number
+        isCorrect: boolean,
+        question: Question
     ): Promise<void> {
-        await this.fibbageAnswers.create({
-            answer: answer,
-            user: user,
-            questionId: questionId,
-        });
+        await question.$add(
+            'answer',
+            await FibbageAnswer.create({
+                answer: answer,
+                user: user,
+                isCorrect: isCorrect,
+            })
+        );
     }
 
-    public async getAnsweredFibbageQuestions(): Promise<
-        FibbageQuestionInstance[]
-    > {
-        return await this.fibbageQuestions.findAll({
+    public async getAnsweredFibbageQuestions(): Promise<FibbageQuestion[]> {
+        return await FibbageQuestion.findAll({
             where: { state: FibbageQuestionState.ANSWERED },
         });
     }
 
-    public async getQuestionsReadyToPost(): Promise<FibbageQuestionInstance[]> {
-        return await this.fibbageQuestions.findAll({
-            where: { state: FibbageQuestionState.ANSWERED },
+    public async getQuestionsReadyToPost(): Promise<FibbageQuestion[]> {
+        return await FibbageQuestion.findAll({
+            where: { state: FibbageQuestionState.PROMPTED },
         });
     }
 
-    public async getAllFibbageQuestions(): Promise<FibbageQuestionInstance[]> {
-        return await this.fibbageQuestions.findAll();
+    public async getAllFibbageQuestions(): Promise<FibbageQuestion[]> {
+        return await FibbageQuestion.findAll();
     }
 }
