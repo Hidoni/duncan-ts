@@ -23,8 +23,11 @@ export const handler: ComponentHandlerFunction = async (
             content: `OnO, I'm sowwy, but I couldn't find your question, please let Hidoni know ASAP!!`,
         });
     } else if (question.state != FibbageQuestionState.ASKED) {
+        client.logger?.debug(
+            `Question ${questionId} has already been answered, preventing skip button (State is ${question.state})`
+        );
         await interaction.reply(
-            "Nice try, but you've already answered this question!"
+            "Nice try, but you've already answered this question, so no skipping now!"
         );
     } else {
         question.state = FibbageQuestionState.SKIPPED;

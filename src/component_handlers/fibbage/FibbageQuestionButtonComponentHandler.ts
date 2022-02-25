@@ -19,6 +19,9 @@ export const handler: ComponentHandlerFunction = async (
             content: `OnO, I'm sowwy, but I couldn't find your question, please let Hidoni know ASAP!!`,
         });
     } else if (question.state != FibbageQuestionState.ASKED) {
+        client.logger?.debug(
+            `Question ${questionId} has already been answered, preventing a new answer from being submitted (State is ${question.state})`
+        );
         await interaction.reply(
             "Nice try, but you've already answered this question!"
         );

@@ -153,6 +153,7 @@ export async function giveUserNewQuestion(
     user: GuildMember | User
 ) {
     const question = questions[Math.floor(Math.random() * questions.length)];
+    client.logger?.info(`Giving ${user} a new question: ${question}`);
     await sendButtonPromptToUser(client, question, user);
 }
 
