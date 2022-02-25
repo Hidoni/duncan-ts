@@ -6,9 +6,13 @@ import {
     Modal,
     ModalActionRowComponent,
     TextInputComponent,
+    User,
 } from 'discord.js';
 import Bot from '../client/Bot';
-import { FibbageQuestion, FibbageQuestionState } from '../database/models/FibbageQuestion';
+import {
+    FibbageQuestion,
+    FibbageQuestionState,
+} from '../database/models/FibbageQuestion';
 import {
     FibbagePrompt,
     FibbagePrompts,
@@ -131,7 +135,7 @@ function generateComponentsRowForQuestion(questionId: number) {
 async function sendButtonPromptToUser(
     client: Bot,
     question: string,
-    user: GuildMember
+    user: GuildMember | User
 ) {
     const dbQuestion = await client.database.insertFibbageQuestion(
         question,
@@ -146,7 +150,7 @@ async function sendButtonPromptToUser(
 export async function giveUserNewQuestion(
     client: Bot,
     questions: string[],
-    user: GuildMember
+    user: GuildMember | User
 ) {
     const question = questions[Math.floor(Math.random() * questions.length)];
     await sendButtonPromptToUser(client, question, user);
@@ -154,7 +158,7 @@ export async function giveUserNewQuestion(
 
 function getUnaskedQuestionsForUser(
     askedQuestions: FibbageQuestion[],
-    user: GuildMember
+    user: GuildMember | User
 ) {
     const prompts = getFibbagePrompts();
     const allAskedUserQuestions = askedQuestions.filter(
@@ -169,6 +173,15 @@ function getUnaskedQuestionsForUser(
     const promptList =
         unaskedPrompts.length > 0 ? unaskedPrompts : Object.keys(prompts);
     return promptList;
+}
+
+export async function promptUserWithQuestion(
+    client: Bot,
+    user: GuildMember | User,
+    askedQuestions: FibbageQuestion[]
+) {
+    const unaskedQuestions = getUnaskedQuestionsForUser(askedQuestions, user);
+    await giveUserNewQuestion(client, unaskedQuestions, user);
 }
 
 export async function promptUsersWithQuestions(client: Bot) {
@@ -193,7 +206,6 @@ export async function promptUsersWithQuestions(client: Bot) {
         return;
     }
     for (const user of usersWithoutQuestion) {
-        const promptList = getUnaskedQuestionsForUser(askedQuestions, user);
-        await giveUserNewQuestion(client, promptList, user);
+        promptUserWithQuestion(client, user, askedQuestions);
     }
 }
