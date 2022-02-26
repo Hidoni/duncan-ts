@@ -7,6 +7,7 @@ import {
     PrimaryKey,
     BelongsTo,
     HasMany,
+    DataType,
 } from 'sequelize-typescript';
 import { FibbageGuess } from './FibbageGuess';
 import { FibbageQuestion } from './FibbageQuestion';
@@ -31,13 +32,17 @@ export class FibbageAnswer extends Model {
     @Column
     answer!: string;
 
-    @AllowNull(false)
-    @Column
-    user!: string;
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    user!: string | null;
 
     @AllowNull(false)
     @Column
     isCorrect!: boolean;
+
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    answerPosition!: number | null;
 
     @BelongsTo(() => FibbageQuestion, 'questionId')
     question!: FibbageQuestion;
