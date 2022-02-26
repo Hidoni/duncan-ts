@@ -35,7 +35,7 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
         await interaction.reply('You need to answer the question!');
         return;
     }
-    client.logger?.info(`User ${interaction.user} answered question ${questionId}.`);
+    client.logger?.info(`User ${interaction.user.tag} answered question ${questionId}.`);
     question.state = FibbageQuestionState.ANSWERED;
     await question.save();
     await client.database.insertFibbageAnswer(

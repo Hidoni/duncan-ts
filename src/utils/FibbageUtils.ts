@@ -154,13 +154,19 @@ async function sendButtonPromptToUser(
     });
 }
 
+function getUserTag(user: User | GuildMember) {
+    return user instanceof GuildMember ? user.user.tag : user.tag;
+}
+
 export async function giveUserNewQuestion(
     client: Bot,
     questions: string[],
     user: GuildMember | User
 ) {
     const question = questions[Math.floor(Math.random() * questions.length)];
-    client.logger?.info(`Giving ${user} a new question: ${question}`);
+    client.logger?.info(
+        `Giving ${getUserTag(user)} a new question: ${question}`
+    );
     await sendButtonPromptToUser(client, question, user);
 }
 
@@ -260,7 +266,9 @@ async function promptRandomUsersForFibs(
         usersCopy = usersCopy.filter(
             (u: GuildMember | User) => u.id !== user.id
         );
-        client.logger?.info(`Prompting ${user} with prompt ${promptFormatted}`);
+        client.logger?.info(
+            `Prompting ${getUserTag(user)} with prompt ${promptFormatted}`
+        );
         await sendButtonWithPromptToUser(question, promptFormatted, user);
     }
 }
