@@ -33,6 +33,7 @@ export class FibbageAnswer extends Model {
     answer!: string;
 
     @AllowNull(false)
+    @Column
     user!: string;
 
     @AllowNull(false)
