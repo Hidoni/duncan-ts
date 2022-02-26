@@ -629,10 +629,10 @@ async function generateMessageForPostedQuestion(
     const sep = '------';
     let message = `${promptFormatted}\n\n${sep}ANSWERS${sep}\n${answerCreditsStrings}`;
     if (guessString.length > 0) {
-        message += `\n\n${sep}CORRECT GUESSES${sep}\n${guessString}`;
+        message += `\n${sep}CORRECT GUESSES${sep}\n${guessString}`;
     }
     if (answerString.length > 0) {
-        message += `\n\n${sep}FOOLS${sep}\n${answerString}`;
+        message += `\n${sep}FOOLS${sep}\n${answerString}`;
     }
     return message;
 }
