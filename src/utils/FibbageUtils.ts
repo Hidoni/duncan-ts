@@ -514,6 +514,9 @@ async function awardPointsToUsers(
                         answer,
                         POINTS_FOR_CORRECT_GUESS
                     );
+                    client.logger?.debug(
+                        `Awarded ${POINTS_FOR_CORRECT_GUESS} to ${guess.user} for correct guess.`
+                    );
                     guesserStats.points += POINTS_FOR_CORRECT_GUESS;
                     guesserStats.timesAnsweredCorrectly++;
                     await guesserStats.save();
@@ -522,6 +525,9 @@ async function awardPointsToUsers(
                         answer.user,
                         answer,
                         POINTS_FOR_OTHER_CORRECT_GUESS
+                    );
+                    client.logger?.debug(
+                        `Awarded ${POINTS_FOR_OTHER_CORRECT_GUESS} to ${answer.user} for someone's correct guess.`
                     );
                     authorStats.points += POINTS_FOR_OTHER_CORRECT_GUESS;
                     authorStats.timesOthersAnsweredCorrectly++;
@@ -547,6 +553,9 @@ async function awardPointsToUsers(
                         answer.user,
                         answer,
                         POINTS_FOR_FOOLING_OTHERS
+                    );
+                    client.logger?.debug(
+                        `Awarded ${POINTS_FOR_FOOLING_OTHERS} to ${answer.user} for fooling someone else.`
                     );
                     authorStats.points += POINTS_FOR_FOOLING_OTHERS;
                     authorStats.timesOthersFooled++;
