@@ -133,6 +133,10 @@ function generateComponentsRowForQuestion(questionId: number) {
     );
 }
 
+function escapeDiscordMarkdown(text: string) {
+    return text.replace(/[\*_~`|]/g, '\\$&');
+}
+
 async function sendButtonPromptToUser(
     client: Bot,
     question: string,
@@ -143,7 +147,7 @@ async function sendButtonPromptToUser(
         user.id
     );
     await user.send({
-        content: `Hewwo! ^w^\nI'm here to ask you your question for fibbage!\n\n${question}`,
+        content: escapeDiscordMarkdown(`Hewwo! ^w^\nI'm here to ask you your question for Fibbage!\n\n${question}`),
         components: [generateComponentsRowForQuestion(dbQuestion.id)],
     });
 }
@@ -227,7 +231,7 @@ async function sendButtonWithPromptToUser(
     user: GuildMember | User
 ) {
     await user.send({
-        content: `Hewwo! ^w^\nI need you to put a clever lie to this question that may fool other players!\n\n${prompt}`,
+        content: escapeDiscordMarkdown(`Hewwo! ^w^\nI need you to put a clever lie to this question that may fool other players!\n\n${prompt}`),
         components: [generateComponentsRowForPrompt(question.id)],
     });
 }
