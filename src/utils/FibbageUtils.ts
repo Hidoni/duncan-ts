@@ -316,7 +316,7 @@ export function generatePromptModal(questionId: number) {
         .setCustomId(`fibbage_prompt_modal_${questionId}`);
 }
 
-function groupIdenticalAnswers(answers: FibbageAnswer[]): FibbageAnswer[][] {
+export function groupIdenticalAnswers(answers: FibbageAnswer[]): FibbageAnswer[][] {
     return answers.reduce((acc, curr) => {
         const answerGroup = acc.find((group: FibbageAnswer[]) =>
             group.some((a) => a.answer === curr.answer)
