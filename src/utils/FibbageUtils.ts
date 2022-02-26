@@ -612,7 +612,7 @@ function getPointRewardExplanationForAnswer(
         const amountOfPlayersFooled = Math.floor(
             pointsEarned / POINTS_FOR_FOOLING_OTHERS
         );
-        return `(+${pointsEarned} points for fooling ${amountOfPlayersFooled} player(s).)`;
+        return `(+${pointsEarned} points for fooling ${amountOfPlayersFooled} player(s))`;
     }
 }
 
