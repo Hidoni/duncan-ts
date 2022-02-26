@@ -14,7 +14,7 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
     );
     if (!question) {
         client.logger?.error(
-            `Could not find question ${questionId} for user ${interaction.user.id}`
+            `Could not find question ${questionId} for user ${interaction.user.tag}`
         );
         await interaction.reply(
             "OnO, I'm sowwy, but I can't find the question!! Please tell Hidoni ASAP!!"

@@ -17,7 +17,7 @@ export const handler: ComponentHandlerFunction = async (
     );
     if (!question) {
         client.logger?.error(
-            `Could not find question ${questionId} for user ${interaction.user.id}`
+            `Could not find question ${questionId} for user ${interaction.user.tag}`
         );
         await interaction.reply({
             content: `OnO, I'm sowwy, but I couldn't find your question, please let Hidoni know ASAP!!`,
