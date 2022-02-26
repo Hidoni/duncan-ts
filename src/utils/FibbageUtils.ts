@@ -101,7 +101,7 @@ export async function getUsersWithFibbageRole(
         });
 }
 
-export function generateQuestionModal(question: string, questionId: number) {
+export function generateQuestionModal(questionId: number) {
     return new Modal()
         .setTitle('Fibbage')
         .addComponents(

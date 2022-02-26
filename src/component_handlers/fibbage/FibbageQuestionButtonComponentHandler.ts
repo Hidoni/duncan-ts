@@ -26,9 +26,7 @@ export const handler: ComponentHandlerFunction = async (
             "Nice try, but you've already answered this question!"
         );
     } else {
-        await interaction.showModal(
-            generateQuestionModal(question.question, question.id)
-        );
+        await interaction.showModal(generateQuestionModal(question.id));
     }
 };
 
