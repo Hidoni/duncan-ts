@@ -78,7 +78,7 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
     const questionId = idInfo![1];
     const question = await client.database.getFibbageQuestion(
         Number.parseInt(questionId),
-        true
+        { loadAnswers: true }
     );
     if (!question) {
         client.logger?.error(

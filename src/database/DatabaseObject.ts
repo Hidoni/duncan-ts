@@ -11,6 +11,8 @@ import {
 } from './models/FibbageQuestion';
 import { FibbageAnswer } from './models/FibbageAnswer';
 import { FibbageGuess } from './models/FibbageGuess';
+import { FibbageEagerLoadingOptions } from '../interfaces/fibbage/FibbageEagerLoadingOptions';
+import { Includeable } from 'sequelize/types';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -101,16 +103,33 @@ export default class Database {
         });
     }
 
-    private generateGuessInclude(loadGuesses: boolean) {
-        return loadGuesses ? [{ model: FibbageGuess }] : [];
+    private generateGuessInclude(
+        eagerLoadingOptions: FibbageEagerLoadingOptions
+    ): Includeable[] {
+        return eagerLoadingOptions.loadGuesses ? [{ model: FibbageGuess }] : [];
     }
 
-    private generateAnswerInclude(loadAnswers: boolean, loadGuesses: boolean) {
-        return loadAnswers
+    private generateAnswerInclude(
+        eagerLoadingOptions: FibbageEagerLoadingOptions
+    ): Includeable[] {
+        return eagerLoadingOptions.loadAnswers
             ? [
                   {
                       model: FibbageAnswer,
-                      include: this.generateGuessInclude(loadGuesses),
+                      include: this.generateGuessInclude(eagerLoadingOptions),
+                  },
+              ]
+            : [];
+    }
+
+    private generateQuestionInclude(
+        eagerLoadingOptions: FibbageEagerLoadingOptions
+    ): Includeable[] {
+        return eagerLoadingOptions.loadQuestion
+            ? [
+                  {
+                      model: FibbageQuestion,
+                      include: this.generateAnswerInclude(eagerLoadingOptions),
                   },
               ]
             : [];
@@ -118,33 +137,35 @@ export default class Database {
 
     public async getFibbageQuestion(
         id: number,
-        loadAnswers: boolean = false,
-        loadGuesses: boolean = false
+        eagerLoadingOptions: FibbageEagerLoadingOptions = {}
     ): Promise<FibbageQuestion | null> {
         return await FibbageQuestion.findOne({
             where: { id: id },
-            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
+            include: this.generateAnswerInclude(eagerLoadingOptions),
         });
     }
 
     public async getFibbageAnswer(
         id: number,
-        loadGuesses: boolean = false
+        eagerLoadingOptions: FibbageEagerLoadingOptions = {}
     ): Promise<FibbageAnswer | null> {
-        const includeGuesses = loadGuesses ? [{ model: FibbageGuess }] : [];
         return await FibbageAnswer.findOne({
             where: { id: id },
-            include: this.generateGuessInclude(loadGuesses),
+            include: this.generateQuestionInclude(eagerLoadingOptions).concat(
+                this.generateGuessInclude(eagerLoadingOptions)
+            ),
         });
     }
 
     public async getFibbageAnswersForQuestion(
         questionId: number,
-        loadGuesses: boolean = false
+        eagerLoadingOptions: FibbageEagerLoadingOptions = {}
     ): Promise<FibbageAnswer[]> {
-        const includeGuesses = loadGuesses ? [{ model: FibbageGuess }] : [];
         return FibbageQuestion.findByPk(questionId, {
-            include: this.generateAnswerInclude(true, loadGuesses),
+            include: this.generateAnswerInclude({
+                loadAnswers: true,
+                loadGuesses: eagerLoadingOptions.loadGuesses,
+            }),
         }).then((question) => {
             if (!question) {
                 return [];
@@ -196,21 +217,26 @@ export default class Database {
 
     public async getQuestionsInState(
         state: FibbageQuestionState,
-        loadAnswers: boolean = false,
-        loadGuesses: boolean = false
+        eagerLoadingOptions: FibbageEagerLoadingOptions = {}
     ): Promise<FibbageQuestion[]> {
         return await FibbageQuestion.findAll({
             where: { state: state },
-            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
+            include: this.generateAnswerInclude(eagerLoadingOptions),
         });
     }
 
     public async getAllFibbageQuestions(
-        loadAnswers: boolean = false,
-        loadGuesses: boolean = false
+        eagerLoadingOptions: FibbageEagerLoadingOptions = {}
     ): Promise<FibbageQuestion[]> {
         return await FibbageQuestion.findAll({
-            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
+            include: this.generateAnswerInclude(eagerLoadingOptions),
         });
+    }
+
+    public async insertFibbageGuess(
+        user: Snowflake,
+        answer: FibbageAnswer
+    ): Promise<void> {
+        await answer.$add('guess', await FibbageGuess.create({ user: user }));
     }
 }

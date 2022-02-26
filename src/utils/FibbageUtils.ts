@@ -283,7 +283,9 @@ export async function promptUsersForFibs(client: Bot) {
     if (users.length <= 1) {
         return;
     }
-    const questionsThatNeedFibs = await client.database.getQuestionsInState(FibbageQuestionState.ANSWERED);
+    const questionsThatNeedFibs = await client.database.getQuestionsInState(
+        FibbageQuestionState.ANSWERED
+    );
     if (questionsThatNeedFibs.length === 0) {
         return;
     }
@@ -398,7 +400,10 @@ async function postNewQuestion(
 }
 
 export async function postNewQuestions(client: Bot) {
-    const questions = await client.database.getQuestionsInState(FibbageQuestionState.PROMPTED, true);
+    const questions = await client.database.getQuestionsInState(
+        FibbageQuestionState.PROMPTED,
+        { loadAnswers: true }
+    );
     if (questions.length === 0) {
         return;
     }
