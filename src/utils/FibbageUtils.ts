@@ -5,21 +5,26 @@ import {
     MessageButton,
     Modal,
     ModalActionRowComponent,
+    TextBasedChannel,
     TextInputComponent,
     User,
 } from 'discord.js';
 import Bot from '../client/Bot';
+import { FibbageAnswer } from '../database/models/FibbageAnswer';
 import {
     FibbageQuestion,
     FibbageQuestionState,
 } from '../database/models/FibbageQuestion';
 import {
+    FibbageDefaultAnswers,
     FibbagePrompt,
     FibbagePrompts,
 } from '../interfaces/fibbage/FibbagePrompts';
 
 const MAX_ALLOWED_CHARS_IN_BUTTON = 80;
 const MAX_USERS_TO_PROMPT = 7;
+const MAX_ANSWERS_ALLOWED = 8;
+const FIBBAGE_BUTTON_LOCATION = 4;
 
 const config = new Conf();
 
@@ -278,10 +283,7 @@ export async function promptUsersForFibs(client: Bot) {
     if (users.length <= 1) {
         return;
     }
-    const askedQuestions = await client.database.getAllFibbageQuestions();
-    const questionsThatNeedFibs = askedQuestions.filter(
-        (question) => question.state === FibbageQuestionState.ANSWERED
-    );
+    const questionsThatNeedFibs = await client.database.getQuestionsInState(FibbageQuestionState.ANSWERED);
     if (questionsThatNeedFibs.length === 0) {
         return;
     }
@@ -310,4 +312,103 @@ export function generatePromptModal(questionId: number) {
             )
         )
         .setCustomId(`fibbage_prompt_modal_${questionId}`);
+}
+
+async function generateComponentsRowsForQuestionToPost(
+    answers: FibbageAnswer[]
+) {
+    const components: MessageActionRow[] = [
+        new MessageActionRow(),
+        new MessageActionRow(),
+        new MessageActionRow(),
+    ];
+    for (let i = 0; i < MAX_ANSWERS_ALLOWED + 1; i++) {
+        const componentsIndex = Math.floor(i / 3);
+        if (i === FIBBAGE_BUTTON_LOCATION) {
+            components[componentsIndex].addComponents(
+                new MessageButton()
+                    .setLabel('FIBBAGE!')
+                    .setStyle('SECONDARY')
+                    .setDisabled(true)
+                    .setCustomId(`fibbage_logo_button_unclickable`)
+            );
+        } else {
+            const answer = answers[Math.floor(Math.random() * answers.length)];
+            components[componentsIndex].addComponents(
+                new MessageButton()
+                    .setLabel(answer.answer.toUpperCase())
+                    .setStyle('PRIMARY')
+                    .setCustomId(`fibbage_answer_button_${answer.id}`)
+            );
+            answer.answerPosition = i;
+            await answer.save();
+            answers = answers.filter((a) => a.id !== answer.id);
+        }
+    }
+    return components;
+}
+
+async function fillMissingAnswersForQuestion(
+    client: Bot,
+    question: FibbageQuestion,
+    defaultAnswers: FibbageDefaultAnswers
+) {
+    let validDefaultAnswers = defaultAnswers.filter(
+        (answer) =>
+            !question.answers.some((a) => a.answer.toUpperCase() === answer)
+    );
+    const amountOfAnswersToAdd = MAX_ANSWERS_ALLOWED - question.answers.length;
+    client.logger?.debug(
+        `Adding ${amountOfAnswersToAdd} answers to question ${question.id}`
+    );
+    for (let i = 0; i < amountOfAnswersToAdd; i++) {
+        const answer =
+            validDefaultAnswers[
+                Math.floor(Math.random() * validDefaultAnswers.length)
+            ];
+        validDefaultAnswers = validDefaultAnswers.filter((a) => a !== answer);
+        await client.database.insertFibbageAnswer(
+            answer,
+            null,
+            false,
+            question
+        );
+    }
+}
+
+async function postNewQuestion(
+    client: Bot,
+    channel: TextBasedChannel,
+    question: FibbageQuestion
+) {
+    const questionUser = await client.users.fetch(question.user);
+    const prompt = getFibbagePrompts()[question.question];
+    const promptFormatted = prompt.prompt.replace(/\{0}/g, questionUser.tag);
+    let answers = question.answers;
+    if (answers.length < MAX_ANSWERS_ALLOWED) {
+        await fillMissingAnswersForQuestion(client, question, prompt.answers);
+        answers = await question.$get('answers');
+    }
+    let componentRows = await generateComponentsRowsForQuestionToPost(answers);
+    client.logger?.info(`Posting new question ${question.id}`);
+    await channel.send({
+        content: escapeDiscordMarkdown(promptFormatted),
+        components: componentRows,
+    });
+}
+
+export async function postNewQuestions(client: Bot) {
+    const questions = await client.database.getQuestionsInState(FibbageQuestionState.PROMPTED, true);
+    if (questions.length === 0) {
+        return;
+    }
+    const channel = await client.channels.fetch(getChannel());
+    if (!channel || !channel.isText()) {
+        return;
+    }
+    for (const question of questions) {
+        postNewQuestion(client, channel, question);
+        question.state = FibbageQuestionState.IN_USE;
+        await question.save();
+    }
 }
