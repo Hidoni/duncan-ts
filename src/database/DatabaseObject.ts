@@ -194,22 +194,13 @@ export default class Database {
         );
     }
 
-    public async getAnsweredFibbageQuestions(
+    public async getQuestionsInState(
+        state: FibbageQuestionState,
         loadAnswers: boolean = false,
         loadGuesses: boolean = false
     ): Promise<FibbageQuestion[]> {
         return await FibbageQuestion.findAll({
-            where: { state: FibbageQuestionState.ANSWERED },
-            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
-        });
-    }
-
-    public async getQuestionsReadyToPost(
-        loadAnswers: boolean = false,
-        loadGuesses: boolean = false
-    ): Promise<FibbageQuestion[]> {
-        return await FibbageQuestion.findAll({
-            where: { state: FibbageQuestionState.PROMPTED },
+            where: { state: state },
             include: this.generateAnswerInclude(loadAnswers, loadGuesses),
         });
     }
