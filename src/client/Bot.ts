@@ -27,7 +27,7 @@ export default class Bot extends Client {
         this.config = config;
         this.logger = logger;
         this.restAPI = new REST({ version: '9' }).setToken(config.token);
-        this.database = new Database(config.database);
+        this.database = new Database(config.database, logger);
 
         if (config.commandsFolder) {
             this.loadCommands(config.commandsFolder);
