@@ -570,7 +570,7 @@ async function generateMessageForPostedQuestion(
         throw new Error(`No correct answer found for question ${question.id}`);
     }
     const promptFormatted = prompt.prompt
-        .replace(/\{0}/g, question.user)
+        .replace(/\{0}/g, `<@${question.user}>`)
         .replace(/_______/g, correctAnswer[0].answer);
     const { scoresFromGuesses, scoresFromAnswers } = await awardPointsToUsers(
         answerGroups,
