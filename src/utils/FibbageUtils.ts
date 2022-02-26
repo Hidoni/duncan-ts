@@ -479,15 +479,13 @@ function addToUserScore(
     let score = scores.get(user);
     if (!score) {
         score = {
-            answer: answer.answer,
+            answerId: answer.id,
             points: 0,
-            isCorrect: answer.isCorrect,
         };
     }
     scores.set(user, {
-        answer: answer.answer,
+        answerId: answer.id,
         points: score.points + amount,
-        isCorrect: score.isCorrect,
     });
 }
 
@@ -597,24 +595,22 @@ async function generateMessageForPostedQuestion(
         (acc, [user, summary]) => {
             return (
                 acc +
-                `<@${user}>: +${summary.points} points for guessing '${summary.answer}' correctly.\n`
-            );
-        },
-        ''
-    );
-    const answerString = Array.from(scoresFromAnswers.entries()).reduce(
-        (acc, [user, summary]) => {
-            return (
-                acc +
-                `<@${user}>: +${summary.points} points for fooling ${Math.floor(
-                    summary.points / POINTS_FOR_FOOLING_OTHERS
-                )} players with the lie '${summary.answer}'\n`
+                `<@${user}>: +${summary.points} points for guessing correctly.\n`
             );
         },
         ''
     );
     const answerCreditsStrings = answerGroups.reduce((acc, group) => {
         const answer = group[0];
+        const pointsPerAnswerSubmitter = Array.from(
+            scoresFromAnswers.entries()
+        ).filter(([, summary]) => {
+            return summary.answerId === answer.id;
+        });
+        const pointsEarned =
+            pointsPerAnswerSubmitter.length !== 0
+                ? pointsPerAnswerSubmitter[0][1].points
+                : 0;
         return (
             acc +
             `'${answer.answer}' (${
@@ -625,16 +621,23 @@ async function generateMessageForPostedQuestion(
                         ? `${getUserMentionString(client, answer.user)}`
                         : ` AND ${getUserMentionString(client, answer.user)}`,
                 ''
-            )}\n`
+            )}${
+                pointsEarned !== 0
+                    ? answer.isCorrect
+                        ? ` (+${pointsEarned} points as a reputation bonus for ${Math.floor(
+                              pointsEarned / POINTS_FOR_OTHER_CORRECT_GUESS
+                          )} player(s) knowing them well!)`
+                        : ` (+${pointsEarned} points for fooling ${Math.floor(
+                              pointsEarned / POINTS_FOR_FOOLING_OTHERS
+                          )} player(s).)`
+                    : ''
+            }\n`
         );
     }, '');
     const sep = '------';
     let message = `${promptFormatted}\n\n${sep}ANSWERS${sep}\n${answerCreditsStrings}`;
     if (guessString.length > 0) {
         message += `\n${sep}CORRECT GUESSES${sep}\n${guessString}`;
-    }
-    if (answerString.length > 0) {
-        message += `\n${sep}FOOLS${sep}\n${answerString}`;
     }
     return message;
 }
