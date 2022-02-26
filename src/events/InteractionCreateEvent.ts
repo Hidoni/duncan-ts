@@ -3,9 +3,13 @@ import {
     SlashCommandBuilder,
 } from '@discordjs/builders';
 import {
+    BaseCommandInteraction,
     CommandInteraction,
     ContextMenuInteraction,
     Interaction,
+    InteractionReplyOptions,
+    MessageComponentInteraction,
+    ModalSubmitInteraction,
     Snowflake,
 } from 'discord.js';
 import Bot from '../client/Bot';
@@ -20,6 +24,23 @@ import { hasPermissions, isUserAdmin } from '../utils/PermissionUtils';
 const UNKNOWN_ERROR_MESSAGE =
     'Aw heck! Something went wrong here and I dunno what it is! ;w; Let’s go ask Hidoni about it!';
 
+function getReplyFunction(
+    client: Bot,
+    interaction:
+        | CommandInteractionType<CommandBuilderType>
+        | MessageComponentInteraction
+        | ModalSubmitInteraction
+): (options: InteractionReplyOptions) => Promise<void> {
+    return async (options: InteractionReplyOptions) => {
+        const replyFunction = interaction.replied
+            ? interaction.followUp.bind(interaction)
+            : interaction.reply.bind(interaction);
+        await replyFunction(options).catch((error) => {
+            client.logger?.error(`Could not reply to interaction: ${error}`);
+        });
+    };
+}
+
 async function canRunCommand(
     client: Bot,
     interaction: CommandInteractionType<CommandBuilderType>,
@@ -30,7 +51,10 @@ async function canRunCommand(
         command.guildOnly(interaction) &&
         !interaction.guild
     ) {
-        interaction.reply({
+        getReplyFunction(
+            client,
+            interaction
+        )({
             content:
                 'Oh wait! Send that command to me in the server instead! It gets covered in chocolate and sprinkles here in our messages so I don’t really see it! ',
             ephemeral: true,
@@ -43,7 +67,10 @@ async function canRunCommand(
     ) {
         const permissions = command.permissions(interaction);
         if (!interaction.member) {
-            interaction.reply({
+            getReplyFunction(
+                client,
+                interaction
+            )({
                 content:
                     'What the..! The sprinkles spell out ‘404’! Not sure what happened there..',
                 ephemeral: true,
@@ -53,7 +80,10 @@ async function canRunCommand(
             );
             return false;
         } else if (!hasPermissions(interaction.member, permissions)) {
-            interaction.reply({
+            getReplyFunction(
+                client,
+                interaction
+            )({
                 content: `Uh oh… you’re not allowed to do that! I think you might need the following permission${
                     permissions.length > 1 ? '(s)' : ''
                 }: ${permissions.join(', ')}`,
@@ -108,15 +138,13 @@ export const handler: EventHandler = async (
                     client.logger?.error(
                         `Got the following error while executing ${interaction.commandName} command: ${error}`
                     );
-                    const replyFunction = interaction.replied
-                        ? interaction.followUp.bind(interaction)
-                        : interaction.reply.bind(interaction);
-                    replyFunction({
+                    getReplyFunction(
+                        client,
+                        interaction
+                    )({
                         content: UNKNOWN_ERROR_MESSAGE,
                         ephemeral: true,
-                    }).catch(() =>
-                        client.logger?.debug('Could not reply to interaction')
-                    );
+                    });
                 }
             }
         } else {
@@ -133,10 +161,10 @@ export const handler: EventHandler = async (
                 client.logger?.error(
                     `Got the following error while handling a component with id ${interaction.customId}: ${error}`
                 );
-                const replyFunction = interaction.replied
-                    ? interaction.followUp.bind(interaction)
-                    : interaction.reply.bind(interaction);
-                replyFunction({
+                getReplyFunction(
+                    client,
+                    interaction
+                )({
                     content: UNKNOWN_ERROR_MESSAGE,
                     ephemeral: true,
                 });
@@ -153,10 +181,10 @@ export const handler: EventHandler = async (
                 client.logger?.error(
                     `Got the following error while handling a modal with id ${interaction.customId}: ${error}`
                 );
-                const replyFunction = interaction.replied
-                    ? interaction.followUp.bind(interaction)
-                    : interaction.reply.bind(interaction);
-                replyFunction({
+                getReplyFunction(
+                    client,
+                    interaction
+                )({
                     content: UNKNOWN_ERROR_MESSAGE,
                     ephemeral: true,
                 });
