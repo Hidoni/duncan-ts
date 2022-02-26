@@ -316,7 +316,9 @@ export function generatePromptModal(questionId: number) {
         .setCustomId(`fibbage_prompt_modal_${questionId}`);
 }
 
-export function groupIdenticalAnswers(answers: FibbageAnswer[]): FibbageAnswer[][] {
+export function groupIdenticalAnswers(
+    answers: FibbageAnswer[]
+): FibbageAnswer[][] {
     return answers.reduce((acc, curr) => {
         const answerGroup = acc.find((group: FibbageAnswer[]) =>
             group.some((a) => a.answer === curr.answer)
@@ -406,7 +408,7 @@ async function postNewQuestion(
         answerGroups
     );
     client.logger?.info(`Posting new question ${question.id}`);
-    await channel.send({
+    return await channel.send({
         content: escapeDiscordMarkdown(promptFormatted),
         components: componentRows,
     });
@@ -425,8 +427,9 @@ export async function postNewQuestions(client: Bot) {
         return;
     }
     for (const question of questions) {
-        await postNewQuestion(client, channel, question);
+        const message = await postNewQuestion(client, channel, question);
         question.state = FibbageQuestionState.IN_USE;
+        question.message = message.id;
         await question.save();
     }
 }
