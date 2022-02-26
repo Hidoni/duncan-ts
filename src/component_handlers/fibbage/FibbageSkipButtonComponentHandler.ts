@@ -31,6 +31,7 @@ export const handler: ComponentHandlerFunction = async (
         );
     } else {
         question.state = FibbageQuestionState.SKIPPED;
+        await question.save();
         const askedQuestions = await client.database.getAllFibbageQuestions();
         await interaction.reply('Oki! Lemme get you a new question...');
         await promptUserWithQuestion(client, interaction.user, askedQuestions);
