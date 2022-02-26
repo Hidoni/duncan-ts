@@ -24,7 +24,7 @@ import {
 const MAX_ALLOWED_CHARS_IN_BUTTON = 80;
 const MAX_USERS_TO_PROMPT = 7;
 const MAX_ANSWERS_ALLOWED = 8;
-const FIBBAGE_BUTTON_LOCATION = 4;
+const ANSWER_BUTTONS_PER_ROW = 2;
 
 const config = new Conf();
 
@@ -323,29 +323,20 @@ async function generateComponentsRowsForQuestionToPost(
         new MessageActionRow(),
         new MessageActionRow(),
         new MessageActionRow(),
+        new MessageActionRow(),
     ];
-    for (let i = 0; i < MAX_ANSWERS_ALLOWED + 1; i++) {
-        const componentsIndex = Math.floor(i / 3);
-        if (i === FIBBAGE_BUTTON_LOCATION) {
-            components[componentsIndex].addComponents(
-                new MessageButton()
-                    .setLabel('FIBBAGE!')
-                    .setStyle('SECONDARY')
-                    .setDisabled(true)
-                    .setCustomId(`fibbage_logo_button_unclickable`)
-            );
-        } else {
-            const answer = answers[Math.floor(Math.random() * answers.length)];
-            components[componentsIndex].addComponents(
-                new MessageButton()
-                    .setLabel(answer.answer.toUpperCase())
-                    .setStyle('PRIMARY')
-                    .setCustomId(`fibbage_answer_button_${answer.id}`)
-            );
-            answer.answerPosition = i;
-            await answer.save();
-            answers = answers.filter((a) => a.id !== answer.id);
-        }
+    for (let i = 0; i < MAX_ANSWERS_ALLOWED; i++) {
+        const componentsIndex = Math.floor(i / ANSWER_BUTTONS_PER_ROW);
+        const answer = answers[Math.floor(Math.random() * answers.length)];
+        components[componentsIndex].addComponents(
+            new MessageButton()
+                .setLabel(answer.answer.toUpperCase())
+                .setStyle('PRIMARY')
+                .setCustomId(`fibbage_answer_button_${answer.id}`)
+        );
+        answer.answerPosition = i;
+        await answer.save();
+        answers = answers.filter((a) => a.id !== answer.id);
     }
     return components;
 }
@@ -412,7 +403,7 @@ export async function postNewQuestions(client: Bot) {
         return;
     }
     for (const question of questions) {
-        postNewQuestion(client, channel, question);
+        await postNewQuestion(client, channel, question);
         question.state = FibbageQuestionState.IN_USE;
         await question.save();
     }
