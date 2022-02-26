@@ -667,5 +667,7 @@ export async function showResultsForQuestions(client: Bot) {
             continue;
         }
         await message.edit(await generateResultsForQuestion(client, question));
+        question.state = FibbageQuestionState.DONE;
+        await question.save();
     }
 }
