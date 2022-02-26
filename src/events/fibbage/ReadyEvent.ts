@@ -28,13 +28,13 @@ export const handler: EventHandler = async (client: Bot) => {
     );
     schedule.scheduleJob(rule, async () => {
         // Resolve existing questions in channel
-        showResultsForQuestions(client);
+        await showResultsForQuestions(client);
         // Post new questions
-        postNewQuestions(client);
+        await postNewQuestions(client);
         // Prompt users for fibs for answered questions
-        promptUsersForFibs(client);
+        await promptUsersForFibs(client);
         // Prompt users for new questions
-        promptUsersWithQuestions(client);
+        await promptUsersWithQuestions(client);
     });
 };
 export const once: boolean = true;
