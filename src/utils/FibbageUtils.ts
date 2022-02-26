@@ -147,7 +147,9 @@ async function sendButtonPromptToUser(
         user.id
     );
     await user.send({
-        content: escapeDiscordMarkdown(`Hewwo! ^w^\nI'm here to ask you your question for Fibbage!\n\n${question}`),
+        content: escapeDiscordMarkdown(
+            `Hewwo! ^w^\nI'm here to ask you your question for Fibbage!\n\n${question}`
+        ),
         components: [generateComponentsRowForQuestion(dbQuestion.id)],
     });
 }
@@ -231,7 +233,9 @@ async function sendButtonWithPromptToUser(
     user: GuildMember | User
 ) {
     await user.send({
-        content: escapeDiscordMarkdown(`Hewwo! ^w^\nI need you to put a clever lie to this question that may fool other players!\n\n${prompt}`),
+        content: escapeDiscordMarkdown(
+            `Hewwo! ^w^\nI need you to put a clever lie to this question that may fool other players!\n\n${prompt}`
+        ),
         components: [generateComponentsRowForPrompt(question.id)],
     });
 }
@@ -241,11 +245,9 @@ async function promptRandomUsersForFibs(
     question: FibbageQuestion,
     users: (GuildMember | User)[]
 ) {
+    const questionUser = await client.users.fetch(question.user);
     const prompt = getFibbagePrompts()[question.question];
-    const promptFormatted = prompt.prompt.replace(
-        /\{0}/g,
-        `<@${question.user}>`
-    );
+    const promptFormatted = prompt.prompt.replace(/\{0}/g, questionUser.tag);
 
     let usersCopy = users.slice();
     const amountToPrompt =
