@@ -10,6 +10,7 @@ import {
     FibbageQuestionState,
 } from './models/FibbageQuestion';
 import { FibbageAnswer } from './models/FibbageAnswer';
+import { FibbageGuess } from './models/FibbageGuess';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -100,24 +101,51 @@ export default class Database {
         });
     }
 
+    private generateGuessInclude(loadGuesses: boolean) {
+        return loadGuesses ? [{ model: FibbageGuess }] : [];
+    }
+
+    private generateAnswerInclude(loadAnswers: boolean, loadGuesses: boolean) {
+        return loadAnswers
+            ? [
+                  {
+                      model: FibbageAnswer,
+                      include: this.generateGuessInclude(loadGuesses),
+                  },
+              ]
+            : [];
+    }
+
     public async getFibbageQuestion(
-        id: number
+        id: number,
+        loadAnswers: boolean = false,
+        loadGuesses: boolean = false
     ): Promise<FibbageQuestion | null> {
         return await FibbageQuestion.findOne({
             where: { id: id },
+            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
         });
     }
 
-    public async getFibbageAnswer(id: number): Promise<FibbageAnswer | null> {
+    public async getFibbageAnswer(
+        id: number,
+        loadGuesses: boolean = false
+    ): Promise<FibbageAnswer | null> {
+        const includeGuesses = loadGuesses ? [{ model: FibbageGuess }] : [];
         return await FibbageAnswer.findOne({
             where: { id: id },
+            include: this.generateGuessInclude(loadGuesses),
         });
     }
 
     public async getFibbageAnswersForQuestion(
-        questionId: number
+        questionId: number,
+        loadGuesses: boolean = false
     ): Promise<FibbageAnswer[]> {
-        return FibbageQuestion.findByPk(questionId).then((question) => {
+        const includeGuesses = loadGuesses ? [{ model: FibbageGuess }] : [];
+        return FibbageQuestion.findByPk(questionId, {
+            include: this.generateAnswerInclude(true, loadGuesses),
+        }).then((question) => {
             if (!question) {
                 return [];
             } else {
@@ -166,19 +194,32 @@ export default class Database {
         );
     }
 
-    public async getAnsweredFibbageQuestions(): Promise<FibbageQuestion[]> {
+    public async getAnsweredFibbageQuestions(
+        loadAnswers: boolean = false,
+        loadGuesses: boolean = false
+    ): Promise<FibbageQuestion[]> {
         return await FibbageQuestion.findAll({
             where: { state: FibbageQuestionState.ANSWERED },
+            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
         });
     }
 
-    public async getQuestionsReadyToPost(): Promise<FibbageQuestion[]> {
+    public async getQuestionsReadyToPost(
+        loadAnswers: boolean = false,
+        loadGuesses: boolean = false
+    ): Promise<FibbageQuestion[]> {
         return await FibbageQuestion.findAll({
             where: { state: FibbageQuestionState.PROMPTED },
+            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
         });
     }
 
-    public async getAllFibbageQuestions(): Promise<FibbageQuestion[]> {
-        return await FibbageQuestion.findAll();
+    public async getAllFibbageQuestions(
+        loadAnswers: boolean = false,
+        loadGuesses: boolean = false
+    ): Promise<FibbageQuestion[]> {
+        return await FibbageQuestion.findAll({
+            include: this.generateAnswerInclude(loadAnswers, loadGuesses),
+        });
     }
 }
