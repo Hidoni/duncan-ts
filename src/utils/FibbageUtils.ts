@@ -571,6 +571,64 @@ function getUserMentionString(client: Bot, user: Snowflake) {
     return user !== client.user!.id ? `<@${user}>` : 'MY LIE >:3c';
 }
 
+function getPointsEarnedFromAnswer(
+    answer: FibbageAnswer,
+    scoresFromAnswers: Map<string, FibbageScoreSummary>
+) {
+    const pointsPerAnswerSubmitter = Array.from(
+        scoresFromAnswers.entries()
+    ).filter(([, summary]) => {
+        return summary.answerId === answer.id;
+    });
+    const pointsEarned =
+        pointsPerAnswerSubmitter.length !== 0
+            ? pointsPerAnswerSubmitter[0][1].points
+            : 0;
+    return pointsEarned;
+}
+
+function getUserMentionsForAnswer(client: Bot, group: FibbageAnswer[]) {
+    return group.reduce(
+        (acc, answer) =>
+            acc.length === 0
+                ? `${getUserMentionString(client, answer.user)}`
+                : ` AND ${getUserMentionString(client, answer.user)}`,
+        ''
+    );
+}
+
+function getPointRewardExplanationForAnswer(
+    pointsEarned: number,
+    answer: FibbageAnswer
+) {
+    if (pointsEarned === 0) {
+        return '';
+    } else if (answer.isCorrect) {
+        const amountOfCorrectGuesses = Math.floor(
+            pointsEarned / POINTS_FOR_OTHER_CORRECT_GUESS
+        );
+        return `(+${pointsEarned} points as a reputation bonus for ${amountOfCorrectGuesses} player(s) knowing them well!)`;
+    } else {
+        const amountOfPlayersFooled = Math.floor(
+            pointsEarned / POINTS_FOR_FOOLING_OTHERS
+        );
+        return `(+${pointsEarned} points for fooling ${amountOfPlayersFooled} player(s).)`;
+    }
+}
+
+function getCreditStringForAnswer(
+    client: Bot,
+    group: FibbageAnswer[],
+    pointsEarned: number
+) {
+    const answer = group[0];
+    const answerType = answer.isCorrect ? 'TRUTH' : 'LIE';
+    return `'${answer.answer}' (${answerType}): ${getUserMentionsForAnswer(
+        client,
+        group
+    )} ${getPointRewardExplanationForAnswer(pointsEarned, answer)}\n`;
+}
+
 async function generateMessageForPostedQuestion(
     client: Bot,
     question: FibbageQuestion,
@@ -602,37 +660,11 @@ async function generateMessageForPostedQuestion(
     );
     const answerCreditsStrings = answerGroups.reduce((acc, group) => {
         const answer = group[0];
-        const pointsPerAnswerSubmitter = Array.from(
-            scoresFromAnswers.entries()
-        ).filter(([, summary]) => {
-            return summary.answerId === answer.id;
-        });
-        const pointsEarned =
-            pointsPerAnswerSubmitter.length !== 0
-                ? pointsPerAnswerSubmitter[0][1].points
-                : 0;
-        return (
-            acc +
-            `'${answer.answer}' (${
-                answer.isCorrect ? 'TRUTH' : 'LIE'
-            }): ${group.reduce(
-                (acc, answer) =>
-                    acc.length === 0
-                        ? `${getUserMentionString(client, answer.user)}`
-                        : ` AND ${getUserMentionString(client, answer.user)}`,
-                ''
-            )}${
-                pointsEarned !== 0
-                    ? answer.isCorrect
-                        ? ` (+${pointsEarned} points as a reputation bonus for ${Math.floor(
-                              pointsEarned / POINTS_FOR_OTHER_CORRECT_GUESS
-                          )} player(s) knowing them well!)`
-                        : ` (+${pointsEarned} points for fooling ${Math.floor(
-                              pointsEarned / POINTS_FOR_FOOLING_OTHERS
-                          )} player(s).)`
-                    : ''
-            }\n`
+        const pointsEarned = getPointsEarnedFromAnswer(
+            answer,
+            scoresFromAnswers
         );
+        return acc + getCreditStringForAnswer(client, group, pointsEarned);
     }, '');
     const sep = '------';
     let message = `${promptFormatted}\n\n${sep}ANSWERS${sep}\n${answerCreditsStrings}`;
