@@ -481,11 +481,13 @@ function addToUserScore(
         score = {
             answer: answer.answer,
             points: 0,
+            isCorrect: answer.isCorrect,
         };
     }
     scores.set(user, {
         answer: answer.answer,
         points: score.points + amount,
+        isCorrect: score.isCorrect,
     });
 }
 
