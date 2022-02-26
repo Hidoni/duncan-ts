@@ -383,7 +383,7 @@ async function fillMissingAnswersForQuestion(
         validDefaultAnswers = validDefaultAnswers.filter((a) => a !== answer);
         await client.database.insertFibbageAnswer(
             answer,
-            null,
+            client.user!.id,
             false,
             question
         );

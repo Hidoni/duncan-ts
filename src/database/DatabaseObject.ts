@@ -187,7 +187,7 @@ export default class Database {
 
     public async insertFibbageAnswerByQuestionId(
         answer: string,
-        user: Snowflake | null,
+        user: Snowflake,
         isCorrect: boolean,
         questionId: number
     ): Promise<void> {
@@ -201,7 +201,7 @@ export default class Database {
 
     public async insertFibbageAnswer(
         answer: string,
-        user: Snowflake | null,
+        user: Snowflake,
         isCorrect: boolean,
         question: FibbageQuestion
     ): Promise<void> {

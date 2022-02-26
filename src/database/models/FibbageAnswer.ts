@@ -32,9 +32,8 @@ export class FibbageAnswer extends Model {
     @Column
     answer!: string;
 
-    @AllowNull(true)
-    @Column(DataType.STRING)
-    user!: string | null;
+    @AllowNull(false)
+    user!: string;
 
     @AllowNull(false)
     @Column
