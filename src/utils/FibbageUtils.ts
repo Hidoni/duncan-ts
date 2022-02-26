@@ -5,6 +5,7 @@ import {
     MessageButton,
     Modal,
     ModalActionRowComponent,
+    Snowflake,
     TextBasedChannel,
     TextInputComponent,
     User,
@@ -20,11 +21,15 @@ import {
     FibbagePrompt,
     FibbagePrompts,
 } from '../interfaces/fibbage/FibbagePrompts';
+import { FibbageScoreSummary } from '../interfaces/fibbage/FibbageScoreSummary';
 
 const MAX_ALLOWED_CHARS_IN_BUTTON = 80;
 const MAX_USERS_TO_PROMPT = 7;
 const MAX_ANSWERS_ALLOWED = 8;
 const ANSWER_BUTTONS_PER_ROW = 2;
+const POINTS_FOR_CORRECT_GUESS = 1000;
+const POINTS_FOR_OTHER_CORRECT_GUESS = 1000;
+const POINTS_FOR_FOOLING_OTHERS = 500;
 
 const config = new Conf();
 
@@ -431,5 +436,229 @@ export async function postNewQuestions(client: Bot) {
         question.state = FibbageQuestionState.IN_USE;
         question.message = message.id;
         await question.save();
+    }
+}
+
+function generateComponentsRowsForPostedQuestion(
+    client: Bot,
+    question: FibbageQuestion,
+    answerGroups: FibbageAnswer[][]
+) {
+    const components: MessageActionRow[] = [
+        new MessageActionRow(),
+        new MessageActionRow(),
+        new MessageActionRow(),
+        new MessageActionRow(),
+    ];
+    for (let i = 0; i < MAX_ANSWERS_ALLOWED; i++) {
+        const componentsIndex = Math.floor(i / ANSWER_BUTTONS_PER_ROW);
+        const answerGroup = answerGroups.find((g) => g[0].answerPosition === i);
+        if (answerGroup) {
+            const answer = answerGroup[0];
+            components[componentsIndex].addComponents(
+                new MessageButton()
+                    .setLabel(answer.answer)
+                    .setStyle(answer.isCorrect ? 'SUCCESS' : 'DANGER')
+                    .setCustomId(`fibbage_answer_button_${question.id}_${i}`)
+            );
+        } else {
+            client.logger?.debug(
+                `No answer found for question ${question.id} answer position ${i}`
+            );
+        }
+    }
+    return components;
+}
+
+function addToUserScore(
+    scores: Map<Snowflake, FibbageScoreSummary>,
+    user: Snowflake,
+    answer: FibbageAnswer,
+    amount: number
+) {
+    let score = scores.get(user);
+    if (!score) {
+        score = {
+            answer: answer.answer,
+            points: 0,
+        };
+    }
+    scores.set(user, {
+        answer: answer.answer,
+        points: score.points + amount,
+    });
+}
+
+async function awardPointsToUsers(
+    answerGroups: FibbageAnswer[][],
+    client: Bot
+) {
+    const scoresFromGuesses = new Map<Snowflake, FibbageScoreSummary>();
+    const scoresFromAnswers = new Map<Snowflake, FibbageScoreSummary>();
+    for (const answerGroup of answerGroups) {
+        if (answerGroup[0].isCorrect) {
+            for (const answer of answerGroup) {
+                const authorStats = await client.database.getFibbageStats(
+                    answer.user
+                );
+                for (const guess of answer.guesses) {
+                    const guesserStats = await client.database.getFibbageStats(
+                        guess.user
+                    );
+                    addToUserScore(
+                        scoresFromGuesses,
+                        guess.user,
+                        answer,
+                        POINTS_FOR_CORRECT_GUESS
+                    );
+                    guesserStats.points += POINTS_FOR_CORRECT_GUESS;
+                    guesserStats.timesAnsweredCorrectly++;
+                    await guesserStats.save();
+                    addToUserScore(
+                        scoresFromAnswers,
+                        answer.user,
+                        answer,
+                        POINTS_FOR_OTHER_CORRECT_GUESS
+                    );
+                    authorStats.points += POINTS_FOR_OTHER_CORRECT_GUESS;
+                    authorStats.timesOthersAnsweredCorrectly++;
+                }
+                await authorStats.save();
+            }
+        } else {
+            for (const answer of answerGroup) {
+                const authorStats = await client.database.getFibbageStats(
+                    answer.user
+                );
+                for (const guess of answer.guesses) {
+                    const guesserStats = await client.database.getFibbageStats(
+                        guess.user
+                    );
+                    guesserStats.timesFooled++;
+                    await guesserStats.save();
+                    addToUserScore(
+                        scoresFromAnswers,
+                        answer.user,
+                        answer,
+                        POINTS_FOR_FOOLING_OTHERS
+                    );
+                    authorStats.points += POINTS_FOR_FOOLING_OTHERS;
+                    authorStats.timesOthersFooled++;
+                }
+                await authorStats.save();
+            }
+        }
+    }
+    return { scoresFromGuesses, scoresFromAnswers };
+}
+
+function getUserMentionString(client: Bot, user: Snowflake) {
+    return user !== client.user!.id ? `<@${user}>` : 'MY LIE >:3c';
+}
+
+async function generateMessageForPostedQuestion(
+    client: Bot,
+    question: FibbageQuestion,
+    answerGroups: FibbageAnswer[][]
+) {
+    const prompt = getFibbagePrompts()[question.question];
+    const correctAnswer = answerGroups.find((g) => g[0].isCorrect);
+    if (!correctAnswer) {
+        client.logger?.error(
+            `No correct answer found for question ${question.id}`
+        );
+        throw new Error(`No correct answer found for question ${question.id}`);
+    }
+    const promptFormatted = prompt.prompt
+        .replace(/\{0}/g, question.user)
+        .replace(/_______/g, correctAnswer[0].answer);
+    const { scoresFromGuesses, scoresFromAnswers } = await awardPointsToUsers(
+        answerGroups,
+        client
+    );
+    const guessString = Array.from(scoresFromGuesses.entries()).reduce(
+        (acc, [user, summary]) => {
+            return (
+                acc +
+                `<@${user}>: +${summary.points} points for guessing '${summary.answer}' correctly.\n`
+            );
+        },
+        ''
+    );
+    const answerString = Array.from(scoresFromAnswers.entries()).reduce(
+        (acc, [user, summary]) => {
+            return (
+                acc +
+                `<@${user}>: +${summary.points} points for fooling ${Math.floor(
+                    summary.points / POINTS_FOR_FOOLING_OTHERS
+                )} players with the lie '${summary.answer}'\n`
+            );
+        },
+        ''
+    );
+    const answerCreditsStrings = answerGroups.reduce((acc, group) => {
+        const answer = group[0];
+        return (
+            acc +
+            `'${answer.answer}' (${
+                answer.isCorrect ? 'TRUTH' : 'LIE'
+            }): ${group.reduce(
+                (acc, answer) =>
+                    acc.length === 0
+                        ? `${getUserMentionString(client, answer.user)}`
+                        : ` AND ${getUserMentionString(client, answer.user)}`,
+                ''
+            )}\n`
+        );
+    }, '');
+    const sep = '------';
+    return `${promptFormatted}\n\n${sep}${answerCreditsStrings}${sep}\n${sep}CORRECT GUESSES${sep}${guessString}\n${sep}FOOLS${sep}${answerString}`;
+}
+
+async function generateResultsForQuestion(
+    client: Bot,
+    question: FibbageQuestion
+) {
+    const answerGroups = groupIdenticalAnswers(question.answers);
+    const components = generateComponentsRowsForPostedQuestion(
+        client,
+        question,
+        answerGroups
+    );
+    const content = await generateMessageForPostedQuestion(
+        client,
+        question,
+        answerGroups
+    );
+    return { components, content };
+}
+
+export async function showResultsForQuestions(client: Bot) {
+    const questions = await client.database.getQuestionsInState(
+        FibbageQuestionState.IN_USE,
+        { loadAnswers: true, loadGuesses: true }
+    );
+    if (questions.length === 0) {
+        return;
+    }
+    const channel = await client.channels.fetch(getChannel());
+    if (!channel || !channel.isText()) {
+        return;
+    }
+    for (const question of questions) {
+        if (!question.message) {
+            client.logger?.debug(
+                `Question ${question.id} has no message, assuming intentional.`
+            );
+            continue;
+        }
+        const message = await channel.messages.fetch(question.message);
+        if (!message) {
+            client.logger?.debug(
+                `Could not fetch message for question ${question.id}, assuming intentional.`
+            );
+            continue;
+        }
+        await message.edit(await generateResultsForQuestion(client, question));
     }
 }
