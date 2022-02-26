@@ -612,7 +612,14 @@ async function generateMessageForPostedQuestion(
         );
     }, '');
     const sep = '------';
-    return `${promptFormatted}\n\n${sep}${answerCreditsStrings}${sep}\n${sep}CORRECT GUESSES${sep}${guessString}\n${sep}FOOLS${sep}${answerString}`;
+    let message = `${promptFormatted}\n\n${sep}ANSWERS${sep}\n${answerCreditsStrings}`;
+    if (guessString.length > 0) {
+        message += `\n\n${sep}CORRECT GUESSES${sep}\n${guessString}`;
+    }
+    if (answerString.length > 0) {
+        message += `\n\n${sep}FOOLS${sep}\n${answerString}`;
+    }
+    return message;
 }
 
 async function generateResultsForQuestion(
