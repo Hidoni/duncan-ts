@@ -3,7 +3,9 @@ import { FibbageQuestionState } from '../../database/models/FibbageQuestion';
 import { ModalHandlerFunction } from '../../interfaces/ModalHandler';
 
 function getAnswerFromModal(interaction: ModalSubmitInteraction) {
-    return interaction.fields.getTextInputValue('fibbage_question_input');
+    return interaction.fields
+        .getTextInputValue('fibbage_question_input')
+        .toUpperCase();
 }
 
 export const handler: ModalHandlerFunction = async (client, interaction) => {
@@ -35,7 +37,9 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
         await interaction.reply('You need to answer the question!');
         return;
     }
-    client.logger?.info(`User ${interaction.user.tag} answered question ${questionId}.`);
+    client.logger?.info(
+        `User ${interaction.user.tag} answered question ${questionId}.`
+    );
     question.state = FibbageQuestionState.ANSWERED;
     await question.save();
     await client.database.insertFibbageAnswer(
