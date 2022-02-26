@@ -50,7 +50,7 @@ export class FibbageQuestion extends Model {
     state!: FibbageQuestionState;
 
     @AllowNull(true)
-    @Column(DataType.TEXT)
+    @Column(DataType.STRING)
     message!: string | null;
 
     @HasMany(() => FibbageAnswer, 'questionId')
