@@ -316,8 +316,23 @@ export function generatePromptModal(questionId: number) {
         .setCustomId(`fibbage_prompt_modal_${questionId}`);
 }
 
+function groupIdenticalAnswers(answers: FibbageAnswer[]): FibbageAnswer[][] {
+    return answers.reduce((acc, curr) => {
+        const answerGroup = acc.find((group: FibbageAnswer[]) =>
+            group.some((a) => a.answer === curr.answer)
+        );
+        if (answerGroup) {
+            answerGroup.push(curr);
+        } else {
+            acc.push([curr]);
+        }
+        return acc;
+    }, [] as FibbageAnswer[][]);
+}
+
 async function generateComponentsRowsForQuestionToPost(
-    answers: FibbageAnswer[]
+    question: FibbageQuestion,
+    answerGroups: FibbageAnswer[][]
 ) {
     const components: MessageActionRow[] = [
         new MessageActionRow(),
@@ -327,16 +342,19 @@ async function generateComponentsRowsForQuestionToPost(
     ];
     for (let i = 0; i < MAX_ANSWERS_ALLOWED; i++) {
         const componentsIndex = Math.floor(i / ANSWER_BUTTONS_PER_ROW);
-        const answer = answers[Math.floor(Math.random() * answers.length)];
+        const answerGroup =
+            answerGroups[Math.floor(Math.random() * answerGroups.length)];
         components[componentsIndex].addComponents(
             new MessageButton()
-                .setLabel(answer.answer.toUpperCase())
+                .setLabel(answerGroup[0].answer)
                 .setStyle('PRIMARY')
-                .setCustomId(`fibbage_answer_button_${answer.id}`)
+                .setCustomId(`fibbage_answer_button_${question.id}_${i}`)
         );
-        answer.answerPosition = i;
-        await answer.save();
-        answers = answers.filter((a) => a.id !== answer.id);
+        for (const answer of answerGroup) {
+            answer.answerPosition = i;
+            await answer.save();
+        }
+        answerGroups = answerGroups.filter((a) => a !== answerGroup);
     }
     return components;
 }
@@ -346,11 +364,12 @@ async function fillMissingAnswersForQuestion(
     question: FibbageQuestion,
     defaultAnswers: FibbageDefaultAnswers
 ) {
+    const answerGroups = groupIdenticalAnswers(question.answers);
     let validDefaultAnswers = defaultAnswers.filter(
         (answer) =>
-            !question.answers.some((a) => a.answer.toUpperCase() === answer)
+            !answerGroups.some((g) => g.some((a) => a.answer === answer))
     );
-    const amountOfAnswersToAdd = MAX_ANSWERS_ALLOWED - question.answers.length;
+    const amountOfAnswersToAdd = MAX_ANSWERS_ALLOWED - answerGroups.length;
     client.logger?.debug(
         `Adding ${amountOfAnswersToAdd} answers to question ${question.id}`
     );
@@ -377,12 +396,15 @@ async function postNewQuestion(
     const questionUser = await client.users.fetch(question.user);
     const prompt = getFibbagePrompts()[question.question];
     const promptFormatted = prompt.prompt.replace(/\{0}/g, questionUser.tag);
-    let answers = question.answers;
-    if (answers.length < MAX_ANSWERS_ALLOWED) {
+    let answerGroups = groupIdenticalAnswers(question.answers);
+    if (answerGroups.length < MAX_ANSWERS_ALLOWED) {
         await fillMissingAnswersForQuestion(client, question, prompt.answers);
-        answers = await question.$get('answers');
+        answerGroups = groupIdenticalAnswers(await question.$get('answers'));
     }
-    let componentRows = await generateComponentsRowsForQuestionToPost(answers);
+    let componentRows = await generateComponentsRowsForQuestionToPost(
+        question,
+        answerGroups
+    );
     client.logger?.info(`Posting new question ${question.id}`);
     await channel.send({
         content: escapeDiscordMarkdown(promptFormatted),

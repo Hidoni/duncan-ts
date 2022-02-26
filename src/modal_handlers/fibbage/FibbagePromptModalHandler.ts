@@ -8,7 +8,9 @@ import {
 import { ModalHandlerFunction } from '../../interfaces/ModalHandler';
 
 function getAnswerFromModal(interaction: ModalSubmitInteraction) {
-    return interaction.fields.getTextInputValue('fibbage_prompt_input');
+    return interaction.fields
+        .getTextInputValue('fibbage_prompt_input')
+        .toUpperCase();
 }
 
 async function isQuestionStateValid(
@@ -61,7 +63,7 @@ async function isUserAnswerValid(
         await interaction.reply('You need to write a lie!');
         return false;
     }
-    if (answer.toUpperCase() === truth.answer.toUpperCase()) {
+    if (answer === truth.answer) {
         client.logger?.debug(
             `User ${interaction.user.tag} submitted a lie for ${question.id} that was the correct answer`
         );
