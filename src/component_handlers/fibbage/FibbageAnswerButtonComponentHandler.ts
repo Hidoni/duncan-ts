@@ -81,6 +81,9 @@ export const handler: ComponentHandlerFunction = async (
         });
         return;
     }
+    client.logger?.info(
+        `Saving user ${interaction.user.tag} guess for answer in position ${answerPosition} for question ${question.id}`
+    );
     for (const answer of answerGroup) {
         await client.database.insertFibbageGuess(interaction.user.id, answer);
     }
