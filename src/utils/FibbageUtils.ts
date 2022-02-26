@@ -498,6 +498,9 @@ async function awardPointsToUsers(
     for (const answerGroup of answerGroups) {
         if (answerGroup[0].isCorrect) {
             for (const answer of answerGroup) {
+                if (answer.guesses.length === 0) {
+                    continue;
+                }
                 const authorStats = await client.database.getFibbageStats(
                     answer.user
                 );
@@ -527,6 +530,9 @@ async function awardPointsToUsers(
             }
         } else {
             for (const answer of answerGroup) {
+                if (answer.guesses.length === 0) {
+                    continue;
+                }
                 const authorStats = await client.database.getFibbageStats(
                     answer.user
                 );
