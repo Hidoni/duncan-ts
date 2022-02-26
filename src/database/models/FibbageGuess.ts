@@ -29,10 +29,6 @@ export class FibbageGuess extends Model {
     @Column
     user!: string;
 
-    @AllowNull(false)
-    @Column
-    answerId!: number;
-
     @BelongsTo(() => FibbageAnswer, 'answerId')
     answer!: FibbageAnswer;
 }
