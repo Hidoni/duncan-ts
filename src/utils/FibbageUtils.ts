@@ -292,3 +292,22 @@ export async function promptUsersForFibs(client: Bot) {
         await question.save();
     }
 }
+
+export function generatePromptModal(questionId: number) {
+    return new Modal()
+        .setTitle('Fibbage')
+        .addComponents(
+            new MessageActionRow<ModalActionRowComponent>().addComponents(
+                new TextInputComponent()
+                    .setLabel('Enter your lie: ')
+                    .setPlaceholder(
+                        "Be creative! You'll get points if other players pick your lie!."
+                    )
+                    .setMaxLength(MAX_ALLOWED_CHARS_IN_BUTTON)
+                    .setRequired(true)
+                    .setStyle('SHORT')
+                    .setCustomId('fibbage_prompt_input')
+            )
+        )
+        .setCustomId(`fibbage_prompt_modal_${questionId}`);
+}
