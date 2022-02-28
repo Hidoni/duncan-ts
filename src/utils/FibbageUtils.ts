@@ -684,17 +684,17 @@ async function generateResultsForQuestion(
 ) {
     const answerGroups = groupIdenticalAnswers(question.answers);
     await awardPointsToUsers(client, answerGroups);
-    const components = generateComponentsRowsForPostedQuestion(
-        client,
-        question,
-        answerGroups
-    );
     const content = await generateMessageForPostedQuestion(
         client,
         question,
         answerGroups
     );
-    return { components, content };
+    const components = generateComponentsRowsForPostedQuestion(
+        client,
+        question,
+        answerGroups
+    );
+    return { content, components };
 }
 
 export async function showResultsForQuestions(client: Bot) {
