@@ -659,6 +659,38 @@ function getCreditStringForAnswer(
     )} ${getPointRewardExplanationForAnswer(pointsEarned, answer)}\n`;
 }
 
+export function generateDetailedQuestionReport(
+    client: Bot,
+    question: FibbageQuestion
+) {
+    const answerGroups = groupIdenticalAnswers(question.answers);
+    const { scoresFromGuesses, scoresFromAnswers } =
+        calculateUserScores(answerGroups);
+    const guessString = Array.from(scoresFromGuesses.entries()).reduce(
+        (acc, [user, summary]) => {
+            return (
+                acc +
+                `<@${user}>: +${summary.points} points for guessing correctly.\n`
+            );
+        },
+        ''
+    );
+    const answerCreditsStrings = answerGroups.reduce((acc, group) => {
+        const answer = group[0];
+        const pointsEarned = getPointsEarnedFromAnswer(
+            answer,
+            scoresFromAnswers
+        );
+        return acc + getCreditStringForAnswer(client, group, pointsEarned);
+    }, '');
+    const sep = '------';
+    let message = `${sep}ANSWERS${sep}\n${answerCreditsStrings}`;
+    if (guessString.length > 0) {
+        message += `\n${sep}CORRECT GUESSES${sep}\n${guessString}`;
+    }
+    return message;
+}
+
 async function generateMessageForPostedQuestion(
     client: Bot,
     question: FibbageQuestion,
