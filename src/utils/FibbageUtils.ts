@@ -472,7 +472,7 @@ function generateComponentsRowsForPostedQuestion(
             new MessageButton()
                 .setLabel('VIEW DETAILED RESULTS')
                 .setStyle('PRIMARY')
-                .setCustomId(`fibbage_points_breakdown_${question.id}`)
+                .setCustomId(`fibbage_detailed_results_${question.id}`)
         )
     );
     return components;
