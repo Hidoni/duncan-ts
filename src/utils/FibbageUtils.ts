@@ -467,6 +467,14 @@ function generateComponentsRowsForPostedQuestion(
             );
         }
     }
+    components.push(
+        new MessageActionRow().addComponents(
+            new MessageButton()
+                .setLabel('VIEW DETAILED RESULTS')
+                .setStyle('PRIMARY')
+                .setCustomId(`fibbage_points_breakdown_${question.id}`)
+        )
+    );
     return components;
 }
 
