@@ -497,12 +497,53 @@ function addToUserScore(
     });
 }
 
-async function awardPointsToUsers(
-    answerGroups: FibbageAnswer[][],
-    client: Bot
-) {
+function calculateUserScores(answerGroups: FibbageAnswer[][]) {
     const scoresFromGuesses = new Map<Snowflake, FibbageScoreSummary>();
     const scoresFromAnswers = new Map<Snowflake, FibbageScoreSummary>();
+    for (const answerGroup of answerGroups) {
+        if (answerGroup[0].isCorrect) {
+            for (const answer of answerGroup) {
+                if (answer.guesses.length === 0) {
+                    continue;
+                }
+                for (const guess of answer.guesses) {
+                    addToUserScore(
+                        scoresFromGuesses,
+                        guess.user,
+                        answer,
+                        POINTS_FOR_CORRECT_GUESS
+                    );
+                    addToUserScore(
+                        scoresFromAnswers,
+                        answer.user,
+                        answer,
+                        POINTS_FOR_OTHER_CORRECT_GUESS
+                    );
+                }
+            }
+        } else {
+            for (const answer of answerGroup) {
+                if (answer.guesses.length === 0) {
+                    continue;
+                }
+                for (const {} of answer.guesses) {
+                    addToUserScore(
+                        scoresFromAnswers,
+                        answer.user,
+                        answer,
+                        POINTS_FOR_FOOLING_OTHERS
+                    );
+                }
+            }
+        }
+    }
+    return { scoresFromGuesses, scoresFromAnswers };
+}
+
+async function awardPointsToUsers(
+    client: Bot,
+    answerGroups: FibbageAnswer[][]
+) {
     for (const answerGroup of answerGroups) {
         if (answerGroup[0].isCorrect) {
             for (const answer of answerGroup) {
@@ -516,24 +557,12 @@ async function awardPointsToUsers(
                     const guesserStats = await client.database.getFibbageStats(
                         guess.user
                     );
-                    addToUserScore(
-                        scoresFromGuesses,
-                        guess.user,
-                        answer,
-                        POINTS_FOR_CORRECT_GUESS
-                    );
                     client.logger?.debug(
                         `Awarded ${POINTS_FOR_CORRECT_GUESS} to ${guess.user} for correct guess.`
                     );
                     guesserStats.points += POINTS_FOR_CORRECT_GUESS;
                     guesserStats.timesAnsweredCorrectly++;
                     await guesserStats.save();
-                    addToUserScore(
-                        scoresFromAnswers,
-                        answer.user,
-                        answer,
-                        POINTS_FOR_OTHER_CORRECT_GUESS
-                    );
                     client.logger?.debug(
                         `Awarded ${POINTS_FOR_OTHER_CORRECT_GUESS} to ${answer.user} for someone's correct guess.`
                     );
@@ -556,12 +585,6 @@ async function awardPointsToUsers(
                     );
                     guesserStats.timesFooled++;
                     await guesserStats.save();
-                    addToUserScore(
-                        scoresFromAnswers,
-                        answer.user,
-                        answer,
-                        POINTS_FOR_FOOLING_OTHERS
-                    );
                     client.logger?.debug(
                         `Awarded ${POINTS_FOR_FOOLING_OTHERS} to ${answer.user} for fooling someone else.`
                     );
@@ -572,7 +595,6 @@ async function awardPointsToUsers(
             }
         }
     }
-    return { scoresFromGuesses, scoresFromAnswers };
 }
 
 function getUserMentionString(client: Bot, user: Snowflake) {
@@ -653,33 +675,7 @@ async function generateMessageForPostedQuestion(
     const promptFormatted = prompt.prompt
         .replace(/\{0}/g, `<@${question.user}>`)
         .replace(/_______/g, correctAnswer[0].answer);
-    const { scoresFromGuesses, scoresFromAnswers } = await awardPointsToUsers(
-        answerGroups,
-        client
-    );
-    const guessString = Array.from(scoresFromGuesses.entries()).reduce(
-        (acc, [user, summary]) => {
-            return (
-                acc +
-                `<@${user}>: +${summary.points} points for guessing correctly.\n`
-            );
-        },
-        ''
-    );
-    const answerCreditsStrings = answerGroups.reduce((acc, group) => {
-        const answer = group[0];
-        const pointsEarned = getPointsEarnedFromAnswer(
-            answer,
-            scoresFromAnswers
-        );
-        return acc + getCreditStringForAnswer(client, group, pointsEarned);
-    }, '');
-    const sep = '------';
-    let message = `${promptFormatted}\n\n${sep}ANSWERS${sep}\n${answerCreditsStrings}`;
-    if (guessString.length > 0) {
-        message += `\n${sep}CORRECT GUESSES${sep}\n${guessString}`;
-    }
-    return message;
+    return promptFormatted;
 }
 
 async function generateResultsForQuestion(
@@ -687,6 +683,7 @@ async function generateResultsForQuestion(
     question: FibbageQuestion
 ) {
     const answerGroups = groupIdenticalAnswers(question.answers);
+    await awardPointsToUsers(client, answerGroups);
     const components = generateComponentsRowsForPostedQuestion(
         client,
         question,
