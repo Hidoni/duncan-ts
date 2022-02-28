@@ -12,7 +12,8 @@ export const handler: ComponentHandlerFunction = async (
     const idInfo = interaction.customId.match(pattern);
     const questionId = idInfo![1];
     const question = await client.database.getFibbageQuestion(
-        Number.parseInt(questionId)
+        Number.parseInt(questionId),
+        { loadAnswers: true, loadGuesses: true }
     );
     if (!question) {
         client.logger?.error(
