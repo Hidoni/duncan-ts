@@ -30,6 +30,7 @@ const ANSWER_BUTTONS_PER_ROW = 2;
 const POINTS_FOR_CORRECT_GUESS = 1000;
 const POINTS_FOR_OTHER_CORRECT_GUESS = 1000;
 const POINTS_FOR_FOOLING_OTHERS = 500;
+const MAX_NEW_QUESTIONS_POSTED = 5;
 
 const config = new Conf();
 
@@ -420,7 +421,7 @@ async function postNewQuestion(
 }
 
 export async function postNewQuestions(client: Bot) {
-    const questions = await client.database.getQuestionsInState(
+    let questions = await client.database.getQuestionsInState(
         FibbageQuestionState.PROMPTED,
         { loadAnswers: true }
     );
@@ -431,11 +432,17 @@ export async function postNewQuestions(client: Bot) {
     if (!channel || !channel.isText()) {
         return;
     }
-    for (const question of questions) {
-        const message = await postNewQuestion(client, channel, question);
+    const amountOfQuestionsToPost = Math.min(
+        MAX_NEW_QUESTIONS_POSTED,
+        questions.length
+    );
+    for (let i = 0; i < amountOfQuestionsToPost; i++) {
+        const question =
+            questions[Math.floor(Math.random() * questions.length)];
+        await postNewQuestion(client, channel, question);
         question.state = FibbageQuestionState.IN_USE;
-        question.message = message.id;
         await question.save();
+        questions = questions.filter((q) => q !== question);
     }
 }
 
