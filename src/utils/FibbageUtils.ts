@@ -439,7 +439,8 @@ export async function postNewQuestions(client: Bot) {
     for (let i = 0; i < amountOfQuestionsToPost; i++) {
         const question =
             questions[Math.floor(Math.random() * questions.length)];
-        await postNewQuestion(client, channel, question);
+        const message = await postNewQuestion(client, channel, question);
+        question.message = message.id;
         question.state = FibbageQuestionState.IN_USE;
         await question.save();
         questions = questions.filter((q) => q !== question);
@@ -754,15 +755,19 @@ export async function showResultsForQuestions(client: Bot) {
                 `Question ${question.id} has no message, assuming intentional.`
             );
             continue;
+        } else {
+            const message = await channel.messages.fetch(question.message);
+            if (!message) {
+                client.logger?.debug(
+                    `Could not fetch message for question ${question.id}, assuming intentional.`
+                );
+                continue;
+            } else {
+                await message.edit(
+                    await generateResultsForQuestion(client, question)
+                );
+            }
         }
-        const message = await channel.messages.fetch(question.message);
-        if (!message) {
-            client.logger?.debug(
-                `Could not fetch message for question ${question.id}, assuming intentional.`
-            );
-            continue;
-        }
-        await message.edit(await generateResultsForQuestion(client, question));
         question.state = FibbageQuestionState.DONE;
         await question.save();
     }
