@@ -161,6 +161,13 @@ async function giveFibbageRole(interaction: CommandInteraction) {
         return;
     }
     const member = await interaction.guild.members.fetch(interaction.user.id);
+    if (member.roles.cache.has(getRole())) {
+        await interaction.reply({
+            content: 'Huh?? You already have the role!!',
+            ephemeral: true,
+        });
+        return;
+    }
     await member.roles.add(getRole());
     await interaction.reply({
         content:
@@ -178,6 +185,13 @@ async function removeFibbageRole(interaction: CommandInteraction) {
         return;
     }
     const member = await interaction.guild.members.fetch(interaction.user.id);
+    if (!member.roles.cache.has(getRole())) {
+        await interaction.reply({
+            content: "Hey... You don't even have the role??",
+            ephemeral: true,
+        });
+        return;
+    }
     await member.roles.remove(getRole());
     await interaction.reply({
         content:
