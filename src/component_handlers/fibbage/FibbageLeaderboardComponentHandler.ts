@@ -1,0 +1,49 @@
+import { getLeaderboardFromSubcommand } from '../../commands/fibbage/FibbageCommand';
+import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
+
+function getValidPageValue(page: string): number | 'FIRST' | 'LAST' | null {
+    if (page !== 'FIRST' && page !== 'LAST') {
+        const pageNumber = parseInt(page);
+        if (isNaN(pageNumber)) {
+            return null;
+        }
+        return pageNumber;
+    }
+    return page;
+}
+
+export const handler: ComponentHandlerFunction = async (
+    client,
+    interaction
+) => {
+    const idInfo = interaction.customId.match(pattern);
+    const subCommand = idInfo![1];
+    const userId = idInfo![2];
+    if (userId !== interaction.user.id) {
+        await interaction.reply({
+            content: `OnO, I'm sowwy, but this isn't your leaderboard!! Only <@${userId}> can switch pages on this one!!`,
+            ephemeral: true,
+        });
+        return;
+    }
+    const page = getValidPageValue(idInfo![3]);
+    if (page === null) {
+        await interaction.reply({
+            content: `OnO, I'm sowwy, but I got an invalid page number, please tell Hidoni!!`,
+            ephemeral: true,
+        });
+        client.logger?.error(`Invalid page number: ${idInfo![3]}`);
+        return;
+    }
+    const { leaderboardembed, leaderboardComponenetsRow } =
+        await getLeaderboardFromSubcommand(client, subCommand, userId, page);
+    await interaction.update({
+        embeds: [leaderboardembed],
+        components: [leaderboardComponenetsRow],
+    });
+};
+
+export const pattern: RegExp =
+    /^fibbage_leaderboard_(.+)_(\d+)_((?:FIRST|LAST)|(?:\d+))$/;
+
+export const shoudLoad = () => true;
