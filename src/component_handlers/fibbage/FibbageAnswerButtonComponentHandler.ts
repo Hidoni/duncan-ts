@@ -87,6 +87,12 @@ export const handler: ComponentHandlerFunction = async (
     for (const answer of answerGroup) {
         await client.database.insertFibbageGuess(interaction.user.id, answer);
     }
+    await client.database
+        .getFibbageStats(interaction.user.id)
+        .then(async (stats) => {
+            stats.timesGuessed++;
+            await stats.save();
+        });
     await interaction.reply({
         content: `Your answer has been recorded, please wait until I reveal the results!`,
         ephemeral: true,

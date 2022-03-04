@@ -107,6 +107,12 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
         false,
         question
     );
+    await client.database
+        .getFibbageStats(interaction.user.id)
+        .then(async (stats) => {
+            stats.liesSubmitted++;
+            await stats.save();
+        });
     await interaction.reply(
         "Thank you!! I'm sure this will fool someone! >:3c"
     );
