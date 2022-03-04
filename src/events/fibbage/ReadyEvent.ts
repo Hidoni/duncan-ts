@@ -16,9 +16,9 @@ export const handler: EventHandler = async (client: Bot) => {
         undefined,
         undefined,
         undefined,
-        undefined,
-        undefined,
-        undefined
+        [0, 12],
+        0,
+        0
     );
     rule.tz = 'America/New_York';
     client.logger?.debug(
