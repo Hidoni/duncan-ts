@@ -7,11 +7,26 @@ import {
     Default,
 } from 'sequelize-typescript';
 
+export interface FibbageStatsColumns {
+    id: number;
+    points: number;
+    timesAnsweredCorrectly: number;
+    timesFooled: number;
+    timesOthersFooled: number;
+    timesOthersAnsweredCorrectly: number;
+    questionsSubmitted: number;
+    liesSubmitted: number;
+    timesGuessed: number;
+}
+
 @Table({
     modelName: 'fibbage_stats',
     timestamps: false,
 })
-export class FibbageStats extends Model {
+export class FibbageStats
+    extends Model<FibbageStatsColumns>
+    implements FibbageStatsColumns
+{
     @AllowNull(false)
     @PrimaryKey
     @Column
@@ -41,4 +56,19 @@ export class FibbageStats extends Model {
     @Default(0)
     @Column
     timesOthersAnsweredCorrectly!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    questionsSubmitted!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    liesSubmitted!: number;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    timesGuessed!: number;
 }
