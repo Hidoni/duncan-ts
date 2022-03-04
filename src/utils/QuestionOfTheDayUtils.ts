@@ -1,6 +1,7 @@
 import Conf from 'conf';
 import { Message, TextChannel } from 'discord.js';
 import Bot from '../client/Bot';
+import { capitalizeString } from './StringUtils';
 
 const FLURRY_OF_QUESTIONS_MESSAGE =
     'Flurry of Questions Mode!\n\nAsk any (serious) question and the person below has to answer it. Then they add their own question and the cycle continues.';
@@ -32,9 +33,8 @@ export function getEnabled(): boolean {
     return typeof enabled === 'boolean' ? enabled : false;
 }
 
-export function capitalizeQuestion(question: string) {
-    return question.charAt(0).toUpperCase() + question.slice(1).toLowerCase();
-}
+export const capitalizeQuestion: (question: string) => string =
+    capitalizeString;
 
 function isFriday() {
     const today = new Date();
