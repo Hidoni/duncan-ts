@@ -4,7 +4,7 @@ import { Snowflake } from 'discord.js';
 import { Sequelize } from 'sequelize-typescript';
 import { Question } from './models/Question';
 import { GimmickPoints } from './models/GimmickPoints';
-import { FibbageStats } from './models/FibbageStats';
+import { FibbageStats, FibbageStatsColumns } from './models/FibbageStats';
 import {
     FibbageQuestion,
     FibbageQuestionState,
@@ -238,5 +238,13 @@ export default class Database {
         answer: FibbageAnswer
     ): Promise<void> {
         await answer.$add('guess', await FibbageGuess.create({ user: user }));
+    }
+
+    public async getFibbageStatsByColumn(
+        column: keyof FibbageStatsColumns
+    ): Promise<FibbageStats[]> {
+        return await FibbageStats.findAll({
+            order: Sequelize.literal(`${column} DESC`),
+        });
     }
 }
