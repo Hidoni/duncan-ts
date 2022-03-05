@@ -164,20 +164,12 @@ export async function getLeaderboardFromSubcommand(
 
 async function handleLeaderboard(
     client: Bot,
-    interaction: CommandInteraction,
-    subcommand: string
+    interaction: CommandInteraction
 ) {
-    if (!isValidLeaderboardSubcommand(subcommand)) {
-        await interaction.reply({
-            content: `Huh.. What kind of leaderboard is a ${subcommand} one?`,
-            ephemeral: true,
-        });
-        return;
-    }
     const { leaderboardembed, outputActionRows } =
         await getLeaderboardFromSubcommand(
             client,
-            subcommand,
+            'points',
             interaction.user.id,
             1
         );
@@ -186,7 +178,7 @@ async function handleLeaderboard(
         components: outputActionRows,
     });
     client.logger?.info(
-        `Generated ${subcommand} leaderboard for ${interaction.user.tag}`
+        `Generated points leaderboard for ${interaction.user.tag}`
     );
 }
 
@@ -253,6 +245,9 @@ async function handleDefault(
         case 'quit':
             await removeFibbageRole(client, interaction);
             break;
+        case 'leaderboard':
+            await handleLeaderboard(client, interaction);
+            break;
         default:
             throw new Error(`Unknown fibbage subcommand ${subcommand}`);
     }
@@ -268,9 +263,6 @@ export const handler: CommandHandler = async (
         throw new Error('No subcommand provided for Fibbage command');
     }
     switch (subcommandGroup) {
-        case 'leaderboard':
-            await handleLeaderboard(client, interaction, subcommand);
-            break;
         default:
             await handleDefault(client, interaction, subcommand);
             break;
@@ -292,60 +284,10 @@ export const builder = new SlashCommandBuilder()
             .setName('quit')
             .setDescription('Quit the Fibbage game.')
     )
-    .addSubcommandGroup(
-        new SlashCommandSubcommandGroupBuilder()
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
             .setName('leaderboard')
             .setDescription('View the various leaderboards for Fibbage!')
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('points')
-                    .setDescription('View the points leaderboard.')
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('guessers')
-                    .setDescription('View the best guessers!')
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('liars')
-                    .setDescription('View the best liars!')
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('gullible')
-                    .setDescription(
-                        "View the players who fell for others' lies the most!"
-                    )
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('reputable')
-                    .setDescription(
-                        'View the players who are the most well known!'
-                    )
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('questions')
-                    .setDescription(
-                        'View the players who have answered the most questions.'
-                    )
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('lies')
-                    .setDescription(
-                        'View the players who have submitted the most lies.'
-                    )
-            )
-            .addSubcommand(
-                new SlashCommandSubcommandBuilder()
-                    .setName('guesses')
-                    .setDescription(
-                        'View the players who have guessed the most times.'
-                    )
-            )
     );
 
 export const guildOnly = () => true;
