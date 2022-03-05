@@ -162,10 +162,7 @@ export async function getLeaderboardFromSubcommand(
     return { leaderboardembed, outputActionRows };
 }
 
-async function handleLeaderboard(
-    client: Bot,
-    interaction: CommandInteraction
-) {
+async function handleLeaderboard(client: Bot, interaction: CommandInteraction) {
     const { leaderboardembed, outputActionRows } =
         await getLeaderboardFromSubcommand(
             client,
@@ -177,8 +174,8 @@ async function handleLeaderboard(
         embeds: [leaderboardembed],
         components: outputActionRows,
     });
-    client.logger?.info(
-        `Generated points leaderboard for ${interaction.user.tag}`
+    client.logger?.debug(
+        `Generated initial points leaderboard for ${interaction.user.tag} (from command)`
     );
 }
 

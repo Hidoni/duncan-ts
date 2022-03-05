@@ -37,8 +37,8 @@ export const handler: ComponentHandlerFunction = async (
     }
     const { leaderboardembed, outputActionRows } =
         await getLeaderboardFromSubcommand(client, subCommand, userId, page);
-    client.logger?.info(
-        `Generated ${subCommand} leaderboard for ${interaction.user.tag}`
+    client.logger?.debug(
+        `Generated ${subCommand} leaderboard (page ${page}) for ${interaction.user.tag}`
     );
     await interaction.update({
         embeds: [leaderboardembed],
