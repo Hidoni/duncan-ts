@@ -170,6 +170,7 @@ async function giveFibbageRole(client: Bot, interaction: CommandInteraction) {
         return;
     }
     await member.roles.add(getRole());
+    await client.database.getFibbageStats(interaction.user.id);
     await interaction.reply({
         content:
             "Welcome to Fibbage, I'll start asking you for lies and answers to questions now! ^w^",
