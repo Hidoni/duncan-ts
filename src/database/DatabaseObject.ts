@@ -23,7 +23,7 @@ export default class Database {
         this.sequelize = new Sequelize({
             dialect: 'sqlite',
             storage: database,
-            logging: logger?.debug.bind(logger),
+            logging: logger?.log.bind(logger, 'sql'),
             models: [__dirname + '/models'],
         });
         this.sync();

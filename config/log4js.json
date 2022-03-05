@@ -1,4 +1,10 @@
 {
+    "levels": {
+        "SQL": {
+            "value": 15000,
+            "colour": "magenta"
+        }
+    },
     "appenders": {
         "file": {
             "type": "dateFile",
@@ -6,9 +12,20 @@
         },
         "out": {
             "type": "stdout"
+        },
+        "console": {
+            "type": "logLevelFilter",
+            "appender": "out",
+            "level": "info"
         }
     },
     "categories": {
-        "default": {"appenders": ["file", "out"], "level": "DEBUG"}
+        "default": {
+            "appenders": [
+                "file",
+                "console"
+            ],
+            "level": "SQL"
+        }
     }
 }
