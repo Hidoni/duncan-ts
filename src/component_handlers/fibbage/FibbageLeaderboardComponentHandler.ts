@@ -35,15 +35,15 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.error(`Invalid page number: ${idInfo![3]}`);
         return;
     }
-    const { leaderboardembed, leaderboardComponenetsRow } =
+    const { leaderboardembed, outputActionRows } =
         await getLeaderboardFromSubcommand(client, subCommand, userId, page);
     await interaction.update({
         embeds: [leaderboardembed],
-        components: [leaderboardComponenetsRow],
+        components: outputActionRows,
     });
 };
 
 export const pattern: RegExp =
-    /^fibbage_leaderboard_(.+)_(\d+)_((?:FIRST|LAST)|(?:\d+))$/;
+    /^fibbage_leaderboard_(?:switcher_)?(.+)_(\d+)_((?:FIRST|LAST)|(?:\d+))$/;
 
 export const shoudLoad = () => true;
