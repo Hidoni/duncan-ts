@@ -150,9 +150,10 @@ async function handleLeaderboard(
         embeds: [leaderboardembed],
         components: [leaderboardComponenetsRow],
     });
+    client.logger?.info(`Generated ${subcommand} leaderboard for ${interaction.user.tag}`);
 }
 
-async function giveFibbageRole(interaction: CommandInteraction) {
+async function giveFibbageRole(client: Bot, interaction: CommandInteraction) {
     if (!interaction.guild) {
         await interaction.reply({
             content: 'Sowwy, you can only use this command in a server!',
@@ -174,9 +175,10 @@ async function giveFibbageRole(interaction: CommandInteraction) {
             "Welcome to Fibbage, I'll start asking you for lies and answers to questions now! ^w^",
         ephemeral: true,
     });
+    client.logger?.info(`Gave fibbage role to ${member.user.tag}`);
 }
 
-async function removeFibbageRole(interaction: CommandInteraction) {
+async function removeFibbageRole(client: Bot, interaction: CommandInteraction) {
     if (!interaction.guild) {
         await interaction.reply({
             content: 'Sowwy, you can only use this command in a server!',
@@ -198,6 +200,7 @@ async function removeFibbageRole(interaction: CommandInteraction) {
             "I'm sorry to see you leave ;w;\nIf you still have any unaswered lies or questions, you'll can still answer them, but I won't ask you new ones!",
         ephemeral: true,
     });
+    client.logger?.info(`Removed fibbage role from ${member.user.tag}`);
 }
 
 async function handleDefault(
@@ -207,10 +210,10 @@ async function handleDefault(
 ) {
     switch (subcommand) {
         case 'join':
-            await giveFibbageRole(interaction);
+            await giveFibbageRole(client, interaction);
             break;
         case 'quit':
-            await removeFibbageRole(interaction);
+            await removeFibbageRole(client, interaction);
             break;
         default:
             throw new Error(`Unknown fibbage subcommand ${subcommand}`);
