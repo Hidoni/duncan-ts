@@ -9,7 +9,8 @@ export const handler: ComponentHandlerFunction = async (
     const idInfo = interaction.customId.match(pattern);
     const questionId = idInfo![1];
     const question = await client.database.getFibbageQuestion(
-        Number.parseInt(questionId)
+        Number.parseInt(questionId),
+        { loadAnswers: true }
     );
     if (!question) {
         client.logger?.error(
@@ -24,6 +25,15 @@ export const handler: ComponentHandlerFunction = async (
         );
         await interaction.reply(
             "Sorry, but I can't accept lies for this question anymore!"
+        );
+    } else if (
+        question.answers.some((answer) => answer.user === interaction.user.id)
+    ) {
+        client.logger?.debug(
+            `User ${interaction.user.tag} has already answered question ${question.id}, not showing prompt modal again.`
+        );
+        await interaction.reply(
+            "Nice try, but you can't submit more than one lie per question!!"
         );
     } else {
         await interaction.showModal(generatePromptModal(question.id));
