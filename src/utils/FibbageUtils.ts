@@ -553,7 +553,8 @@ function calculateUserScores(answerGroups: FibbageAnswer[][]) {
 
 async function awardPointsToUsers(
     client: Bot,
-    answerGroups: FibbageAnswer[][]
+    answerGroups: FibbageAnswer[][],
+    question: FibbageQuestion
 ) {
     for (const answerGroup of answerGroups) {
         if (answerGroup[0].isCorrect) {
@@ -569,13 +570,13 @@ async function awardPointsToUsers(
                         guess.user
                     );
                     client.logger?.debug(
-                        `Awarded ${POINTS_FOR_CORRECT_GUESS} to ${guess.user} for correct guess.`
+                        `Awarded ${POINTS_FOR_CORRECT_GUESS} to ${guess.user} for correct guess on answer ${answer.id} on question ${question.id}.`
                     );
                     guesserStats.points += POINTS_FOR_CORRECT_GUESS;
                     guesserStats.timesAnsweredCorrectly++;
                     await guesserStats.save();
                     client.logger?.debug(
-                        `Awarded ${POINTS_FOR_OTHER_CORRECT_GUESS} to ${answer.user} for someone's correct guess.`
+                        `Awarded ${POINTS_FOR_OTHER_CORRECT_GUESS} to ${answer.user} for someone's correct guess on answer ${answer.id} on question ${question.id}.`
                     );
                     authorStats.points += POINTS_FOR_OTHER_CORRECT_GUESS;
                     authorStats.timesOthersAnsweredCorrectly++;
@@ -597,7 +598,7 @@ async function awardPointsToUsers(
                     guesserStats.timesFooled++;
                     await guesserStats.save();
                     client.logger?.debug(
-                        `Awarded ${POINTS_FOR_FOOLING_OTHERS} to ${answer.user} for fooling someone else.`
+                        `Awarded ${POINTS_FOR_FOOLING_OTHERS} to ${answer.user} for fooling someone else on answer ${answer.id} on question ${question.id}.`
                     );
                     authorStats.points += POINTS_FOR_FOOLING_OTHERS;
                     authorStats.timesOthersFooled++;
@@ -726,7 +727,7 @@ async function generateResultsForQuestion(
     question: FibbageQuestion
 ) {
     const answerGroups = groupIdenticalAnswers(question.answers);
-    await awardPointsToUsers(client, answerGroups);
+    await awardPointsToUsers(client, answerGroups, question);
     const content = await generateMessageForPostedQuestion(
         client,
         question,
