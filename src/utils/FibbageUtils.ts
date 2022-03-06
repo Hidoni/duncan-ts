@@ -630,7 +630,7 @@ function getUserMentionsForAnswer(client: Bot, group: FibbageAnswer[]) {
         (acc, answer) =>
             acc.length === 0
                 ? `${getUserMentionString(client, answer.user)}`
-                : ` AND ${getUserMentionString(client, answer.user)}`,
+                : acc + ` AND ${getUserMentionString(client, answer.user)}`,
         ''
     );
 }
