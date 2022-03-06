@@ -403,7 +403,10 @@ async function postNewQuestion(
 ) {
     const questionUser = await client.users.fetch(question.user);
     const prompt = getFibbagePrompts()[question.question];
-    const promptFormatted = prompt.prompt.replace(/\{0}/g, questionUser.toString());
+    const promptFormatted = prompt.prompt.replace(
+        /\{0}/g,
+        questionUser.toString()
+    );
     let answerGroups = groupIdenticalAnswers(question.answers);
     if (answerGroups.length < MAX_ANSWERS_ALLOWED) {
         await fillMissingAnswersForQuestion(client, question, prompt.answers);
