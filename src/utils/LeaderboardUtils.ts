@@ -30,11 +30,12 @@ export function generateLeaderboardEmbed<T>(
         );
     }
     const selectedPage = leaderboard.slice((page - 1) * 10, page * 10);
+    const startIndex = (page - 1) * 10 + 1;
     const { 0: keyRows, 1: valueRows } = selectedPage.reduce(
         (strings, entry, index) => {
             const [key, value] = valueMap(entry);
             return [
-                strings[0] + `${index + 1}. ${key}\n`,
+                strings[0] + `${index + startIndex}. ${key}\n`,
                 strings[1] + `${value}\n`,
             ];
         },
