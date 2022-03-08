@@ -1,5 +1,6 @@
+import Conf from 'conf';
 import { Message, TextChannel } from 'discord.js';
-import { readdirSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
 
@@ -26,6 +27,12 @@ const WHITELISTED_CHANNELS = [
     '801726137058721792',
     '809001007560392714',
 ];
+
+function getEnabled(): boolean {
+    const config = new Conf();
+    const enabled = config.get('quirky_responses.enabled');
+    return typeof enabled === 'boolean' ? enabled : false;
+}
 
 async function sendQuirkyResponse(client: Bot, message: Message) {
     if (
@@ -78,4 +85,4 @@ export const handler: EventHandler = async (client: Bot, message: Message) => {
         await sendQuirkyResponse(client, message);
     }
 };
-export const shoudLoad = () => true;
+export const shoudLoad = getEnabled;
