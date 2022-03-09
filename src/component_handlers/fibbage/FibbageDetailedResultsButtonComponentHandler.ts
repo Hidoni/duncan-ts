@@ -4,6 +4,7 @@ import {
     generateDetailedQuestionReport,
     getEnabled,
 } from '../../utils/FibbageUtils';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 export const handler: ComponentHandlerFunction = async (
     client,
@@ -19,18 +20,29 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.error(
             `Could not find question ${questionId} despite user ${interaction.user.tag} trying to access its detailed results.`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `OnO, I'm sowwy, but I couldn't find that question, please let Hidoni know ASAP!!`,
         });
     } else if (question.state != FibbageQuestionState.DONE) {
         client.logger?.debug(
             `Question ${questionId} is not in DONE state, not showing results. (State is ${question.state})`
         );
-        await interaction.reply(
-            "Sorry, but this question doesn't seem to be finished yet!"
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                "Sorry, but this question doesn't seem to be finished yet!",
+            ephemeral: true,
+        });
     } else {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: generateDetailedQuestionReport(client, question),
             ephemeral: true,
         });

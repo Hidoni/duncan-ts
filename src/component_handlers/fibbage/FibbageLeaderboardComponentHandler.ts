@@ -1,5 +1,6 @@
 import { getLeaderboardFromSubcommand } from '../../commands/fibbage/FibbageCommand';
 import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 function getValidPageValue(page: string): number | 'FIRST' | 'LAST' | null {
     if (page !== 'FIRST' && page !== 'LAST') {
@@ -20,7 +21,10 @@ export const handler: ComponentHandlerFunction = async (
     const subCommand = idInfo![1];
     const userId = idInfo![2];
     if (userId !== interaction.user.id) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `OnO, I'm sowwy, but this isn't your leaderboard!! Only <@${userId}> can switch pages on this one!!`,
             ephemeral: true,
         });
@@ -28,7 +32,10 @@ export const handler: ComponentHandlerFunction = async (
     }
     const page = getValidPageValue(idInfo![3]);
     if (page === null) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `OnO, I'm sowwy, but I got an invalid page number, please tell Hidoni!!`,
             ephemeral: true,
         });
@@ -40,9 +47,13 @@ export const handler: ComponentHandlerFunction = async (
     client.logger?.debug(
         `Generated ${subCommand} leaderboard (page ${page}) for ${interaction.user.tag}`
     );
-    await interaction.update({
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({
         embeds: [leaderboardembed],
         components: outputActionRows,
+        ephemeral: false,
     });
 };
 

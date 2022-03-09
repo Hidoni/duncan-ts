@@ -16,6 +16,7 @@ import {
 } from '../../database/models/FibbageStats';
 import { CommandHandler } from '../../interfaces/Command';
 import { getEnabled, getRole } from '../../utils/FibbageUtils';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 import {
     DEFAULT_EMBED_COLOR,
     generateLeaderboardComponentsRow,
@@ -170,7 +171,10 @@ async function handleLeaderboard(client: Bot, interaction: CommandInteraction) {
             interaction.user.id,
             1
         );
-    await interaction.reply({
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({
         embeds: [leaderboardembed],
         components: outputActionRows,
     });
@@ -181,7 +185,10 @@ async function handleLeaderboard(client: Bot, interaction: CommandInteraction) {
 
 async function giveFibbageRole(client: Bot, interaction: CommandInteraction) {
     if (!interaction.guild) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: 'Sowwy, you can only use this command in a server!',
             ephemeral: true,
         });
@@ -189,7 +196,10 @@ async function giveFibbageRole(client: Bot, interaction: CommandInteraction) {
     }
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (member.roles.cache.has(getRole())) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: 'Huh?? You already have the role!!',
             ephemeral: true,
         });
@@ -197,7 +207,10 @@ async function giveFibbageRole(client: Bot, interaction: CommandInteraction) {
     }
     await member.roles.add(getRole());
     await client.database.getFibbageStats(interaction.user.id);
-    await interaction.reply({
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({
         content:
             "Welcome to Fibbage, I'll start asking you for lies and answers to questions now! ^w^",
         ephemeral: true,
@@ -207,7 +220,10 @@ async function giveFibbageRole(client: Bot, interaction: CommandInteraction) {
 
 async function removeFibbageRole(client: Bot, interaction: CommandInteraction) {
     if (!interaction.guild) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: 'Sowwy, you can only use this command in a server!',
             ephemeral: true,
         });
@@ -215,14 +231,20 @@ async function removeFibbageRole(client: Bot, interaction: CommandInteraction) {
     }
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (!member.roles.cache.has(getRole())) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: "Hey... You don't even have the role??",
             ephemeral: true,
         });
         return;
     }
     await member.roles.remove(getRole());
-    await interaction.reply({
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({
         content:
             "I'm sorry to see you leave ;w;\nIf you still have any unaswered lies or questions, you'll can still answer them, but I won't ask you new ones!",
         ephemeral: true,

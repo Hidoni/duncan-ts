@@ -6,6 +6,7 @@ import { CommandInteraction } from 'discord.js';
 import Bot from '../../client/Bot';
 import { GimmickPoints } from '../../database/models/GimmickPoints';
 import { CommandHandler } from '../../interfaces/Command';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 import {
     DEFAULT_EMBED_COLOR,
     EmbedAttributes,
@@ -40,7 +41,7 @@ async function handleLeaderboardSubcommand(
         1,
         `gimmicks_leaderboard_${interaction.user.id}`
     );
-    await interaction.reply({
+    await getSafeReplyFunction(client, interaction)({
         embeds: [leaderboardembed],
         components: [leaderboardComponenetsRow],
     });

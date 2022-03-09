@@ -6,6 +6,7 @@ import {
     FibbageQuestionState,
 } from '../../database/models/FibbageQuestion';
 import { ModalHandlerFunction } from '../../interfaces/ModalHandler';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 function getAnswerFromModal(interaction: ModalSubmitInteraction) {
     return interaction.fields
@@ -22,9 +23,13 @@ async function isQuestionStateValid(
         client.logger?.debug(
             `Question ${question.id} has already been advanced past the PROMPTED stage (state: ${question.state}), but an interaction for a lie submission was received`
         );
-        await interaction.reply(
-            'Huh... the question has already been used...? If you think this is wrong, tell Hidoni!'
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                'Huh... the question has already been used...? If you think this is wrong, tell Hidoni!',
+        });
         return false;
     }
     const truth = question.answers.filter((question) => question.isCorrect)[0];
@@ -32,9 +37,13 @@ async function isQuestionStateValid(
         client.logger?.error(
             `Question ${question.id} has no correct answer, but user ${interaction.user.tag} submitted a lie for it.`
         );
-        await interaction.reply(
-            'Uh oh, something is wrong with this question, please tell Hidoni ASAP!!'
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                'Uh oh, something is wrong with this question, please tell Hidoni ASAP!!',
+        });
         return false;
     }
     return true;
@@ -53,23 +62,34 @@ async function isUserAnswerValid(
         client.logger?.debug(
             `User ${interaction.user.tag} has already answered question ${question.id}`
         );
-        await interaction.reply(
-            "Nice try, but you can't submit more than one lie per question!!"
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                "Nice try, but you can't submit more than one lie per question!!",
+        });
         return false;
     }
     const answer = getAnswerFromModal(interaction);
     if (!answer) {
-        await interaction.reply('You need to write a lie!');
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({ content: 'You need to write a lie!' });
         return false;
     }
     if (answer === truth.answer) {
         client.logger?.debug(
             `User ${interaction.user.tag} submitted a lie for ${question.id} that was the correct answer`
         );
-        await interaction.reply(
-            'Oh wow, you must know this person pretty well... your lie is too close to the truth!'
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                'Oh wow, you must know this person pretty well... your lie is too close to the truth!',
+        });
         return false;
     }
     return true;
@@ -86,9 +106,13 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
         client.logger?.error(
             `Could not find question ${questionId} despite user ${interaction.user.tag} submitting a lie for it.`
         );
-        await interaction.reply(
-            "OnO, I'm sowwy, but I can't find that question!! Please tell Hidoni ASAP!!"
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                "OnO, I'm sowwy, but I can't find that question!! Please tell Hidoni ASAP!!",
+        });
         return;
     }
     if (!(await isQuestionStateValid(client, interaction, question))) {
@@ -113,9 +137,10 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
             stats.liesSubmitted++;
             await stats.save();
         });
-    await interaction.reply(
-        "Thank you!! I'm sure this will fool someone! >:3c"
-    );
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({ content: "Thank you!! I'm sure this will fool someone! >:3c" });
 };
 
 export const pattern: RegExp = /^fibbage_prompt_modal_(\d+)$/;

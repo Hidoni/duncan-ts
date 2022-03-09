@@ -1,6 +1,7 @@
 import { FibbageQuestionState } from '../../database/models/FibbageQuestion';
 import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
 import { getEnabled, groupIdenticalAnswers } from '../../utils/FibbageUtils';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 export const handler: ComponentHandlerFunction = async (
     client,
@@ -17,7 +18,10 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.error(
             `Could not find question ${questionId} for interaction from user ${interaction.user.tag} (customId: ${interaction.customId})`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `OnO, I'm sowwy, but I couldn't find the question, please let Hidoni know ASAP!!`,
             ephemeral: true,
         });
@@ -27,7 +31,10 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.debug(
             `Question ${question.id} has advanced past the IN_USE state, preventing a new guess for answer in position ${answerPosition} from being submitted (State is ${question.state})`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content:
                 "Sorry, but I can't accept guesses for this question anymore!",
             ephemeral: true,
@@ -42,7 +49,10 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.debug(
             `User ${interaction.user.tag} has already guessed an answer for question ${question.id}, preventing another guess`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `You've already guessed an answer for this question!`,
             ephemeral: true,
         });
@@ -52,7 +62,10 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.debug(
             `Preventing user ${interaction.user.tag} from guessing on their own question`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `Nice try, but you can't guess on your own question!`,
             ephemeral: true,
         });
@@ -65,7 +78,10 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.debug(
             `Could not find an answer group for answer in position ${answerPosition} for question ${question.id}`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `I'm sowwy, but I couldn't find the answer, please let Hidoni know ASAP!!`,
             ephemeral: true,
         });
@@ -75,7 +91,10 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.debug(
             `Preventing user ${interaction.user.tag} from guessing on their own answer`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `Nuh-uh, you can't guess your own answer!`,
             ephemeral: true,
         });
@@ -93,7 +112,10 @@ export const handler: ComponentHandlerFunction = async (
             stats.timesGuessed++;
             await stats.save();
         });
-    await interaction.reply({
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({
         content: `Your answer has been recorded, please wait until I reveal the results!`,
         ephemeral: true,
     });

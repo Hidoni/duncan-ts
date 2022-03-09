@@ -7,6 +7,7 @@ import { CommandInteraction, PermissionString } from 'discord.js';
 import { UniqueConstraintError } from 'sequelize';
 import Bot from '../../client/Bot';
 import { CommandHandler } from '../../interfaces/Command';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 import {
     capitalizeQuestion,
     changeQuestion,
@@ -31,7 +32,10 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
         ): Promise<void> => {
             const question = interaction.options.getString('question');
             if (!question) {
-                await interaction.reply({
+                await getSafeReplyFunction(
+                    client,
+                    interaction
+                )({
                     content: "Huh?? You didn't give me a question!",
                     ephemeral: true,
                 });
@@ -42,7 +46,10 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
                         interaction.user.username
                     )
                     .then(() => {
-                        interaction.reply({
+                        getSafeReplyFunction(
+                            client,
+                            interaction
+                        )({
                             content:
                                 "Oooh! That seems like a good one!! I'll add it to the list!",
                             ephemeral: true,
@@ -53,7 +60,10 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
                     })
                     .catch((error) => {
                         if (error instanceof UniqueConstraintError) {
-                            interaction.reply({
+                            getSafeReplyFunction(
+                                client,
+                                interaction
+                            )({
                                 content:
                                     "Don't be silly, someone's already submitted that one!",
                                 ephemeral: true,
@@ -75,13 +85,14 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
             client.logger?.info(
                 `Prompt skipped by ${interaction.user.username}`
             );
-            interaction
-                .reply({ content: 'Oki, skipping!!', ephemeral: true })
-                .catch(() =>
-                    client.logger?.debug(
-                        'Could not reply to interaction when skipping!'
-                    )
-                );
+            getSafeReplyFunction(
+                client,
+                interaction
+            )({ content: 'Oki, skipping!!', ephemeral: true }).catch(() =>
+                client.logger?.debug(
+                    'Could not reply to interaction when skipping!'
+                )
+            );
             await changeQuestion(client);
         },
     },
@@ -95,16 +106,17 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
             client.logger?.info(
                 `Forced next prompt, triggered by ${interaction.user.username}`
             );
-            interaction
-                .reply({
-                    content: 'Oki, Sending next question!!',
-                    ephemeral: true,
-                })
-                .catch(() =>
-                    client.logger?.debug(
-                        'Could not reply to interaction when skipping!'
-                    )
-                );
+            getSafeReplyFunction(
+                client,
+                interaction
+            )({
+                content: 'Oki, Sending next question!!',
+                ephemeral: true,
+            }).catch(() =>
+                client.logger?.debug(
+                    'Could not reply to interaction when skipping!'
+                )
+            );
             setDays(getDays() + 1);
             await changeQuestion(client);
         },

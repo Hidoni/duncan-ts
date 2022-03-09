@@ -20,26 +20,10 @@ import {
 } from '../interfaces/Command';
 import { EventHandler } from '../interfaces/Event';
 import { hasPermissions, isUserAdmin } from '../utils/PermissionUtils';
+import { getSafeReplyFunction } from '../utils/InteractionUtils';
 
 const UNKNOWN_ERROR_MESSAGE =
     'Aw heck! Something went wrong here and I dunno what it is! ;w; Let’s go ask Hidoni about it!';
-
-function getReplyFunction(
-    client: Bot,
-    interaction:
-        | CommandInteractionType<CommandBuilderType>
-        | MessageComponentInteraction
-        | ModalSubmitInteraction
-): (options: InteractionReplyOptions) => Promise<void> {
-    return async (options: InteractionReplyOptions) => {
-        const replyFunction = interaction.replied
-            ? interaction.followUp.bind(interaction)
-            : interaction.reply.bind(interaction);
-        await replyFunction(options).catch((error) => {
-            client.logger?.error(`Could not reply to interaction: ${error}`);
-        });
-    };
-}
 
 async function canRunCommand(
     client: Bot,
@@ -51,7 +35,7 @@ async function canRunCommand(
         command.guildOnly(interaction) &&
         !interaction.guild
     ) {
-        getReplyFunction(
+        getSafeReplyFunction(
             client,
             interaction
         )({
@@ -67,7 +51,7 @@ async function canRunCommand(
     ) {
         const permissions = command.permissions(interaction);
         if (!interaction.member) {
-            getReplyFunction(
+            getSafeReplyFunction(
                 client,
                 interaction
             )({
@@ -80,7 +64,7 @@ async function canRunCommand(
             );
             return false;
         } else if (!hasPermissions(interaction.member, permissions)) {
-            getReplyFunction(
+            getSafeReplyFunction(
                 client,
                 interaction
             )({
@@ -138,7 +122,7 @@ export const handler: EventHandler = async (
                     client.logger?.error(
                         `Got the following error while executing ${interaction.commandName} command: ${error}`
                     );
-                    getReplyFunction(
+                    getSafeReplyFunction(
                         client,
                         interaction
                     )({
@@ -161,7 +145,7 @@ export const handler: EventHandler = async (
                 client.logger?.error(
                     `Got the following error while handling a component with id ${interaction.customId}: ${error}`
                 );
-                getReplyFunction(
+                getSafeReplyFunction(
                     client,
                     interaction
                 )({
@@ -181,7 +165,7 @@ export const handler: EventHandler = async (
                 client.logger?.error(
                     `Got the following error while handling a modal with id ${interaction.customId}: ${error}`
                 );
-                getReplyFunction(
+                getSafeReplyFunction(
                     client,
                     interaction
                 )({

@@ -7,6 +7,7 @@ import { TextChannel, ThreadChannel } from 'discord.js';
 import { CommandInteraction } from 'discord.js';
 import Bot from '../client/Bot';
 import { CommandHandler } from '../interfaces/Command';
+import { getSafeReplyFunction } from '../utils/InteractionUtils';
 import { isUserAdmin } from '../utils/PermissionUtils';
 
 const TEXT_CHANNEL_TYPES = [
@@ -20,7 +21,10 @@ export const handler: CommandHandler = async (
     interaction: CommandInteraction
 ) => {
     if (!isUserAdmin(interaction.user.id)) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: "Nuh-uh, you can't use that!!",
             ephemeral: true,
         });
@@ -36,7 +40,10 @@ export const handler: CommandHandler = async (
                 channel instanceof ThreadChannel
             )
         ) {
-            await interaction.reply({
+            await getSafeReplyFunction(
+                client,
+                interaction
+            )({
                 content: "Huh?? I can't send messages in that channel!!",
                 ephemeral: true,
             });
@@ -45,7 +52,10 @@ export const handler: CommandHandler = async (
                 .send(message)
                 .then(
                     async (sent) =>
-                        await interaction.reply({
+                        await getSafeReplyFunction(
+                            client,
+                            interaction
+                        )({
                             content: `Message sent, check it out: ${sent.url} ^w^`,
                             ephemeral: true,
                         })
@@ -54,7 +64,10 @@ export const handler: CommandHandler = async (
                     client.logger?.debug(
                         `Failed to send message as Duncan: ${err}`
                     );
-                    await interaction.reply({
+                    await getSafeReplyFunction(
+                        client,
+                        interaction
+                    )({
                         content: "Umm, I couldn't send a message... ;w;",
                         ephemeral: true,
                     });

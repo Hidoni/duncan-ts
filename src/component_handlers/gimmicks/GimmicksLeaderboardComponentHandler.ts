@@ -5,6 +5,7 @@ import {
 } from '../../commands/gimmicks/GimmicksCommand';
 import { GimmickPoints } from '../../database/models/GimmickPoints';
 import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 import {
     generateLeaderboardComponentsRow,
     generateLeaderboardEmbed,
@@ -36,7 +37,10 @@ export const handler: ComponentHandlerFunction = async (
     const idInfo = interaction.customId.match(pattern);
     const userId = idInfo![1];
     if (userId !== interaction.user.id) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `OnO, I'm sowwy, but this isn't your leaderboard!! Only <@${userId}> can switch pages on this one!!`,
             ephemeral: true,
         });
@@ -67,5 +71,5 @@ export const handler: ComponentHandlerFunction = async (
 
 export const pattern: RegExp =
     /^gimmicks_leaderboard_(\d+)_((?:FIRST|LAST)|(?:\d+))$/;
-    
+
 export const shoudLoad = () => true;

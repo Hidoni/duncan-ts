@@ -1,6 +1,7 @@
 import { FibbageQuestionState } from '../../database/models/FibbageQuestion';
 import { ComponentHandlerFunction } from '../../interfaces/ComponentHandler';
 import { generatePromptModal, getEnabled } from '../../utils/FibbageUtils';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 export const handler: ComponentHandlerFunction = async (
     client,
@@ -16,25 +17,36 @@ export const handler: ComponentHandlerFunction = async (
         client.logger?.error(
             `Could not find question ${questionId} despite user ${interaction.user.tag} trying to submit a lie for it.`
         );
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content: `OnO, I'm sowwy, but I couldn't find that question, please let Hidoni know ASAP!!`,
         });
     } else if (question.state != FibbageQuestionState.PROMPTED) {
         client.logger?.debug(
             `Question ${questionId} has advanced past the PROMPTED state, preventing a new lie from being submitted (State is ${question.state})`
         );
-        await interaction.reply(
-            "Sorry, but I can't accept lies for this question anymore!"
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                "Sorry, but I can't accept lies for this question anymore!",
+        });
     } else if (
         question.answers.some((answer) => answer.user === interaction.user.id)
     ) {
         client.logger?.debug(
             `User ${interaction.user.tag} has already answered question ${question.id}, not showing prompt modal again.`
         );
-        await interaction.reply(
-            "Nice try, but you can't submit more than one lie per question!!"
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                "Nice try, but you can't submit more than one lie per question!!",
+        });
     } else {
         await interaction.showModal(generatePromptModal(question.id));
     }

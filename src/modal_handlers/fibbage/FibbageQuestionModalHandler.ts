@@ -1,6 +1,7 @@
 import { ModalSubmitInteraction } from 'discord.js';
 import { FibbageQuestionState } from '../../database/models/FibbageQuestion';
 import { ModalHandlerFunction } from '../../interfaces/ModalHandler';
+import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 function getAnswerFromModal(interaction: ModalSubmitInteraction) {
     return interaction.fields
@@ -18,23 +19,34 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
         client.logger?.error(
             `Could not find question ${questionId} for user ${interaction.user.tag}`
         );
-        await interaction.reply(
-            "OnO, I'm sowwy, but I can't find the question!! Please tell Hidoni ASAP!!"
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                "OnO, I'm sowwy, but I can't find the question!! Please tell Hidoni ASAP!!",
+        });
         return;
     }
     if (question.state != FibbageQuestionState.ASKED) {
         client.logger?.debug(
             `Question ${questionId} has already been asked, but an interaction for a truth submission was received`
         );
-        await interaction.reply(
-            'Huh... the question has already been answered...? If you think this is wrong, tell Hidoni!'
-        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content:
+                'Huh... the question has already been answered...? If you think this is wrong, tell Hidoni!',
+        });
         return;
     }
     const answer = getAnswerFromModal(interaction);
     if (!answer) {
-        await interaction.reply('You need to answer the question!');
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({ content: 'You need to answer the question!' });
         return;
     }
     client.logger?.info(
@@ -54,9 +66,10 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
             stats.questionsSubmitted++;
             await stats.save();
         });
-    await interaction.reply(
-        "Thank you!! I'll go ask other players for some lies! >:3c"
-    );
+    await getSafeReplyFunction(
+        client,
+        interaction
+    )({ content: "Thank you!! I'll go ask other players for some lies! >:3c" });
 };
 
 export const pattern: RegExp = /^fibbage_question_modal_(\d+)$/;

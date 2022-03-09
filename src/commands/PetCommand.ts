@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import Bot from '../client/Bot';
 import { CommandHandler } from '../interfaces/Command';
+import { getSafeReplyFunction } from '../utils/InteractionUtils';
 
 const NEGATIVE_RESPONSES = [
     'Uhm.... ask furmission first! ;w;',
@@ -23,14 +24,20 @@ export const handler: CommandHandler = async (
     interaction: CommandInteraction
 ) => {
     if (Math.random() <= CHANCE_FOR_NEGATIVE_RESPONSE) {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content:
                 NEGATIVE_RESPONSES[
                     Math.floor(Math.random() * NEGATIVE_RESPONSES.length)
                 ],
         });
     } else {
-        await interaction.reply({
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
             content:
                 POSITIVE_RESPONSES[
                     Math.floor(Math.random() * POSITIVE_RESPONSES.length)
