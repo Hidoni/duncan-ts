@@ -78,12 +78,6 @@ const LEADERBOARD_SUBCOMMAND_TO_DETAILS: Record<
     },
 };
 
-function isValidLeaderboardSubcommand(
-    subcommand: string
-): subcommand is keyof typeof LEADERBOARD_SUBCOMMAND_TO_DETAILS {
-    return subcommand in LEADERBOARD_SUBCOMMAND_TO_DETAILS;
-}
-
 function getLeaderboardEmbedAttributesForColumn(
     subcommand: keyof typeof LEADERBOARD_SUBCOMMAND_TO_DETAILS
 ) {
