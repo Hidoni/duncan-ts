@@ -47,13 +47,9 @@ export const handler: ComponentHandlerFunction = async (
     client.logger?.debug(
         `Generated ${subCommand} leaderboard (page ${page}) for ${interaction.user.tag}`
     );
-    await getSafeReplyFunction(
-        client,
-        interaction
-    )({
+    await interaction.update({
         embeds: [leaderboardembed],
         components: outputActionRows,
-        ephemeral: false,
     });
 };
 
