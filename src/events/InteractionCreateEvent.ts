@@ -113,9 +113,11 @@ export const handler: EventHandler = async (
     interaction: Interaction
 ) => {
     client.logger?.debug(
-        `Received an interaction of type ${interaction.type}, id is ${
-            interaction.id
-        }, user is ${interaction.user.tag}${
+        `Received an interaction of type ${interaction.type}${
+            interaction.isMessageComponent() || interaction.isModalSubmit()
+                ? ` (${interaction.customId})`
+                : ''
+        }, id is ${interaction.id}, user is ${interaction.user.tag}${
             interaction.channel
                 ? `, channel id is ${interaction.channel.id}`
                 : ''
