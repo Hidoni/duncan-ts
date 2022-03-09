@@ -112,6 +112,19 @@ export const handler: EventHandler = async (
     client: Bot,
     interaction: Interaction
 ) => {
+    client.logger?.debug(
+        `Received an interaction of type ${interaction.type}, id is ${
+            interaction.id
+        }, user is ${interaction.user.tag}${
+            interaction.channel
+                ? `, channel id is ${interaction.channel.id}`
+                : ''
+        }${
+            interaction.guild
+                ? `, guild is ${interaction.guild.name} (${interaction.guildId})`
+                : ''
+        }`
+    );
     if (interaction.isCommand() || interaction.isContextMenu()) {
         const command = client.getCommand(interaction.commandName);
         if (command) {
@@ -120,7 +133,7 @@ export const handler: EventHandler = async (
                     await handleCommandCall(command, client, interaction);
                 } catch (error) {
                     client.logger?.error(
-                        `Got the following error while executing ${interaction.commandName} command: ${error}`
+                        `Got the following error while executing ${interaction.commandName} command (${interaction.id}): ${error}`
                     );
                     getSafeReplyFunction(
                         client,
@@ -143,7 +156,7 @@ export const handler: EventHandler = async (
         if (componentHandler) {
             componentHandler.handler(client, interaction).catch((error) => {
                 client.logger?.error(
-                    `Got the following error while handling a component with id ${interaction.customId}: ${error}`
+                    `Got the following error while handling a component with id ${interaction.customId} (${interaction.id}): ${error}`
                 );
                 getSafeReplyFunction(
                     client,
@@ -163,7 +176,7 @@ export const handler: EventHandler = async (
         if (modalHandler) {
             modalHandler.handler(client, interaction).catch((error) => {
                 client.logger?.error(
-                    `Got the following error while handling a modal with id ${interaction.customId}: ${error}`
+                    `Got the following error while handling a modal with id ${interaction.customId} (${interaction.id}): ${error}`
                 );
                 getSafeReplyFunction(
                     client,
@@ -175,12 +188,12 @@ export const handler: EventHandler = async (
             });
         } else {
             client.logger?.debug(
-                `Ignoring unknown modal with ID ${interaction.customId}`
+                `Ignoring unknown modal with ID ${interaction.customId} (${interaction.id})`
             );
         }
     } else {
         client.logger?.debug(
-            `Ignoring unknown interaction of type: ${interaction.type}`
+            `Ignoring unknown interaction of type: ${interaction.type} (${interaction.id})`
         );
     }
 };
