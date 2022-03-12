@@ -11,6 +11,7 @@ import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 function getAnswerFromModal(interaction: ModalSubmitInteraction) {
     return interaction.fields
         .getTextInputValue('fibbage_prompt_input')
+        .trim()
         .toUpperCase();
 }
 
