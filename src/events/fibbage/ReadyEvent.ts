@@ -22,7 +22,7 @@ export const handler: EventHandler = async (client: Bot) => {
         0
     );
     rule.tz = 'America/New_York';
-    client.logger?.debug(
+    client.logger?.info(
         `Setting up the Fibbage job, first invocation at ${rule.nextInvocationDate(
             new Date()
         )}`
