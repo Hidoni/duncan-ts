@@ -6,6 +6,7 @@ import {
     postNewQuestions,
     promptUsersForFibs,
     promptUsersWithQuestions,
+    remindUsersToAnswerQuestions,
     showResultsForQuestions,
 } from '../../utils/FibbageUtils';
 
@@ -33,6 +34,8 @@ export const handler: EventHandler = async (client: Bot) => {
         await postNewQuestions(client);
         // Prompt users for fibs for answered questions
         await promptUsersForFibs(client);
+        // Remind users to answer questions
+        await remindUsersToAnswerQuestions(client);
         // Prompt users for new questions
         await promptUsersWithQuestions(client);
     });

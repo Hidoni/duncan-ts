@@ -165,6 +165,37 @@ async function sendButtonPromptToUser(
     });
 }
 
+async function remindUserToAnswerQuestion(
+    question: FibbageQuestion,
+    user: User | GuildMember
+) {
+    await user.send({
+        content: escapeDiscordMarkdown(
+            `Hey... you didn't answer my last question... It's oki, I'll just ask you again! ^w^\n\n${question.question}`
+        ),
+        components: [generateComponentsRowForQuestion(question.id)],
+    });
+}
+
+export async function remindUsersToAnswerQuestions(client: Bot) {
+    const userQuestions = await client.database.getQuestionsInState(
+        FibbageQuestionState.ASKED
+    );
+    for (const userQuestion of userQuestions) {
+        const user = await client.users.fetch(userQuestion.user);
+        if (user) {
+            client.logger?.info(
+                `Reminding ${user.tag} to answer question number ${userQuestion.id}`
+            );
+            await remindUserToAnswerQuestion(userQuestion, user);
+        } else {
+            client.logger?.error(
+                `Failed to fetch user by ID; User is ${userQuestion.user}`
+            );
+        }
+    }
+}
+
 function getUserTag(user: User | GuildMember) {
     return user instanceof GuildMember ? user.user.tag : user.tag;
 }
