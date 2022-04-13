@@ -26,6 +26,7 @@ const WHITELISTED_CHANNELS = [
     '483793171214499840',
     '801726137058721792',
     '809001007560392714',
+    '949461359060463616',
 ];
 
 function getEnabled(): boolean {
