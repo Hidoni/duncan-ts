@@ -66,6 +66,11 @@ export function getEnabled(): boolean {
     return typeof enabled === 'boolean' ? enabled : false;
 }
 
+export function isFibbageOnBreak(): boolean {
+    const onBreak = config.get('fibbage.onBreak');
+    return typeof onBreak === 'boolean' ? onBreak : false;
+}
+
 export function getFibbagePrompts(): FibbagePrompts {
     const prompts = require('../../prompts.json') as FibbagePrompts;
     return prompts;

@@ -2,6 +2,7 @@ import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
 import schedule from 'node-schedule';
 import {
+    isFibbageOnBreak,
     getEnabled,
     postNewQuestions,
     promptUsersForFibs,
@@ -30,14 +31,20 @@ export const handler: EventHandler = async (client: Bot) => {
     schedule.scheduleJob(rule, async () => {
         // Resolve existing questions in channel
         await showResultsForQuestions(client);
-        // Post new questions
-        await postNewQuestions(client);
-        // Prompt users for fibs for answered questions
-        await promptUsersForFibs(client);
-        // Remind users to answer questions
-        await remindUsersToAnswerQuestions(client);
-        // Prompt users for new questions
-        await promptUsersWithQuestions(client);
+        if (!isFibbageOnBreak()) {
+            // Post new questions
+            await postNewQuestions(client);
+            // Prompt users for fibs for answered questions
+            await promptUsersForFibs(client);
+            // Remind users to answer questions
+            await remindUsersToAnswerQuestions(client);
+            // Prompt users for new questions
+            await promptUsersWithQuestions(client);
+        } else {
+            client.logger?.debug(
+                'Fibbage is currently on break, skipping new questions'
+            );
+        }
     });
 };
 export const once: boolean = true;

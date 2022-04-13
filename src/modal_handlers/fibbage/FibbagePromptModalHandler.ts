@@ -6,6 +6,7 @@ import {
     FibbageQuestionState,
 } from '../../database/models/FibbageQuestion';
 import { ModalHandlerFunction } from '../../interfaces/ModalHandler';
+import { isFibbageOnBreak } from '../../utils/FibbageUtils';
 import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 function getAnswerFromModal(interaction: ModalSubmitInteraction) {
@@ -97,6 +98,19 @@ async function isUserAnswerValid(
 }
 
 export const handler: ModalHandlerFunction = async (client, interaction) => {
+    if (isFibbageOnBreak()) {
+        client.logger?.debug(
+            `Fibbage is on break, ignoring interaction ${interaction.id} from ${interaction.user.tag} (customId: ${interaction.customId})`
+        );
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content: `Fibbage is currently on break! You can still view leaderboards and stats, but you can't engage with new questions!`,
+        });
+        return;
+    }
+    
     const idInfo = interaction.customId.match(pattern);
     const questionId = idInfo![1];
     const question = await client.database.getFibbageQuestion(
