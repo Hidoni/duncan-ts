@@ -7,6 +7,7 @@ import {
     PrimaryKey,
     HasMany,
 } from 'sequelize-typescript';
+import { FibbageCustomPromptApproval } from './FibbageCustomPromptApproval';
 import { FibbageCustomPromptDefaultAnswer } from './FibbageCustomPromptDefaultAnswer';
 
 @Table({
@@ -30,6 +31,9 @@ export class FibbageCustomPrompt extends Model {
 
     @HasMany(() => FibbageCustomPromptDefaultAnswer, 'customPromptId')
     answers!: FibbageCustomPromptDefaultAnswer[];
+
+    @HasMany(() => FibbageCustomPromptApproval, 'customPromptId')
+    approvals!: FibbageCustomPromptApproval[];
 
     @AllowNull(false)
     @Column

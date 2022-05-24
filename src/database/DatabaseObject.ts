@@ -14,6 +14,8 @@ import { FibbageGuess } from './models/FibbageGuess';
 import { FibbageEagerLoadingOptions } from '../interfaces/fibbage/FibbageEagerLoadingOptions';
 import { Includeable } from 'sequelize/types';
 import { FibbageCustomPrompt } from './models/FibbageCustomPrompt';
+import { FibbageCustomPromptDefaultAnswer } from './models/FibbageCustomPromptDefaultAnswer';
+import { FibbageCustomPromptApproval } from './models/FibbageCustomPromptApproval';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -250,6 +252,10 @@ export default class Database {
     }
 
     public async getAllCustomFibbagePrompts(): Promise<FibbageCustomPrompt[]> {
-        return await FibbageCustomPrompt.findAll();
+        return await FibbageCustomPrompt.findAll({
+            include: [{model: FibbageCustomPromptDefaultAnswer}, {model: FibbageCustomPromptApproval}],
+            group: ['fibbage_custom_prompts.id'],
+            having: Sequelize.literal('COUNT(fibbage_custom_prompt_approvals.id) > 2'),
+        });
     }
 }
