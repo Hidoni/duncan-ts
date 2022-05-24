@@ -5,16 +5,13 @@ import {
     AllowNull,
     AutoIncrement,
     PrimaryKey,
+    HasMany,
 } from 'sequelize-typescript';
+import { FibbageCustomPromptDefaultAnswer } from './FibbageCustomPromptDefaultAnswer';
 
 @Table({
     modelName: 'fibbage_custom_prompts',
     timestamps: false,
-    indexes: [
-        {
-            fields: ['prompt'],
-        },
-    ],
 })
 export class FibbageCustomPrompt extends Model {
     @AllowNull(false)
@@ -31,33 +28,8 @@ export class FibbageCustomPrompt extends Model {
     @Column
     prompt!: string;
 
-    @AllowNull(false)
-    @Column
-    answerOne!: string;
-
-    @AllowNull(false)
-    @Column
-    answerTwo!: string;
-
-    @AllowNull(false)
-    @Column
-    answerThree!: string;
-
-    @AllowNull(false)
-    @Column
-    answerFour!: string;
-
-    @AllowNull(false)
-    @Column
-    answerFive!: string;
-
-    @AllowNull(false)
-    @Column
-    answerSix!: string;
-
-    @AllowNull(false)
-    @Column
-    answerSeven!: string;
+    @HasMany(() => FibbageCustomPromptDefaultAnswer, 'customPromptId')
+    answers!: FibbageCustomPromptDefaultAnswer[];
 
     @AllowNull(false)
     @Column

@@ -72,10 +72,19 @@ export function isFibbageOnBreak(): boolean {
     return typeof onBreak === 'boolean' ? onBreak : false;
 }
 
+function customFibbagePromptHasRightAmountOfAnswers(
+    customPromptAnswers: readonly string[]
+): customPromptAnswers is FibbageDefaultAnswers {
+    return customPromptAnswers.length == 7;
+}
+
 function convertCustomFibbagePromptsToRegularOnes(custom: FibbageCustomPrompt[]): FibbagePrompts {
     let regularPrompts: FibbagePrompts = {}
     for (const prompt of custom) {
-        const answers: FibbageDefaultAnswers = [prompt.answerOne, prompt.answerTwo, prompt.answerThree, prompt.answerFour, prompt.answerFive, prompt.answerSix, prompt.answerSeven];
+        const answers = prompt.answers.map((answer) => answer.answer);
+        if (!customFibbagePromptHasRightAmountOfAnswers(answers)) {
+            throw new Error(`Unexpected amount of default answers (${answers.length}) for custom prompt ${prompt.id}`);
+        }
         regularPrompts[prompt.question] = {prompt: prompt.prompt, answers: answers};
     }
     return regularPrompts;
