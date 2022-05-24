@@ -12,6 +12,7 @@ import {
 } from 'discord.js';
 import Bot from '../client/Bot';
 import { FibbageAnswer } from '../database/models/FibbageAnswer';
+import { FibbageCustomPrompt } from '../database/models/FibbageCustomPrompt';
 import {
     FibbageQuestion,
     FibbageQuestionState,
@@ -71,13 +72,19 @@ export function isFibbageOnBreak(): boolean {
     return typeof onBreak === 'boolean' ? onBreak : false;
 }
 
-export function getFibbagePrompts(): FibbagePrompts {
-    const prompts = require('../../prompts.json') as FibbagePrompts;
-    return prompts;
+function convertCustomFibbagePromptsToRegularOnes(custom: FibbageCustomPrompt[]): FibbagePrompts {
+    let regularPrompts: FibbagePrompts = {}
+    for (const prompt of custom) {
+        const answers: FibbageDefaultAnswers = [prompt.answerOne, prompt.answerTwo, prompt.answerThree, prompt.answerFour, prompt.answerFive, prompt.answerSix, prompt.answerSeven];
+        regularPrompts[prompt.question] = {prompt: prompt.prompt, answers: answers};
+    }
+    return regularPrompts;
 }
 
-export function getRandomFibbagePrompt(): [string, FibbagePrompt] {
-    return getRandomFibbagePromptFromOptions(getFibbagePrompts());
+export async function getFibbagePrompts(client: Bot): Promise<FibbagePrompts> {
+    const defaultPrompts = require('../../prompts.json') as FibbagePrompts;
+    const customPrompts = convertCustomFibbagePromptsToRegularOnes(await client.database.getAllCustomFibbagePrompts());
+    return {...defaultPrompts, ...customPrompts};
 }
 
 export function getRandomFibbagePromptFromOptions(
@@ -217,11 +224,12 @@ export async function giveUserNewQuestion(
     await sendButtonPromptToUser(client, question, user);
 }
 
-function getUnaskedQuestionsForUser(
+async function getUnaskedQuestionsForUser(
+    client: Bot,
     askedQuestions: FibbageQuestion[],
     user: GuildMember | User
 ) {
-    const prompts = getFibbagePrompts();
+    const prompts = await getFibbagePrompts(client);
     const allAskedUserQuestions = askedQuestions.filter(
         (question) => question.user === user.id
     );
@@ -241,7 +249,7 @@ export async function promptUserWithQuestion(
     user: GuildMember | User,
     askedQuestions: FibbageQuestion[]
 ) {
-    const unaskedQuestions = getUnaskedQuestionsForUser(askedQuestions, user);
+    const unaskedQuestions = await getUnaskedQuestionsForUser(client, askedQuestions, user);
     await giveUserNewQuestion(client, unaskedQuestions, user);
 }
 
@@ -299,7 +307,7 @@ async function promptRandomUsersForFibs(
     users: (GuildMember | User)[]
 ) {
     const questionUser = await client.users.fetch(question.user);
-    const prompt = getFibbagePrompts()[question.question];
+    const prompt = (await getFibbagePrompts(client))[question.question];
     const promptFormatted = prompt.prompt.replace(/\{0}/g, questionUser.tag);
 
     let usersCopy = users.slice();
@@ -438,7 +446,7 @@ async function postNewQuestion(
     question: FibbageQuestion
 ) {
     const questionUser = await client.users.fetch(question.user);
-    const prompt = getFibbagePrompts()[question.question];
+    const prompt = (await getFibbagePrompts(client))[question.question];
     const promptFormatted = prompt.prompt.replace(
         /\{0}/g,
         questionUser.toString()
@@ -744,7 +752,7 @@ async function generateMessageForPostedQuestion(
     question: FibbageQuestion,
     answerGroups: FibbageAnswer[][]
 ) {
-    const prompt = getFibbagePrompts()[question.question];
+    const prompt = (await getFibbagePrompts(client))[question.question];
     const correctAnswer = answerGroups.find((g) => g[0].isCorrect);
     if (!correctAnswer) {
         client.logger?.error(

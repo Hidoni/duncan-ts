@@ -13,6 +13,7 @@ import { FibbageAnswer } from './models/FibbageAnswer';
 import { FibbageGuess } from './models/FibbageGuess';
 import { FibbageEagerLoadingOptions } from '../interfaces/fibbage/FibbageEagerLoadingOptions';
 import { Includeable } from 'sequelize/types';
+import { FibbageCustomPrompt } from './models/FibbageCustomPrompt';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -246,5 +247,9 @@ export default class Database {
         return await FibbageStats.findAll({
             order: Sequelize.literal(`${column} DESC`),
         });
+    }
+
+    public async getAllCustomFibbagePrompts(): Promise<FibbageCustomPrompt[]> {
+        return await FibbageCustomPrompt.findAll();
     }
 }
