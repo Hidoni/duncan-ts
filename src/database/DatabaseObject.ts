@@ -12,10 +12,11 @@ import {
 import { FibbageAnswer } from './models/FibbageAnswer';
 import { FibbageGuess } from './models/FibbageGuess';
 import { FibbageEagerLoadingOptions } from '../interfaces/fibbage/FibbageEagerLoadingOptions';
-import { Includeable } from 'sequelize/types';
+import { FindOrCreateOptions, Includeable } from 'sequelize/types';
 import { FibbageCustomPrompt } from './models/FibbageCustomPrompt';
 import { FibbageCustomPromptDefaultAnswer } from './models/FibbageCustomPromptDefaultAnswer';
 import { FibbageCustomPromptApproval } from './models/FibbageCustomPromptApproval';
+import { Name } from './models/Name';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -253,9 +254,44 @@ export default class Database {
 
     public async getAllCustomFibbagePrompts(): Promise<FibbageCustomPrompt[]> {
         return await FibbageCustomPrompt.findAll({
-            include: [{model: FibbageCustomPromptDefaultAnswer}, {model: FibbageCustomPromptApproval}],
+            include: [
+                { model: FibbageCustomPromptDefaultAnswer },
+                { model: FibbageCustomPromptApproval },
+            ],
             group: ['fibbage_custom_prompts.id'],
-            having: Sequelize.literal('COUNT(fibbage_custom_prompt_approvals.id) > 2'),
+            having: Sequelize.literal(
+                'COUNT(fibbage_custom_prompt_approvals.id) > 2'
+            ),
         });
+    }
+
+    public async insertOrUpdateName(
+        user: Snowflake,
+        name: string
+    ): Promise<void> {
+        await Name.findOrCreate({
+            where: {
+                id: user,
+            },
+        }).then(async ({ 0: instance }) => {
+            instance.name = name;
+            await instance.save();
+        });
+    }
+
+    public async clearName(user: Snowflake): Promise<void> {
+        const instance = await Name.findOne({ where: { id: user } });
+        if (instance) {
+            instance.name = null;
+            await instance.save();
+        }
+    }
+
+    public async getName(user: Snowflake): Promise<string | null> {
+        const instance = await Name.findOne({ where: { id: user } });
+        if (instance) {
+            return instance.name;
+        }
+        return null;
     }
 }
