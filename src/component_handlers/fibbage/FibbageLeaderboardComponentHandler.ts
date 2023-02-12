@@ -56,4 +56,4 @@ export const handler: ComponentHandlerFunction = async (
 export const pattern: RegExp =
     /^fibbage_leaderboard_(?:switcher_)?(.+)_(\d+)_((?:FIRST|LAST)|(?:\d+))$/;
 
-export const shoudLoad = () => true;
+export const shouldLoad = () => true;

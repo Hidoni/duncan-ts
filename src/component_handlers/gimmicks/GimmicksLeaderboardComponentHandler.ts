@@ -72,4 +72,4 @@ export const handler: ComponentHandlerFunction = async (
 export const pattern: RegExp =
     /^gimmicks_leaderboard_(\d+)_((?:FIRST|LAST)|(?:\d+))$/;
 
-export const shoudLoad = () => true;
+export const shouldLoad = () => true;

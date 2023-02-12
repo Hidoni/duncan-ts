@@ -31,4 +31,4 @@ export const handler: EventHandler = async (client: Bot) => {
     });
 };
 export const once: boolean = true;
-export const shoudLoad = getEnabled;
+export const shouldLoad = getEnabled;

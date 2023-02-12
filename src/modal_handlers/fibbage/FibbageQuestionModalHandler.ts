@@ -89,4 +89,4 @@ export const handler: ModalHandlerFunction = async (client, interaction) => {
 
 export const pattern: RegExp = /^fibbage_question_modal_(\d+)$/;
 
-export const shoudLoad = () => true;
+export const shouldLoad = () => true;

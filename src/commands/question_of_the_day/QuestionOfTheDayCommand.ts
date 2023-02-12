@@ -184,4 +184,4 @@ export const permissions = (interaction: CommandInteraction) => {
     return undefined;
 };
 
-export const shoudLoad = getEnabled;
+export const shouldLoad = getEnabled;

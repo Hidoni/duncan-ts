@@ -48,7 +48,7 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: Command<CommandBuilderType> = require(file);
-                    if (handler.shoudLoad()) {
+                    if (handler.shouldLoad()) {
                         this.commands.set(handler.builder.name, handler);
                     }
                 } catch (error) {
@@ -67,7 +67,7 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: Event = require(file);
-                    if (handler.shoudLoad()) {
+                    if (handler.shouldLoad()) {
                         this.registerEvent(handler.name, handler);
                     }
                 } catch (error) {
@@ -86,7 +86,7 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: ComponentHandler = require(file);
-                    if (handler.shoudLoad()) {
+                    if (handler.shouldLoad()) {
                         this.componentHandlers.set(handler.pattern, handler);
                     }
                 } catch (error) {
@@ -108,7 +108,7 @@ export default class Bot extends Client {
             glob.sync(path.join(folder, '**/*.js')).forEach((file: string) => {
                 try {
                     const handler: ModalHandler = require(file);
-                    if (handler.shoudLoad()) {
+                    if (handler.shouldLoad()) {
                         this.modalHandlers.set(handler.pattern, handler);
                     }
                 } catch (error) {

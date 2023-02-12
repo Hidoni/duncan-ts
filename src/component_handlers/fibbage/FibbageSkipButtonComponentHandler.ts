@@ -64,4 +64,4 @@ export const handler: ComponentHandlerFunction = async (
 
 export const pattern: RegExp = /^fibbage_question_skip_(\d+)$/;
 
-export const shoudLoad = () => getEnabled;
+export const shouldLoad = () => getEnabled;

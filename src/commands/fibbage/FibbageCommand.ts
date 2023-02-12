@@ -307,4 +307,4 @@ export const guildOnly = () => true;
 
 export const permissions = () => false;
 
-export const shoudLoad = getEnabled;
+export const shouldLoad = getEnabled;

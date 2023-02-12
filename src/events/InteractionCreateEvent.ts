@@ -199,4 +199,4 @@ export const handler: EventHandler = async (
         );
     }
 };
-export const shoudLoad = () => true;
+export const shouldLoad = () => true;

@@ -86,4 +86,4 @@ export const handler: EventHandler = async (client: Bot, message: Message) => {
         await sendQuirkyResponse(client, message);
     }
 };
-export const shoudLoad = getEnabled;
+export const shouldLoad = getEnabled;

@@ -31,4 +31,4 @@ export const guildOnly = (interaction: CommandInteraction) => false;
 
 export const permissions = (interaction: CommandInteraction) => false;
 
-export const shoudLoad = () => true;
+export const shouldLoad = () => true;

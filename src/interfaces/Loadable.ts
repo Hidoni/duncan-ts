@@ -1,3 +1,3 @@
 export interface Loadable {
-    shoudLoad: () => boolean;
+    shouldLoad: () => boolean;
 }

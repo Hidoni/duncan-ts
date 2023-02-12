@@ -141,4 +141,4 @@ export const handler: ComponentHandlerFunction = async (
 
 export const pattern: RegExp = /^fibbage_answer_button_(\d+)_(\d+)$/;
 
-export const shoudLoad = () => getEnabled;
+export const shouldLoad = () => getEnabled;
