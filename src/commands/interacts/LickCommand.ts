@@ -2,13 +2,13 @@ import { CommandInteraction } from 'discord.js';
 import { InteractCommand } from './InteractCommand';
 
 const NEGATIVE_RESPONSES = [
-    'Omg that is SO gross',
+    'Omg that is SO gross!',
     'What the HECK!!',
     "What part of **NOT EDIBLE** didn't you understand?!",
     'Ew... ew ew ew ew EW!',
     "_sigh_ aren't you tired of this already?",
     'Thanks... I guess?',
-    'Please dont!',
+    "Please don't! >w<",
     'Get AWAY from me with that tongue!!',
     'H..how about we just stick to pets for now...',
 ];
