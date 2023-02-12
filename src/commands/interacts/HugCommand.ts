@@ -11,11 +11,9 @@ const NEGATIVE_RESPONSES = [
 ];
 
 const POSITIVE_RESPONSES = [
-    '<a:hugAttack:1074424007694241823>',
     'Awwww _hugs back_ uwu',
     'Oh gosh... for me?! Thank you! ^w^',
     'Wow, you seem a little stressed. You should keep hugging me!',
-    // 'Is that a banana in your pocket or are you just excited to see me?',
     'Nice and warm <3',
 ];
 
