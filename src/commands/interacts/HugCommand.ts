@@ -6,8 +6,8 @@ const NEGATIVE_RESPONSES = [
     'Have you... taken a shower this week?',
     'Ack!! Too tight!!',
     '_hides_',
-    "M-maybe we shouldn't, you could be sick!!", 
-    'Oh... no thank you. How about a pet instead?'
+    "M-maybe we shouldn't, you could be sick!!",
+    'Oh... no thank you. How about a pet instead?',
 ];
 
 const POSITIVE_RESPONSES = [
@@ -16,7 +16,7 @@ const POSITIVE_RESPONSES = [
     'Oh gosh... for me?! Thank you! ^w^',
     'Wow, you seem a little stressed. You should keep hugging me!',
     // 'Is that a banana in your pocket or are you just excited to see me?',
-    'Nice and warm <3'
+    'Nice and warm <3',
 ];
 
 const CHANCE_FOR_NEGATIVE_RESPONSE = 1 / 69;
@@ -24,11 +24,13 @@ const CHANCE_FOR_NEGATIVE_RESPONSE = 1 / 69;
 const NAME = 'hug';
 const DESCRIPTION = 'You wanna hug me?!';
 
-const command = new InteractCommand(NAME, DESCRIPTION, 
-    POSITIVE_RESPONSES, NEGATIVE_RESPONSES, CHANCE_FOR_NEGATIVE_RESPONSE);
-
-export const builder = command.builder;
-export const handler = command.handler;
+export const { builder, handler } = new InteractCommand(
+    NAME,
+    DESCRIPTION,
+    POSITIVE_RESPONSES,
+    NEGATIVE_RESPONSES,
+    CHANCE_FOR_NEGATIVE_RESPONSE
+);
 
 export const guildOnly = (interaction: CommandInteraction) => false;
 

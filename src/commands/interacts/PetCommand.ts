@@ -19,11 +19,13 @@ const CHANCE_FOR_NEGATIVE_RESPONSE = 1 / 100;
 const NAME = 'pet';
 const DESCRIPTION = 'You want to... pet me? >w<';
 
-const command = new InteractCommand(NAME, DESCRIPTION, 
-    POSITIVE_RESPONSES, NEGATIVE_RESPONSES, CHANCE_FOR_NEGATIVE_RESPONSE);
-
-export const builder = command.builder;
-export const handler = command.handler;
+export const { builder, handler } = new InteractCommand(
+    NAME,
+    DESCRIPTION,
+    POSITIVE_RESPONSES,
+    NEGATIVE_RESPONSES,
+    CHANCE_FOR_NEGATIVE_RESPONSE
+);
 
 export const guildOnly = (interaction: CommandInteraction) => false;
 
