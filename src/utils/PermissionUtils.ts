@@ -9,6 +9,7 @@ import {
 const USERS_WITH_ADMIN_PERMISSIONS: Snowflake[] = [
     '87495537498021888',
     '381002402947399691',
+    '358685840467034122'  // :em_beg:
 ];
 
 export function hasPermissions(
