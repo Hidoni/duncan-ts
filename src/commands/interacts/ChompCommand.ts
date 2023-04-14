@@ -6,18 +6,19 @@ const NEGATIVE_RESPONSES = [
     '**WHY** do people keep trying to eat me??',
     "Ugh... I don't try to bite you!",
     'What is **wrong** with you?!?',
-    'Ew! Who *knows* where that mouth has been',
+    'Ew! Who *knows* where that mouth has been... TwT',
     'QUIT IT!',
-    "That's *sooo* hemkin gross",
-    "Do you want me to bite you? My teeth are *very* sharp."
-    // Do you have the emote for nightmare dunc? I don't
+    "That's *sooo* hemkin gross!",
+    'Do you want me to bite you? My teeth are *very* sharp.',
 ];
 
 const POSITIVE_RESPONSES = [
     'Well... I guess I do taste pretty good',
     'Did Lykai tell you to do this? That stinky wuff...',
-    "*sigh...*",
-    "Gosh, you're so silly!"
+    '*sigh...*',
+    "Gosh, you're so silly!",
+    "Well, it's fine as long as you give candy! These sprinkles take time and sugar to regrow, yknow!",
+    'Just this once!!',
 ];
 
 const CHANCE_FOR_NEGATIVE_RESPONSE = 49 / 50;
