@@ -1,11 +1,30 @@
 import {
     CommandInteraction,
     ContextMenuInteraction,
+    Guild,
     InteractionReplyOptions,
     MessageComponentInteraction,
     ModalSubmitInteraction,
+    Snowflake,
 } from 'discord.js';
 import Bot from '../client/Bot';
+
+export async function getUserPreferredName(
+    client: Bot,
+    user: Snowflake,
+    guild: Guild
+) {
+    const name = await client.database.getName(user);
+    if (name) {
+        return name;
+    }
+    const guildUser = await guild.members.fetch(user);
+    const nickname = guildUser.nickname;
+    if (nickname) {
+        return nickname;
+    }
+    return guildUser.displayName;
+}
 
 export function getReplyFunction(
     interaction:

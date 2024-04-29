@@ -17,6 +17,7 @@ import { FibbageCustomPrompt } from './models/FibbageCustomPrompt';
 import { FibbageCustomPromptDefaultAnswer } from './models/FibbageCustomPromptDefaultAnswer';
 import { FibbageCustomPromptApproval } from './models/FibbageCustomPromptApproval';
 import { Name } from './models/Name';
+import { MessageCount } from './models/MessageCount';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -293,5 +294,26 @@ export default class Database {
             return instance.name;
         }
         return null;
+    }
+
+    public async incrementMessageCount(user: Snowflake): Promise<void> {
+        await MessageCount.findOrCreate({ where: { id: user } }).then(
+            async ({ 0: instance }) => {
+                instance.count += 1;
+                await instance.save();
+            }
+        );
+    }
+
+    public async clearAllMessageCounts(): Promise<void> {
+        await MessageCount.update({ count: 0 }, { where: {} });
+    }
+
+    public async getMessageCount(user: Snowflake): Promise<number> {
+        const instance = await MessageCount.findOne({ where: { id: user } });
+        if (instance) {
+            return instance.count;
+        }
+        return 0;
     }
 }

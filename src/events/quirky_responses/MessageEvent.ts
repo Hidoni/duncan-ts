@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { setTimeout } from 'timers/promises';
 import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
+import { getUserPreferredName } from '../../utils/InteractionUtils';
 
 const QUIRKY_RESPONSES = readFileSync('./quirky-responses.txt', 'utf8')
     .trim()
@@ -40,23 +41,6 @@ function getEnabled(): boolean {
     return typeof enabled === 'boolean' ? enabled : false;
 }
 
-async function getUserPreferredName(
-    client: Bot,
-    user: Snowflake,
-    guild: Guild
-) {
-    const name = await client.database.getName(user);
-    if (name) {
-        return name;
-    }
-    const guildUser = await guild.members.fetch(user);
-    const nickname = guildUser.nickname;
-    if (nickname) {
-        return nickname;
-    }
-    return guildUser.displayName;
-}
-
 async function getRandomUserToMentionInGuild(
     guild: Guild,
     excluded: Snowflake[] | null
@@ -84,9 +68,10 @@ async function formatResponse(client: Bot, message: Message, response: string) {
         )
         .replace(
             /\{random}/gi,
-            await getRandomUserToMentionInGuild(guild, [message.author.id, client.user!.id]).then(
-                (member) => getUserPreferredName(client, member.id, guild)
-            )
+            await getRandomUserToMentionInGuild(guild, [
+                message.author.id,
+                client.user!.id,
+            ]).then((member) => getUserPreferredName(client, member.id, guild))
         );
 }
 
