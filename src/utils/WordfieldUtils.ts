@@ -1,6 +1,7 @@
 import Conf from 'conf';
-import { GuildMember } from 'discord.js';
+import { Guild, GuildMember, Message } from 'discord.js';
 import Bot from '../client/Bot';
+import { getUserPreferredName } from './InteractionUtils';
 
 const REGEX_CHARACTERS = /[\\^$.*+?()[\]{}|]/g;
 
@@ -88,4 +89,33 @@ export async function getUsersWithWordfieldRole(
             );
             return [];
         });
+}
+
+export async function checkForBannedWords(
+    client: Bot,
+    message: Message,
+    guild: Guild
+) {
+    const regex = getBannedWordsRegex();
+    const matches = regex.exec(message.content.toLowerCase());
+    if (matches) {
+        client.logger?.info(
+            `Got match for regex on message from ${message.author.username}: ${matches} (From original message: "${message.content}")`
+        );
+        try {
+            await message.reply(
+                `OOOOOOHH! ${await getUserPreferredName(
+                    client,
+                    message.author.id,
+                    guild
+                )} said one of the banned words, "${
+                    matches[0]
+                }"! I gotta tell <@381002402947399691> about this!`
+            );
+        } catch (error) {
+            client.logger?.error(
+                `Could not reply to message with id (${message.id}): ${error}`
+            );
+        }
+    }
 }
