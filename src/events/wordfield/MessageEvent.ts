@@ -4,6 +4,7 @@ import { EventHandler } from '../../interfaces/Event';
 import {
     getBannedWordsRegex,
     getEnabled,
+    getIgnoredChannelsList,
     isMemberParticipatingInWordfield,
 } from '../../utils/WordfieldUtils';
 import { getUserPreferredName } from '../../utils/InteractionUtils';
@@ -42,7 +43,13 @@ export const handler: EventHandler = async (client: Bot, message: Message) => {
         const member = await guild.members.fetch(message.author);
         if (isMemberParticipatingInWordfield(member)) {
             await checkForBannedWords(client, message, guild);
-            await client.database.incrementMessageCount(message.author.id);
+            if (
+                !getIgnoredChannelsList().find(
+                    (value) => value == message.channelId
+                )
+            ) {
+                await client.database.incrementMessageCount(message.author.id);
+            }
         }
     }
 };

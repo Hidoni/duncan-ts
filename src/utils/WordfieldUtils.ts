@@ -38,6 +38,15 @@ export function setBannedWordsList(list: string[]) {
     config.set('wordfield.banned_words', list);
 }
 
+export function getIgnoredChannelsList(): string[] {
+    const list = config.get('wordfield.ignored_channels');
+    return Array.isArray(list) ? list : [];
+}
+
+export function setIgnoredChannelsList(list: string[]) {
+    config.set('wordfield.ignored_channels', list);
+}
+
 function escapeRegex(input: string): string {
     return input.replace(REGEX_CHARACTERS, '\\$&');
 }
