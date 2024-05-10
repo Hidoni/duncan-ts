@@ -22,7 +22,7 @@ async function generateWeeklyReport(client: Bot) {
                 ];
             })
         )
-    ).sort((a, b) => b[1] - a[1]);
+    ).sort((a, b) => a[0].user.username.localeCompare(b[0].user.username));
     return `Weekly report for Wordfield:\n${counts
         .map((value) => `${value[0].user.username}: ${value[1]}`)
         .join('\n')}`;
