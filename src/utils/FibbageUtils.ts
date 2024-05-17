@@ -1,13 +1,18 @@
 import Conf from 'conf';
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
     GuildMember,
-    MessageActionRow,
-    MessageButton,
-    Modal,
+    MessageActionRowComponentBuilder,
     ModalActionRowComponent,
+    ModalActionRowComponentBuilder,
+    ModalBuilder,
     Snowflake,
     TextBasedChannel,
+    TextInputBuilder,
     TextInputComponent,
+    TextInputStyle,
     User,
 } from 'discord.js';
 import Bot from '../client/Bot';
@@ -134,18 +139,18 @@ export async function getUsersWithFibbageRole(
 }
 
 export function generateQuestionModal(questionId: number) {
-    return new Modal()
+    return new ModalBuilder()
         .setTitle('Fibbage')
         .addComponents(
-            new MessageActionRow<ModalActionRowComponent>().addComponents(
-                new TextInputComponent()
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
                     .setLabel('Enter the truth: ')
                     .setPlaceholder(
                         'Be honest! Other players will have to guess this.'
                     )
                     .setMaxLength(MAX_ALLOWED_CHARS_IN_BUTTON)
                     .setRequired(true)
-                    .setStyle('SHORT')
+                    .setStyle(TextInputStyle.Short)
                     .setCustomId('fibbage_question_input')
             )
         )
@@ -153,14 +158,14 @@ export function generateQuestionModal(questionId: number) {
 }
 
 function generateComponentsRowForQuestion(questionId: number) {
-    return new MessageActionRow().addComponents(
-        new MessageButton()
+    return new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+        new ButtonBuilder()
             .setLabel('Answer Question!')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(`fibbage_question_button_${questionId}`),
-        new MessageButton()
+        new ButtonBuilder()
             .setLabel('Skip Question!')
-            .setStyle('DANGER')
+            .setStyle(ButtonStyle.Danger)
             .setCustomId(`fibbage_question_skip_${questionId}`)
     );
 }
@@ -289,10 +294,10 @@ export async function promptUsersWithQuestions(client: Bot) {
 }
 
 function generateComponentsRowForPrompt(questionId: number) {
-    return new MessageActionRow().addComponents(
-        new MessageButton()
+    return new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+        new ButtonBuilder()
             .setLabel('Submit a Lie!')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(`fibbage_prompt_button_${questionId}`)
     );
 }
@@ -357,18 +362,18 @@ export async function promptUsersForFibs(client: Bot) {
 }
 
 export function generatePromptModal(questionId: number) {
-    return new Modal()
+    return new ModalBuilder()
         .setTitle('Fibbage')
         .addComponents(
-            new MessageActionRow<ModalActionRowComponent>().addComponents(
-                new TextInputComponent()
+            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+                new TextInputBuilder()
                     .setLabel('Enter your lie: ')
                     .setPlaceholder(
                         "Be creative! You'll get points if other players pick your lie!."
                     )
                     .setMaxLength(MAX_ALLOWED_CHARS_IN_BUTTON)
                     .setRequired(true)
-                    .setStyle('SHORT')
+                    .setStyle(TextInputStyle.Short)
                     .setCustomId('fibbage_prompt_input')
             )
         )
@@ -395,20 +400,20 @@ async function generateComponentsRowsForQuestionToPost(
     question: FibbageQuestion,
     answerGroups: FibbageAnswer[][]
 ) {
-    const components: MessageActionRow[] = [
-        new MessageActionRow(),
-        new MessageActionRow(),
-        new MessageActionRow(),
-        new MessageActionRow(),
+    const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
     ];
     for (let i = 0; i < MAX_ANSWERS_ALLOWED; i++) {
         const componentsIndex = Math.floor(i / ANSWER_BUTTONS_PER_ROW);
         const answerGroup =
             answerGroups[Math.floor(Math.random() * answerGroups.length)];
         components[componentsIndex].addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setLabel(answerGroup[0].answer)
-                .setStyle('PRIMARY')
+                .setStyle(ButtonStyle.Primary)
                 .setCustomId(`fibbage_answer_button_${question.id}_${i}`)
         );
         for (const answer of answerGroup) {
@@ -485,7 +490,7 @@ export async function postNewQuestions(client: Bot) {
         return;
     }
     const channel = await client.channels.fetch(getChannel());
-    if (!channel || !channel.isText()) {
+    if (!channel || !channel.isTextBased()) {
         return;
     }
     const amountOfQuestionsToPost = Math.min(
@@ -508,11 +513,11 @@ function generateComponentsRowsForPostedQuestion(
     question: FibbageQuestion,
     answerGroups: FibbageAnswer[][]
 ) {
-    const components: MessageActionRow[] = [
-        new MessageActionRow(),
-        new MessageActionRow(),
-        new MessageActionRow(),
-        new MessageActionRow(),
+    const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
+        new ActionRowBuilder<MessageActionRowComponentBuilder>(),
     ];
     for (let i = 0; i < MAX_ANSWERS_ALLOWED; i++) {
         const componentsIndex = Math.floor(i / ANSWER_BUTTONS_PER_ROW);
@@ -520,9 +525,9 @@ function generateComponentsRowsForPostedQuestion(
         if (answerGroup) {
             const answer = answerGroup[0];
             components[componentsIndex].addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setLabel(answer.answer)
-                    .setStyle(answer.isCorrect ? 'SUCCESS' : 'DANGER')
+                    .setStyle(answer.isCorrect ? ButtonStyle.Success : ButtonStyle.Danger)
                     .setCustomId(`fibbage_answer_button_${question.id}_${i}`)
             );
         } else {
@@ -532,10 +537,10 @@ function generateComponentsRowsForPostedQuestion(
         }
     }
     components.push(
-        new MessageActionRow().addComponents(
-            new MessageButton()
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+            new ButtonBuilder()
                 .setLabel('VIEW DETAILED RESULTS')
-                .setStyle('PRIMARY')
+                .setStyle(ButtonStyle.Primary)
                 .setCustomId(`fibbage_detailed_results_${question.id}`)
         )
     );
@@ -803,7 +808,7 @@ export async function showResultsForQuestions(client: Bot) {
         return;
     }
     const channel = await client.channels.fetch(getChannel());
-    if (!channel || !channel.isText()) {
+    if (!channel || !channel.isTextBased()) {
         return;
     }
     for (const question of questions) {

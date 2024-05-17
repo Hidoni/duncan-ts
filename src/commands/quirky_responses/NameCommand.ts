@@ -3,14 +3,14 @@ import {
     SlashCommandStringOption,
     SlashCommandSubcommandBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import Bot from '../../client/Bot';
 import { CommandHandler } from '../../interfaces/Command';
 import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 async function handleNameSetSubCommand(
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ): Promise<void> {
     const name = interaction.options.getString('name');
     if (!name) {
@@ -36,7 +36,7 @@ async function handleNameSetSubCommand(
 
 async function handleNameClearSubCommand(
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ): Promise<void> {
     await client.database.clearName(interaction.user.id);
     await getSafeReplyFunction(
@@ -51,7 +51,7 @@ async function handleNameClearSubCommand(
 
 export const handler: CommandHandler = async (
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ) => {
     const subcommand = interaction.options.getSubcommand(false);
     if (subcommand) {

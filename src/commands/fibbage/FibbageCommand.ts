@@ -4,9 +4,13 @@ import {
     SlashCommandSubcommandGroupBuilder,
 } from '@discordjs/builders';
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
     CommandInteraction,
-    MessageActionRow,
-    MessageButton,
+    MessageActionRowComponentBuilder,
+    ModalActionRowComponentBuilder,
     Snowflake,
 } from 'discord.js';
 import Bot from '../../client/Bot';
@@ -102,19 +106,19 @@ function getLeaderboardMappingFunctionForColumn(
 function getLeaderboardSwitcherActionRows(
     currentSubcommand: keyof typeof LEADERBOARD_SUBCOMMAND_TO_DETAILS,
     userId: Snowflake
-): MessageActionRow[] {
-    const rows = [new MessageActionRow()];
+): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
+    const rows = [new ActionRowBuilder<MessageActionRowComponentBuilder>()];
     let currentRow = rows[0];
     for (const subcommand of Object.keys(LEADERBOARD_SUBCOMMAND_TO_DETAILS)) {
         if (currentRow.components.length === MAX_COMPONENTS_PER_ROW) {
-            currentRow = new MessageActionRow();
+            currentRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
             rows.push(currentRow);
         }
         const subcommandDetails = LEADERBOARD_SUBCOMMAND_TO_DETAILS[subcommand];
         currentRow.addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setLabel(subcommandDetails.title)
-                .setStyle('PRIMARY')
+                .setStyle(ButtonStyle.Primary)
                 .setDisabled(subcommand === currentSubcommand)
                 .setCustomId(
                     `fibbage_leaderboard_switcher_${subcommand}_${userId}_FIRST`
@@ -268,7 +272,7 @@ async function handleDefault(
 
 export const handler: CommandHandler = async (
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ) => {
     const subcommandGroup = interaction.options.getSubcommandGroup(false);
     const subcommand = interaction.options.getSubcommand(false);

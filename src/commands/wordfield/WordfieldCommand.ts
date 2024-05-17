@@ -3,7 +3,7 @@ import {
     SlashCommandStringOption,
     SlashCommandSubcommandBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import Bot from '../../client/Bot';
 import { CommandHandler } from '../../interfaces/Command';
 import { getSafeReplyFunction } from '../../utils/InteractionUtils';
@@ -17,7 +17,7 @@ import {
 const COMMANDS: { [key: string]: CommandHandler } = {
     add: async function (
         client: Bot,
-        interaction: CommandInteraction
+        interaction: ChatInputCommandInteraction
     ): Promise<void> {
         if (!isUserAdmin(interaction.user.id)) {
             await getSafeReplyFunction(
@@ -63,7 +63,7 @@ const COMMANDS: { [key: string]: CommandHandler } = {
     },
     remove: async function (
         client: Bot,
-        interaction: CommandInteraction
+        interaction: ChatInputCommandInteraction
     ): Promise<void> {
         if (!isUserAdmin(interaction.user.id)) {
             await getSafeReplyFunction(
@@ -98,7 +98,7 @@ const COMMANDS: { [key: string]: CommandHandler } = {
     },
     list: async function (
         client: Bot,
-        interaction: CommandInteraction
+        interaction: ChatInputCommandInteraction
     ): Promise<void> {
         const bannedWordsList = getBannedWordsList();
         await getSafeReplyFunction(
@@ -115,7 +115,7 @@ const COMMANDS: { [key: string]: CommandHandler } = {
 
 export const handler: CommandHandler = async (
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ) => {
     const subcommand = interaction.options.getSubcommand(false);
     if (subcommand) {
@@ -163,8 +163,8 @@ export const builder = new SlashCommandBuilder()
             .setDescription('View the list of banned Wordfield words!')
     );
 
-export const guildOnly = (interaction: CommandInteraction) => true;
+export const guildOnly = (interaction: ChatInputCommandInteraction) => true;
 
-export const permissions = (interaction: CommandInteraction) => false;
+export const permissions = (interaction: ChatInputCommandInteraction) => false;
 
 export const shouldLoad = getEnabled;

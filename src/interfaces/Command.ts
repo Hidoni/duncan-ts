@@ -3,9 +3,10 @@ import {
     SlashCommandBuilder,
 } from '@discordjs/builders';
 import {
+    ChatInputCommandInteraction,
     CommandInteraction,
-    ContextMenuInteraction,
-    PermissionString,
+    ContextMenuCommandInteraction,
+    PermissionsString,
 } from 'discord.js';
 import Bot from '../client/Bot';
 import { Loadable } from './Loadable';
@@ -15,14 +16,14 @@ export type CommandBuilderType =
     | ContextMenuCommandBuilder;
 export type CommandInteractionType<Builder> =
     Builder extends SlashCommandBuilder
-        ? CommandInteraction
-        : ContextMenuInteraction;
+        ? ChatInputCommandInteraction
+        : ContextMenuCommandInteraction;
 
 export interface CommandHandler {
-    (client: Bot, interaction: CommandInteraction): Promise<void>;
+    (client: Bot, interaction: ChatInputCommandInteraction): Promise<void>;
 }
 export interface ContextMenuHandler {
-    (client: Bot, interaction: ContextMenuInteraction): Promise<void>;
+    (client: Bot, interaction: ContextMenuCommandInteraction): Promise<void>;
 }
 
 export interface Command<Builder extends CommandBuilderType> extends Loadable {
@@ -34,6 +35,6 @@ export interface Command<Builder extends CommandBuilderType> extends Loadable {
         | ((interaction: CommandInteractionType<Builder>) => boolean)
         | undefined;
     permissions:
-        | ((interaction: CommandInteractionType<Builder>) => PermissionString[])
+        | ((interaction: CommandInteractionType<Builder>) => PermissionsString[])
         | undefined;
 }

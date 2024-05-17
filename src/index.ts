@@ -1,7 +1,7 @@
 import log4js from 'log4js';
-import { Intents } from 'discord.js';
 import Bot from './client/Bot';
 import path from 'path';
+import { IntentsBitField } from 'discord.js';
 
 log4js.configure('./config/log4js.json');
 const logger = log4js.getLogger('bot');
@@ -20,7 +20,8 @@ for (const envVar of REQUIRED_ENV_VARS) {
 
 const bot = new Bot(
     {
-        intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS],
+        intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.GuildMembers],
+        partials: [],
         token: process.env.BOT_TOKEN!,
         appId: process.env.BOT_APPLICATION_ID!,
         database: process.env.DATABASE_PATH!,

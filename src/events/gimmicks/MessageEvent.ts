@@ -1,6 +1,6 @@
 import {
     CategoryChannel,
-    GuildTextBasedChannel,
+    GuildBasedChannel,
     Message,
     TextChannel,
     ThreadChannel,
@@ -10,7 +10,7 @@ import { EventHandler } from '../../interfaces/Event';
 
 const GIMMICKS_CATEGORY_ID = '789272443104788530';
 
-function getCategory(channel: GuildTextBasedChannel): CategoryChannel | null {
+function getCategory(channel: GuildBasedChannel): CategoryChannel | null {
     const category = channel.parent;
     if (!category) {
         return null;

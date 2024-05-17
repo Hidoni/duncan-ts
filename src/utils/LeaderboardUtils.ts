@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed, EmbedBuilder, MessageActionRowComponent, MessageActionRowComponentBuilder } from "discord.js";
 
 export const DEFAULT_EMBED_COLOR: readonly [number, number, number] = [
     251, 177, 189,
@@ -20,7 +20,7 @@ export function generateLeaderboardEmbed<T>(
     valueMap: LeaderboardMap<T>,
     page: number,
     embedAttributes: EmbedAttributes
-): MessageEmbed {
+): EmbedBuilder {
     const pageCount = Math.ceil(leaderboard.length / 10);
     if (page <= 0) {
         throw new Error('Leaderboard page number must be 1 or higher');
@@ -41,7 +41,7 @@ export function generateLeaderboardEmbed<T>(
         },
         ['', '']
     );
-    return new MessageEmbed()
+    return new EmbedBuilder()
         .setTitle(embedAttributes.title)
         .setFooter({ text: `Page ${page} of ${pageCount}` })
         .setColor(embedAttributes.color)
@@ -59,7 +59,7 @@ export function generateLeaderboardComponentsRow<T>(
     leaderboard: T[],
     page: number,
     customId: string
-): MessageActionRow {
+): ActionRowBuilder<MessageActionRowComponentBuilder> {
     const pageCount = Math.ceil(leaderboard.length / 10);
     if (page <= 0) {
         throw new Error('Leaderboard page number must be 1 or higher');
@@ -68,25 +68,25 @@ export function generateLeaderboardComponentsRow<T>(
             `Leaderboard page number exceeds amount of pages (${pageCount})`
         );
     }
-    return new MessageActionRow().addComponents(
-        new MessageButton()
+    return new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+        new ButtonBuilder()
             .setEmoji('⏮')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(`${customId}_FIRST`)
             .setDisabled(page === 1),
-        new MessageButton()
+        new ButtonBuilder()
             .setEmoji('◀')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(`${customId}_${page - 1}`)
             .setDisabled(page === 1),
-        new MessageButton()
+        new ButtonBuilder()
             .setEmoji('▶')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(`${customId}_${page + 1}`)
             .setDisabled(page === pageCount),
-        new MessageButton()
+        new ButtonBuilder()
             .setEmoji('⏭')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(`${customId}_LAST`)
             .setDisabled(page === pageCount)
     );

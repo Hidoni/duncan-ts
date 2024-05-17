@@ -3,7 +3,7 @@ import {
     SlashCommandStringOption,
     SlashCommandSubcommandBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction, PermissionString } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction, PermissionsString } from 'discord.js';
 import { UniqueConstraintError } from 'sequelize';
 import Bot from '../../client/Bot';
 import { CommandHandler } from '../../interfaces/Command';
@@ -18,7 +18,7 @@ import {
 
 interface QuestionOfTheDayCommandAttributes {
     guildOnly: boolean | undefined;
-    permissions: PermissionString[] | undefined;
+    permissions: PermissionsString[] | undefined;
     handler: CommandHandler;
 }
 
@@ -28,7 +28,7 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
         permissions: undefined,
         handler: async (
             client: Bot,
-            interaction: CommandInteraction
+            interaction: ChatInputCommandInteraction
         ): Promise<void> => {
             const question = interaction.options.getString('question');
             if (!question) {
@@ -77,7 +77,7 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
     },
     skip: {
         guildOnly: true,
-        permissions: ['ADMINISTRATOR'],
+        permissions: ['Administrator'],
         handler: async (
             client: Bot,
             interaction: CommandInteraction
@@ -98,7 +98,7 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
     },
     next: {
         guildOnly: true,
-        permissions: ['ADMINISTRATOR'],
+        permissions: ['Administrator'],
         handler: async (
             client: Bot,
             interaction: CommandInteraction
@@ -125,7 +125,7 @@ const COMMANDS: { [key: string]: QuestionOfTheDayCommandAttributes } = {
 
 export const handler: CommandHandler = async (
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ) => {
     const subcommand = interaction.options.getSubcommand(false);
     if (subcommand) {
@@ -166,7 +166,7 @@ export const builder = new SlashCommandBuilder()
             .setDescription("Send the next day's question manually.")
     );
 
-export const guildOnly = (interaction: CommandInteraction) => {
+export const guildOnly = (interaction: ChatInputCommandInteraction) => {
     const subcommand = interaction.options.getSubcommand(false);
     if (subcommand) {
         const guildOnly = COMMANDS[subcommand]?.guildOnly;
@@ -175,7 +175,7 @@ export const guildOnly = (interaction: CommandInteraction) => {
     return false;
 };
 
-export const permissions = (interaction: CommandInteraction) => {
+export const permissions = (interaction: ChatInputCommandInteraction) => {
     const subcommand = interaction.options.getSubcommand(false);
     if (subcommand) {
         const permissions = COMMANDS[subcommand]?.permissions;

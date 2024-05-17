@@ -3,8 +3,7 @@ import {
     SlashCommandChannelOption,
     SlashCommandStringOption,
 } from '@discordjs/builders';
-import { TextChannel, ThreadChannel } from 'discord.js';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, TextChannel, ThreadChannel } from 'discord.js';
 import Bot from '../client/Bot';
 import { CommandHandler } from '../interfaces/Command';
 import { getSafeReplyFunction } from '../utils/InteractionUtils';
@@ -18,7 +17,7 @@ const TEXT_CHANNEL_TYPES = [
 
 export const handler: CommandHandler = async (
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ) => {
     if (!isUserAdmin(interaction.user.id)) {
         await getSafeReplyFunction(
@@ -92,8 +91,8 @@ export const builder = new SlashCommandBuilder()
             .setRequired(true)
     );
 
-export const guildOnly = (interaction: CommandInteraction) => false;
+export const guildOnly = (interaction: ChatInputCommandInteraction) => false;
 
-export const permissions = (interaction: CommandInteraction) => false;
+export const permissions = (interaction: ChatInputCommandInteraction) => false;
 
 export const shouldLoad = () => true;

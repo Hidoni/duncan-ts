@@ -1,6 +1,6 @@
 import {
     CommandInteraction,
-    ContextMenuInteraction,
+    ContextMenuCommandInteraction,
     Guild,
     InteractionReplyOptions,
     MessageComponentInteraction,
@@ -29,7 +29,7 @@ export async function getUserPreferredName(
 export function getReplyFunction(
     interaction:
         | CommandInteraction
-        | ContextMenuInteraction
+        | ContextMenuCommandInteraction
         | MessageComponentInteraction
         | ModalSubmitInteraction
 ) {
@@ -46,7 +46,7 @@ export function getSafeReplyFunction(
     client: Bot,
     interaction:
         | CommandInteraction
-        | ContextMenuInteraction
+        | ContextMenuCommandInteraction
         | MessageComponentInteraction
         | ModalSubmitInteraction
 ) {

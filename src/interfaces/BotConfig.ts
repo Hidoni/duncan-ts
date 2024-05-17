@@ -1,12 +1,12 @@
-import { BitFieldResolvable, IntentsString, PartialTypes } from 'discord.js';
+import { BitFieldResolvable, GatewayIntentsString, Partials } from 'discord.js';
 
 export default interface BotConfig {
-    intents: BitFieldResolvable<IntentsString, number>;
+    intents: BitFieldResolvable<GatewayIntentsString, number>;
     token: string;
     appId: string;
     database: string;
     debugGuildId?: string;
-    partials?: PartialTypes[];
+    partials: Partials[];
     commandsFolder?: string;
     eventsFolder?: string;
     componentHandlersFolder?: string;

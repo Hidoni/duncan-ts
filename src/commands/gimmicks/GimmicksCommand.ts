@@ -2,7 +2,7 @@ import {
     SlashCommandBuilder,
     SlashCommandSubcommandBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import Bot from '../../client/Bot';
 import { GimmickPoints } from '../../database/models/GimmickPoints';
 import { CommandHandler } from '../../interfaces/Command';
@@ -27,7 +27,7 @@ export const leaderboardMappingFunction: LeaderboardMap<
 
 async function handleLeaderboardSubcommand(
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ): Promise<void> {
     const points = await client.database.getAllGimmickPoints();
     const leaderboardembed = generateLeaderboardEmbed(
@@ -49,7 +49,7 @@ async function handleLeaderboardSubcommand(
 
 export const handler: CommandHandler = async (
     client: Bot,
-    interaction: CommandInteraction
+    interaction: ChatInputCommandInteraction
 ) => {
     const subcommand = interaction.options.getSubcommand(false);
     if (subcommand) {
@@ -73,8 +73,8 @@ export const builder = new SlashCommandBuilder()
             .setDescription('Shows the leaderboard for the gimmick channels!')
     );
 
-export const guildOnly = (interaction: CommandInteraction) => true;
+export const guildOnly = (interaction: ChatInputCommandInteraction) => true;
 
-export const permissions = (interaction: CommandInteraction) => false;
+export const permissions = (interaction: ChatInputCommandInteraction) => false;
 
 export const shouldLoad = () => true;

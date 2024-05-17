@@ -1,7 +1,7 @@
 import { CommandHandler } from '../../interfaces/Command';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Bot from '../../client/Bot';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 
 export class InteractCommand {
@@ -22,7 +22,7 @@ export class InteractCommand {
         this.positiveResponses = positiveResponses;
         this.negativeResponses = negativeResponses;
         this.chanceForNegativeResponse = chanceForNegativeResponse;
-        this.handler = async (client: Bot, interaction: CommandInteraction) => {
+        this.handler = async (client: Bot, interaction: ChatInputCommandInteraction) => {
             await getSafeReplyFunction(
                 client,
                 interaction

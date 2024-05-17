@@ -1,8 +1,8 @@
-import { APIInteractionGuildMember } from 'discord.js/node_modules/discord-api-types/payloads/v9/';
 import {
+    APIInteractionGuildMember,
     GuildMember,
     PermissionResolvable,
-    Permissions,
+    PermissionsBitField,
     Snowflake,
 } from 'discord.js';
 
@@ -20,7 +20,7 @@ export function hasPermissions(
         return member.permissions.has(permissions, checkAdmin);
     }
     const userPermissions = BigInt(member.permissions);
-    return new Permissions(userPermissions).has(permissions, checkAdmin);
+    return new PermissionsBitField(userPermissions).has(permissions, checkAdmin);
 }
 
 export function isUserAdmin(id: Snowflake) {

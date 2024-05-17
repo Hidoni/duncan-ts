@@ -3,9 +3,8 @@ import {
     SlashCommandBuilder,
 } from '@discordjs/builders';
 import {
-    BaseCommandInteraction,
     CommandInteraction,
-    ContextMenuInteraction,
+    ContextMenuCommandInteraction,
     Interaction,
     InteractionReplyOptions,
     MessageComponentInteraction,
@@ -82,10 +81,10 @@ async function canRunCommand(
 async function handleCommandCall(
     command: Command<CommandBuilderType>,
     client: Bot,
-    interaction: CommandInteraction | ContextMenuInteraction
+    interaction: CommandInteraction | ContextMenuCommandInteraction
 ): Promise<void> {
     if (
-        interaction.isContextMenu() &&
+        interaction.isContextMenuCommand() &&
         command.builder instanceof ContextMenuCommandBuilder
     ) {
         await (command as Command<ContextMenuCommandBuilder>).handler(
@@ -93,7 +92,7 @@ async function handleCommandCall(
             interaction
         );
     } else if (
-        interaction.isCommand() &&
+        interaction.isChatInputCommand() &&
         command.builder instanceof SlashCommandBuilder
     ) {
         await (command as Command<SlashCommandBuilder>).handler(
@@ -127,7 +126,7 @@ export const handler: EventHandler = async (
                 : ''
         }`
     );
-    if (interaction.isCommand() || interaction.isContextMenu()) {
+    if (interaction.isCommand()) {
         const command = client.getCommand(interaction.commandName);
         if (command) {
             if (await canRunCommand(client, interaction, command)) {
