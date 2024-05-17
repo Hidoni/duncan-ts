@@ -100,7 +100,13 @@ const COMMANDS: { [key: string]: CommandHandler } = {
         client: Bot,
         interaction: ChatInputCommandInteraction
     ): Promise<void> {
-        const bannedWordsList = getBannedWordsList();
+        let bannedWordsList = getBannedWordsList();
+        const sortMethod = interaction.options.getString('sort');
+        if (sortMethod === 'alphabetical') {
+            bannedWordsList = bannedWordsList.sort((a, b) =>
+                a.localeCompare(b)
+            );
+        }
         await getSafeReplyFunction(
             client,
             interaction
@@ -161,6 +167,16 @@ export const builder = new SlashCommandBuilder()
         new SlashCommandSubcommandBuilder()
             .setName('list')
             .setDescription('View the list of banned Wordfield words!')
+            .addStringOption(
+                new SlashCommandStringOption()
+                    .setName('sort')
+                    .setDescription('The sort method for the word list')
+                    .setChoices(
+                        { name: 'Alphabetical Order', value: 'alphabetical' },
+                        { name: "Don't Sort", value: 'original' }
+                    )
+                    .setRequired(false)
+            )
     );
 
 export const guildOnly = (interaction: ChatInputCommandInteraction) => true;
