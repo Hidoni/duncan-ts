@@ -20,7 +20,7 @@ for (const envVar of REQUIRED_ENV_VARS) {
 
 const bot = new Bot(
     {
-        intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.GuildMembers],
+        intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.GuildMembers, IntentsBitField.Flags.MessageContent],
         partials: [],
         token: process.env.BOT_TOKEN!,
         appId: process.env.BOT_APPLICATION_ID!,
