@@ -101,21 +101,31 @@ const COMMANDS: { [key: string]: CommandHandler } = {
         interaction: ChatInputCommandInteraction
     ): Promise<void> {
         let bannedWordsList = getBannedWordsList();
-        const sortMethod = interaction.options.getString('sort');
-        if (sortMethod === 'alphabetical') {
-            bannedWordsList = bannedWordsList.sort((a, b) =>
-                a.localeCompare(b)
-            );
+        if (bannedWordsList.length === 0) {
+            await getSafeReplyFunction(
+                client,
+                interaction
+            )({
+                content: `There are currently no banned words!`,
+                ephemeral: true,
+            });
+        } else {
+            const sortMethod = interaction.options.getString('sort');
+            if (sortMethod === 'alphabetical') {
+                bannedWordsList = bannedWordsList.sort((a, b) =>
+                    a.localeCompare(b)
+                );
+            }
+            await getSafeReplyFunction(
+                client,
+                interaction
+            )({
+                content: `The currently banned words are:\n${bannedWordsList.join(
+                    '\n'
+                )}`,
+                ephemeral: true,
+            });
         }
-        await getSafeReplyFunction(
-            client,
-            interaction
-        )({
-            content: `The currently banned words are:\n${bannedWordsList.join(
-                '\n'
-            )}`,
-            ephemeral: true,
-        });
     },
     clear: async function (
         client: Bot,
