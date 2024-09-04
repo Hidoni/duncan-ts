@@ -117,6 +117,29 @@ const COMMANDS: { [key: string]: CommandHandler } = {
             ephemeral: true,
         });
     },
+    clear: async function (
+        client: Bot,
+        interaction: ChatInputCommandInteraction
+    ): Promise<void> {
+        if (!isUserAdmin(interaction.user.id)) {
+            await getSafeReplyFunction(
+                client,
+                interaction
+            )({
+                content: "Nuh-uh, you can't use that!!",
+                ephemeral: true,
+            });
+            return;
+        }
+        setBannedWordsList([]);
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content: 'Oki, The Wordfield banned word list is empty now!',
+            ephemeral: true,
+        });
+    },
 };
 
 export const handler: CommandHandler = async (
@@ -177,6 +200,11 @@ export const builder = new SlashCommandBuilder()
                     )
                     .setRequired(false)
             )
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
+            .setName('clear')
+            .setDescription('Clear the entire list of banned Wordfield words!')
     );
 
 export const guildOnly = (interaction: ChatInputCommandInteraction) => true;
