@@ -58,3 +58,5 @@ export class CountedInteractCommand extends InteractCommand {
         return i + "th";
     }
 }
+
+export const shouldLoad = () => false;
