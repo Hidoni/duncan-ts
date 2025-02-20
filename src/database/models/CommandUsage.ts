@@ -1,7 +1,7 @@
 import { Table, Column, Model, AllowNull, AutoIncrement, PrimaryKey, Unique } from 'sequelize-typescript';
 
 @Table({
-    modelName: 'interact_usage',
+    tableName: 'command_usages',
     timestamps: false
 })
 export class CommandUsage extends Model {
@@ -16,7 +16,11 @@ export class CommandUsage extends Model {
     user!: string;
 
     @AllowNull(false)
+    @Unique('user_command')
+    @Column
+    commandName!: string;
+
+    @AllowNull(false)
     @Column
     count!: number;
 }
-
