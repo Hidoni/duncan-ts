@@ -8,9 +8,9 @@ export class InteractCommand {
     public handler: CommandHandler;
     public builder: SlashCommandBuilder;
 
-    private positiveResponses: readonly string[];
-    private negativeResponses: readonly string[];
-    private chanceForNegativeResponse: number;
+    protected positiveResponses: readonly string[];
+    protected negativeResponses: readonly string[];
+    protected chanceForNegativeResponse: number;
 
     public constructor(
         name: string,
