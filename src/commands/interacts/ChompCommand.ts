@@ -1,5 +1,5 @@
 import { CommandInteraction } from 'discord.js';
-import { InteractCommand } from './InteractCommand';
+import { CountedInteractCommand } from './CountedInteractCommand';
 
 const NEGATIVE_RESPONSES = [
     'OWWWW! What the heck!',
@@ -26,7 +26,7 @@ const CHANCE_FOR_NEGATIVE_RESPONSE = 49 / 50;
 const NAME = 'chomp';
 const DESCRIPTION = 'What... why is your mouth open like that...?';
 
-export const { builder, handler } = new InteractCommand(
+export const { builder, handler } = new CountedInteractCommand(
     NAME,
     DESCRIPTION,
     POSITIVE_RESPONSES,
