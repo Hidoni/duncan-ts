@@ -17,12 +17,12 @@ const POSITIVE_RESPONSES = [
     'Did Lykai tell you to do this? That stinky wuff...',
     '*sigh...*',
     "Gosh, you're so silly!",
+    "C'mon, you really thought the {ordinal} chomp wasn't enough?",
     "Well, it's fine as long as you give candy! These sprinkles take time and sugar to regrow, yknow!",
     'Just this once!!',
 ];
 
 const CHANCE_FOR_NEGATIVE_RESPONSE = 49 / 50;
-
 const NAME = 'chomp';
 const DESCRIPTION = 'What... why is your mouth open like that...?';
 
@@ -34,8 +34,6 @@ export const { builder, handler } = new CountedInteractCommand(
     CHANCE_FOR_NEGATIVE_RESPONSE
 );
 
-export const guildOnly = (interaction: CommandInteraction) => false;
-
-export const permissions = (interaction: CommandInteraction) => false;
-
+export const guildOnly = (_interaction: CommandInteraction) => false;
+export const permissions = (_interaction: CommandInteraction) => false;
 export const shouldLoad = () => true;
