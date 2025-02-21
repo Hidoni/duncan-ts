@@ -18,6 +18,7 @@ import { FibbageCustomPromptDefaultAnswer } from './models/FibbageCustomPromptDe
 import { FibbageCustomPromptApproval } from './models/FibbageCustomPromptApproval';
 import { Name } from './models/Name';
 import { MessageCount } from './models/MessageCount';
+import { CommandUsage } from './models/CommandUsage';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -251,6 +252,14 @@ export default class Database {
         return await FibbageStats.findAll({
             order: Sequelize.literal(`${column} DESC`),
         });
+    }
+
+    public async getCommandUsageStats(userId: string, commandName: string): Promise<CommandUsage> {
+        const usage = await CommandUsage.findOne({where: { user: userId, commandName: commandName} });
+        if (!usage) {
+            return CommandUsage.create({ user: userId, commandName: commandName, count: 0})
+        }
+        return usage
     }
 
     public async getAllCustomFibbagePrompts(): Promise<FibbageCustomPrompt[]> {

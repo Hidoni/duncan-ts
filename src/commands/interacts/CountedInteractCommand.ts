@@ -19,15 +19,12 @@ export class CountedInteractCommand extends InteractCommand {
             const userId = interaction.user.id;
             let newCount = 0;
             try {
-                let record = await CommandUsage.findOne({ where: { user: userId, commandName: this.commandName } });
-                if (record) {
-                    record.count++;
-                    newCount = record.count;
-                    await record.save();
-                } else {
-                    const newRecord = await CommandUsage.create({ user: userId, commandName: this.commandName, count: 1 });
-                    newCount = newRecord.count;
-                }
+                await client.database.getCommandUsageStats(userId, this.commandName)
+                    .then(async (usage) => {
+                        usage.count++;
+                        await usage.save();
+                        newCount = usage.count;
+                    });
             } catch (error) {
                 console.error('Error updating command usage count:', error);
             }
@@ -43,7 +40,6 @@ export class CountedInteractCommand extends InteractCommand {
         return response.includes('{ordinal}') ? response.replace('{ordinal}', ordinal) : response;
     }
     private appendSuffixToOrdinal(i: number): string {
-        // Cannot think of a better way to do this :(
         const last_digit = i % 10;
         const last_two_digits = i % 100;
         if (last_digit === 1 && last_two_digits !== 11) {
