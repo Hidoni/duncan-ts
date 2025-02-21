@@ -31,7 +31,7 @@ export class CountedInteractCommand extends InteractCommand {
             } catch (error) {
                 console.error('Error updating command usage count:', error);
             }
-            const ordinal = this.ordinalSuffix(newCount);
+            const ordinal = this.appendSuffixToOrdinal(newCount);
             const response = this.generateResponse(ordinal);
             await getSafeReplyFunction(client, interaction)({ content: response });
         };
@@ -42,17 +42,17 @@ export class CountedInteractCommand extends InteractCommand {
         const response = responses[Math.floor(Math.random() * responses.length)];
         return response.includes('{ordinal}') ? response.replace('{ordinal}', ordinal) : response;
     }
-    private ordinalSuffix(i: number): string {
+    private appendSuffixToOrdinal(i: number): string {
         // Cannot think of a better way to do this :(
-        const j = i % 10;
-        const k = i % 100;
-        if (j === 1 && k !== 11) {
+        const last_digit = i % 10;
+        const last_two_digits = i % 100;
+        if (last_digit === 1 && last_two_digits !== 11) {
             return i + "st";
         }
-        if (j === 2 && k !== 12) {
+        if (last_digit === 2 && last_two_digits !== 12) {
             return i + "nd";
         }
-        if (j === 3 && k !== 13) {
+        if (last_digit === 3 && last_two_digits !== 13) {
             return i + "rd";
         }
         return i + "th";
