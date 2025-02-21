@@ -2,7 +2,6 @@ import Bot from '../../client/Bot';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 import { InteractCommand } from './InteractCommand';
-import { CommandUsage } from '../../database/models/CommandUsage';
 
 export class CountedInteractCommand extends InteractCommand {
     private readonly commandName: string;
@@ -33,12 +32,14 @@ export class CountedInteractCommand extends InteractCommand {
             await getSafeReplyFunction(client, interaction)({ content: response });
         };
     }
+
     private generateResponse(ordinal: string): string {
         const useNegative = Math.random() <= this.chanceForNegativeResponse;
         const responses = useNegative ? this.negativeResponses : this.positiveResponses;
         const response = responses[Math.floor(Math.random() * responses.length)];
         return response.includes('{ordinal}') ? response.replace('{ordinal}', ordinal) : response;
     }
+
     private appendSuffixToOrdinal(i: number): string {
         const last_digit = i % 10;
         const last_two_digits = i % 100;
