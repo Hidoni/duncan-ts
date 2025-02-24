@@ -12,13 +12,14 @@ import {
 import { FibbageAnswer } from './models/FibbageAnswer';
 import { FibbageGuess } from './models/FibbageGuess';
 import { FibbageEagerLoadingOptions } from '../interfaces/fibbage/FibbageEagerLoadingOptions';
-import { FindOrCreateOptions, Includeable } from 'sequelize/types';
+import { Includeable } from 'sequelize/types';
 import { FibbageCustomPrompt } from './models/FibbageCustomPrompt';
 import { FibbageCustomPromptDefaultAnswer } from './models/FibbageCustomPromptDefaultAnswer';
 import { FibbageCustomPromptApproval } from './models/FibbageCustomPromptApproval';
 import { Name } from './models/Name';
 import { MessageCount } from './models/MessageCount';
 import { CommandUsage } from './models/CommandUsage';
+import { Op } from 'sequelize';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -254,12 +255,38 @@ export default class Database {
         });
     }
 
-    public async getCommandUsageStats(userId: string, commandName: string): Promise<CommandUsage> {
-        const usage = await CommandUsage.findOne({where: { user: userId, commandName: commandName} });
-        if (!usage) {
-            return CommandUsage.create({ user: userId, commandName: commandName, count: 0})
-        }
-        return usage
+    public async newCommandUsage(
+        userId: string,
+        commandName: string
+    ): Promise<CommandUsage> {
+        return CommandUsage.create({
+            user: userId,
+            commandName: commandName,
+            usedAt: new Date(),
+        });
+    }
+
+    public async getCommandUsageByUserSince(
+        userId: string,
+        commandName: string,
+        since: Date
+    ): Promise<number> {
+        return CommandUsage.count({
+            where: {
+                user: userId,
+                commandName: commandName,
+                usedAt: { [Op.gte]: since },
+            },
+        });
+    }
+
+    public async getAllCommandUsageByUser(
+        userId: string,
+        commandName: string
+    ): Promise<number> {
+        return CommandUsage.count({
+            where: { user: userId, commandName: commandName },
+        });
     }
 
     public async getAllCustomFibbagePrompts(): Promise<FibbageCustomPrompt[]> {

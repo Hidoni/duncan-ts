@@ -10,6 +10,7 @@ const NEGATIVE_RESPONSES = [
     'QUIT IT!',
     "That's *sooo* hemkin gross!",
     'Do you want me to bite you? My teeth are *very* sharp.',
+    "C'mon, you really thought the {count(delta=*, suffix=True)} chomp wasn't enough?",
 ];
 
 const POSITIVE_RESPONSES = [
@@ -17,7 +18,6 @@ const POSITIVE_RESPONSES = [
     'Did Lykai tell you to do this? That stinky wuff...',
     '*sigh...*',
     "Gosh, you're so silly!",
-    "C'mon, you really thought the {ordinal} chomp wasn't enough?",
     "Well, it's fine as long as you give candy! These sprinkles take time and sugar to regrow, yknow!",
     'Just this once!!',
 ];
