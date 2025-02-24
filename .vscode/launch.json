@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Bot",
             "preLaunchTask": "tsc: build - tsconfig.json",
@@ -15,7 +15,7 @@
             "smartStep": true
         },
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Init Database",
             "preLaunchTask": "tsc: build - tsconfig.json",
@@ -28,20 +28,7 @@
             "smartStep": true
         },
         {
-            "type": "pwa-node",
-            "request": "launch",
-            "name": "Import JSON to Database",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "skipFiles": ["<node_internals>/**"],
-            "program": "${workspaceFolder}/src/old_version_import/Import.ts",
-            "outFiles": ["${workspaceFolder}/bin/**/*.js"],
-            "runtimeArgs": ["-r", "dotenv/config"],
-            "outputCapture": "std",
-            "sourceMaps": true,
-            "smartStep": true
-        },
-        {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Fallback Run (No Rebuild)",
             "skipFiles": ["<node_internals>/**"],
