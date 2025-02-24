@@ -7,6 +7,7 @@ const FLURRY_OF_QUESTIONS_MESSAGE =
     'Flurry of Questions Mode!\n\nAsk any (serious) question and the person below has to answer it. Then they add their own question and the cycle continues.';
 const JAKEMI_USER_ID = '381002402947399691';
 const MAX_PINS_IN_CHANNEL = 50;
+const QOTD_MESSAGE_REGEX = /\*\*QotD #\d+:.+\*\*/s;
 
 const config = new Conf();
 
@@ -81,7 +82,13 @@ export async function changeQuestion(client: Bot) {
             .fetchPinned()
             .then(async (messages) => {
                 if (messages.size === MAX_PINS_IN_CHANNEL) {
-                    await messages.last()?.unpin();
+                    const oldMessage = messages.reverse().find((message) => message.content.match(QOTD_MESSAGE_REGEX) != null)
+                    if (oldMessage) {
+                        client.logger?.debug(`Unpinning message with id ${oldMessage.id}`);
+                        await oldMessage.unpin();
+                    } else {
+                        client.logger?.warn(`Found no messages to unpin in QotD channel`);
+                    }
                 }
                 await msg.pin();
             })
