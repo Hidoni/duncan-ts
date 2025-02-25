@@ -51,6 +51,9 @@ async function countAllExistingInteractCommandsInChannel(
                 message.thread,
                 client
             );
+            client.logger?.info(
+                `Done with thread ${message.thread.name} in message ${message.id}`
+            );
         }
     }
 }
@@ -73,11 +76,21 @@ async function countAllExistingInteractCommands(client: Bot) {
         );
     }
     const channels = await guild.channels.fetch();
+    const bot = await guild.members.fetchMe();
     for (let [id, channel] of channels) {
         const resolvedChannel = await (channel
             ? channel.fetch()
             : guild.channels.fetch(id));
         if (!resolvedChannel || !resolvedChannel.isTextBased()) {
+            continue;
+        }
+        const missingPermissions = resolvedChannel
+            .permissionsFor(bot)
+            .missing(['ViewChannel', 'ReadMessageHistory']);
+        if (missingPermissions.length !== 0) {
+            client.logger?.info(
+                `Can't run on channel ${resolvedChannel.name} because of missing permissions ${missingPermissions}`
+            );
             continue;
         }
         client.logger?.info(
