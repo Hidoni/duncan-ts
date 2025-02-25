@@ -78,26 +78,28 @@ async function countAllExistingInteractCommands(client: Bot) {
     const channels = await guild.channels.fetch();
     const bot = await guild.members.fetchMe();
     for (let [id, channel] of channels) {
-        const resolvedChannel = await (channel
-            ? channel.fetch()
-            : guild.channels.fetch(id));
-        if (!resolvedChannel || !resolvedChannel.isTextBased()) {
+        if (!channel) {
+            client.logger?.info(`Counted interact commands migration skipping channel ${id} (Was not resolved)`)
             continue;
         }
-        const missingPermissions = resolvedChannel
+        if (!channel.isTextBased()) {
+            client.logger?.info(`Counted interact commands migration skipping channel ${channel.name} (Not text based)`)
+            continue;
+        }
+        const missingPermissions = channel
             .permissionsFor(bot)
             .missing(['ViewChannel', 'ReadMessageHistory']);
         if (missingPermissions.length !== 0) {
             client.logger?.info(
-                `Can't run on channel ${resolvedChannel.name} because of missing permissions ${missingPermissions}`
+                `Counted interact commands migration skipping channel ${channel.name} (missing permissions ${missingPermissions})`
             );
             continue;
         }
         client.logger?.info(
-            `Counted interact commands migration running on channel ${resolvedChannel.name}`
+            `Counted interact commands migration running on channel ${channel.name}`
         );
         await countAllExistingInteractCommandsInChannel(
-            resolvedChannel,
+            channel,
             client
         );
     }
