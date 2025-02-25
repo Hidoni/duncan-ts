@@ -27,7 +27,8 @@ function isInteractCommand(commandName: string) {
 
 async function countAllExistingInteractCommandsInChannel(
     channel: TextBasedChannel,
-    client: Bot
+    client: Bot,
+    lastMessage?: string
 ) {
     for await (const message of getAllMessagesInChannel(channel)) {
         if (
@@ -83,7 +84,7 @@ async function countAllExistingInteractCommands(client: Bot) {
             continue;
         }
         if (!channel.isTextBased()) {
-            client.logger?.info(`Counted interact commands migration skipping channel ${channel.name} (Not text based)`)
+            client.logger?.info(`Counted interact commands migration skipping channel ${channel.name} (${id}) (Not text based)`)
             continue;
         }
         const missingPermissions = channel
@@ -91,12 +92,12 @@ async function countAllExistingInteractCommands(client: Bot) {
             .missing(['ViewChannel', 'ReadMessageHistory']);
         if (missingPermissions.length !== 0) {
             client.logger?.info(
-                `Counted interact commands migration skipping channel ${channel.name} (missing permissions ${missingPermissions})`
+                `Counted interact commands migration skipping channel ${channel.name} (${id}) (missing permissions ${missingPermissions})`
             );
             continue;
         }
         client.logger?.info(
-            `Counted interact commands migration running on channel ${channel.name}`
+            `Counted interact commands migration running on channel ${channel.name} (${id})`
         );
         await countAllExistingInteractCommandsInChannel(
             channel,
