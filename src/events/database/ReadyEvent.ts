@@ -3,7 +3,7 @@ import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
 import { getInteractionCountMigrationGuild } from '../../utils/MigrationUtils';
 import { getAllMessagesInChannel } from '../../utils/MessageUtils';
-import { TextBasedChannel } from 'discord.js';
+import { DiscordAPIError, TextBasedChannel } from 'discord.js';
 
 const COUNTED_INTERACT_COMMANDS_DATABASE_VERSION = 1;
 const INTERACT_COMMAND_NAMES = ['chomp', 'hug', 'lick', 'pet'];
@@ -80,11 +80,15 @@ async function countAllExistingInteractCommands(client: Bot) {
     const bot = await guild.members.fetchMe();
     for (let [id, channel] of channels) {
         if (!channel) {
-            client.logger?.info(`Counted interact commands migration skipping channel ${id} (Was not resolved)`)
+            client.logger?.info(
+                `Counted interact commands migration skipping channel ${id} (Was not resolved)`
+            );
             continue;
         }
         if (!channel.isTextBased()) {
-            client.logger?.info(`Counted interact commands migration skipping channel ${channel.name} (${id}) (Not text based)`)
+            client.logger?.info(
+                `Counted interact commands migration skipping channel ${channel.name} (${id}) (Not text based)`
+            );
             continue;
         }
         const missingPermissions = channel
@@ -99,10 +103,16 @@ async function countAllExistingInteractCommands(client: Bot) {
         client.logger?.info(
             `Counted interact commands migration running on channel ${channel.name} (${id})`
         );
-        await countAllExistingInteractCommandsInChannel(
-            channel,
-            client
-        );
+        try {
+            await countAllExistingInteractCommandsInChannel(channel, client);
+        } catch (error) {
+            if (error instanceof DiscordAPIError && error.code == 50001) {
+                client.logger?.info(
+                    `Got known error while trying to scan through channel ${channel.name} (${id}) (${error})`
+                );
+            }
+            throw error;
+        }
     }
     client.logger?.info(`Counted interact commands migration finished`);
 }
