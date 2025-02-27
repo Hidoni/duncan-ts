@@ -110,6 +110,7 @@ async function countAllExistingInteractCommands(client: Bot) {
                 client.logger?.info(
                     `Got known error while trying to scan through channel ${channel.name} (${id}) (${error})`
                 );
+                continue;
             }
             throw error;
         }
