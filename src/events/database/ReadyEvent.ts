@@ -7,6 +7,7 @@ import { DiscordAPIError, TextBasedChannel } from 'discord.js';
 
 const COUNTED_INTERACT_COMMANDS_DATABASE_VERSION = 1;
 const INTERACT_COMMAND_NAMES = ['chomp', 'hug', 'lick', 'pet'];
+const FIRST_INTERACT_COMMAND_DATE = new Date(2022, 1, 26);
 
 function exitMigrationFailure(
     client: Bot,
@@ -31,6 +32,9 @@ async function countAllExistingInteractCommandsInChannel(
     lastMessage?: string
 ) {
     for await (const message of getAllMessagesInChannel(channel)) {
+        if (message.createdAt < FIRST_INTERACT_COMMAND_DATE) {
+            break;
+        }
         if (
             message.interaction &&
             isInteractCommand(message.interaction.commandName) &&
