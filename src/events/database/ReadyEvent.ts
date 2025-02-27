@@ -1,7 +1,11 @@
 import { exit } from 'process';
 import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
-import { getInteractionCountMigrationGuild } from '../../utils/MigrationUtils';
+import {
+    getInteractionCountMigrationGuild,
+    getInteractionCountMigrationLastMessageMap,
+    setInteractionCountMigrationLastMessageMap,
+} from '../../utils/MigrationUtils';
 import { getAllMessagesInChannel } from '../../utils/MessageUtils';
 import { DiscordAPIError, TextBasedChannel } from 'discord.js';
 
@@ -29,12 +33,16 @@ function isInteractCommand(commandName: string) {
 async function countAllExistingInteractCommandsInChannel(
     channel: TextBasedChannel,
     client: Bot,
-    lastMessage?: string
+    lastMessageMap: Map<string, string>
 ) {
-    for await (const message of getAllMessagesInChannel(channel)) {
+    for await (const message of getAllMessagesInChannel(
+        channel,
+        lastMessageMap.get(channel.id)
+    )) {
         if (message.createdAt < FIRST_INTERACT_COMMAND_DATE) {
             break;
         }
+        lastMessageMap.set(channel.id, message.id);
         if (
             message.interaction &&
             isInteractCommand(message.interaction.commandName) &&
@@ -54,7 +62,8 @@ async function countAllExistingInteractCommandsInChannel(
             );
             await countAllExistingInteractCommandsInChannel(
                 message.thread,
-                client
+                client,
+                lastMessageMap
             );
             client.logger?.info(
                 `Done with thread ${message.thread.name} in message ${message.id}`
@@ -82,6 +91,7 @@ async function countAllExistingInteractCommands(client: Bot) {
     }
     const channels = await guild.channels.fetch();
     const bot = await guild.members.fetchMe();
+    const lastMessageMap = getInteractionCountMigrationLastMessageMap();
     for (let [id, channel] of channels) {
         if (!channel) {
             client.logger?.info(
@@ -108,7 +118,11 @@ async function countAllExistingInteractCommands(client: Bot) {
             `Counted interact commands migration running on channel ${channel.name} (${id})`
         );
         try {
-            await countAllExistingInteractCommandsInChannel(channel, client);
+            await countAllExistingInteractCommandsInChannel(
+                channel,
+                client,
+                lastMessageMap
+            );
         } catch (error) {
             if (error instanceof DiscordAPIError && error.code == 50001) {
                 client.logger?.info(
@@ -116,8 +130,13 @@ async function countAllExistingInteractCommands(client: Bot) {
                 );
                 continue;
             }
+            setInteractionCountMigrationLastMessageMap(lastMessageMap);
             throw error;
         }
+        client.logger?.info(
+            `Counted interact commands migration done running on channel ${channel.name} (${id})`
+        );
+        setInteractionCountMigrationLastMessageMap(lastMessageMap);
     }
     client.logger?.info(`Counted interact commands migration finished`);
 }
