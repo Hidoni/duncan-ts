@@ -85,13 +85,17 @@ export class CountedInteractCommand extends InteractCommand {
         return response;
     }
 
-    protected async getResponse(
+    protected async resolveSpecial(
         client: Bot,
-        interaction: ChatInputCommandInteraction
+        interaction: ChatInputCommandInteraction,
+        response: string
     ): Promise<string> {
-        await client.database.newCommandUsage(interaction.user.id, interaction.commandName);
+        await client.database.newCommandUsage(
+            interaction.user.id,
+            interaction.commandName
+        );
         return super
-            .getResponse(client, interaction)
+            .resolveSpecial(client, interaction, response)
             .then(async (response) =>
                 this.resolveCounts(client, interaction, response)
             );
