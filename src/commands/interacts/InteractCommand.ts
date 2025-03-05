@@ -2,10 +2,17 @@ import { CommandHandler } from '../../interfaces/Command';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Bot from '../../client/Bot';
 import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
-import { getSafeReplyFunction } from '../../utils/InteractionUtils';
+import {
+    getRandomUserToMentionInGuild,
+    getSafeReplyFunction,
+    getUserPreferredName,
+} from '../../utils/InteractionUtils';
 
 const BROWNIE_POINT_REGEX =
     /{modifyBrowniePoints\(delta=(?<delta>[+-]?\d+)\)}/g;
+
+const SENDER_MENTION_REGEX = /{sender}/g;
+const RANDOM_MENTION_REGEX = /{random(?:_\d+)?}/g;
 
 export class InteractCommand {
     public handler: CommandHandler;
@@ -63,12 +70,50 @@ export class InteractCommand {
         return response;
     }
 
+    protected async resolveMentions(
+        client: Bot,
+        interaction: ChatInputCommandInteraction,
+        response: string
+    ): Promise<string> {
+        if (!interaction.guild) {
+            return response;
+        }
+        response = response.replace(
+            SENDER_MENTION_REGEX,
+            await getUserPreferredName(
+                client,
+                interaction.user.id,
+                interaction.guild
+            )
+        );
+        const randomUserBlacklist = [client.user!.id, interaction.user.id];
+        for (const match of response.matchAll(RANDOM_MENTION_REGEX)) {
+            const randomUser = await getRandomUserToMentionInGuild(
+                interaction.guild,
+                randomUserBlacklist
+            );
+            randomUserBlacklist.push(randomUser.id);
+            response = response.replace(
+                match[0],
+                await getUserPreferredName(
+                    client,
+                    randomUser.id,
+                    interaction.guild
+                )
+            );
+        }
+        return response;
+    }
+
     protected async resolveSpecial(
         client: Bot,
         interaction: ChatInputCommandInteraction,
         response: string
     ): Promise<string> {
-        return this.resolveBrowniePoints(client, interaction, response);
+        return this.resolveBrowniePoints(client, interaction, response).then(
+            async (response) =>
+                this.resolveMentions(client, interaction, response)
+        );
     }
 
     protected getMessage(

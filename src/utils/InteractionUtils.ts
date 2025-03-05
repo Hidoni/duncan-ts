@@ -26,6 +26,21 @@ export async function getUserPreferredName(
     return guildUser.displayName;
 }
 
+export async function getRandomUserToMentionInGuild(
+    guild: Guild,
+    excluded: Snowflake[] | null
+) {
+    const guildMembers = Array.from(
+        (await guild.members.fetch())
+            .filter((member) => !excluded || excluded.indexOf(member.id) == -1)
+            .values()
+    );
+    if (guildMembers.length === 0) {
+        throw Error('Server is too small to get another member!');
+    }
+    return guildMembers[Math.floor(Math.random() * guildMembers.length)];
+}
+
 export function getReplyFunction(
     interaction:
         | CommandInteraction

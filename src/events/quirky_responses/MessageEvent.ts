@@ -1,10 +1,13 @@
 import Conf from 'conf';
-import { Guild, Message, Snowflake, TextChannel } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import { readFileSync } from 'fs';
 import { setTimeout } from 'timers/promises';
 import Bot from '../../client/Bot';
 import { EventHandler } from '../../interfaces/Event';
-import { getUserPreferredName } from '../../utils/InteractionUtils';
+import {
+    getRandomUserToMentionInGuild,
+    getUserPreferredName,
+} from '../../utils/InteractionUtils';
 
 const QUIRKY_RESPONSES = readFileSync('./quirky-responses.txt', 'utf8')
     .trim()
@@ -39,21 +42,6 @@ function getEnabled(): boolean {
     const config = new Conf();
     const enabled = config.get('quirky_responses.enabled');
     return typeof enabled === 'boolean' ? enabled : false;
-}
-
-async function getRandomUserToMentionInGuild(
-    guild: Guild,
-    excluded: Snowflake[] | null
-) {
-    const guildMembers = Array.from(
-        (await guild.members.fetch())
-            .filter((member) => !excluded || excluded.indexOf(member.id) == -1)
-            .values()
-    );
-    if (guildMembers.length === 0) {
-        throw Error('Server is too small to get another member!');
-    }
-    return guildMembers[Math.floor(Math.random() * guildMembers.length)];
 }
 
 async function formatResponse(client: Bot, message: Message, response: string) {
