@@ -20,6 +20,7 @@ import { Name } from './models/Name';
 import { MessageCount } from './models/MessageCount';
 import { CommandUsage } from './models/CommandUsage';
 import { Op, QueryTypes, TimeoutError } from 'sequelize';
+import { BrowniePoints } from './models/BrowniePoints';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -110,6 +111,20 @@ export default class Database {
 
     public async getAllGimmickPoints(): Promise<GimmickPoints[]> {
         return await GimmickPoints.findAll({
+            order: Sequelize.literal('points DESC'),
+        });
+    }
+
+    public async getBrowniePoints(id: string): Promise<BrowniePoints> {
+        const points = await BrowniePoints.findOne({ where: { id: id } });
+        if (!points) {
+            return BrowniePoints.create({ id: id });
+        }
+        return points;
+    }
+
+    public async getAllBrowniePoints(): Promise<BrowniePoints[]> {
+        return await BrowniePoints.findAll({
             order: Sequelize.literal('points DESC'),
         });
     }
