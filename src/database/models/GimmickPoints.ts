@@ -15,7 +15,7 @@ export class GimmickPoints extends Model {
     @AllowNull(false)
     @PrimaryKey
     @Column
-    id!: number;
+    id!: string;
 
     @AllowNull(false)
     @Default(0)
