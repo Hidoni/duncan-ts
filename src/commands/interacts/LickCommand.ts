@@ -11,9 +11,16 @@ const NEGATIVE_RESPONSES = [
     "Please don't! >w<",
     'Get AWAY from me with that tongue!!',
     'H..how about we just stick to pets for now...',
+    "Eughhhh now I have to wash my face because of YOU! -15 brownie points! {modifyBrowniePoints(delta=-15)}",
+    "NOOO don't lick me here! -40 brownie points! {modifyBrowniePoints(delta=-40)}",
 ];
 
-const POSITIVE_RESPONSES = ['Well... I guess I do taste okay...']; // There's no world where this is po
+const POSITIVE_RESPONSES = [
+    'Well... I guess I do taste okay...', // There's no world where this is po
+    "After the {count(delta=*, suffix=True)} lick... I'm surprised that you're not tired of my flavors yet!",
+    "I'm gonna lick you right back, c'mere you cutie! You taste like  +20 brownie points! {modifyBrowniePoints(delta=20)}",
+    "Huh.. okay you've impressed me, that actually felt plenty nice! +40 brownie points! {modifyBrowniePoints(delta=40)}",
+];
 
 const CHANCE_FOR_NEGATIVE_RESPONSE = 99 / 100;
 
