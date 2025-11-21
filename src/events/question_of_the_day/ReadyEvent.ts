@@ -14,7 +14,7 @@ export const handler: EventHandler = async (client: Bot) => {
         undefined,
         undefined,
         undefined,
-        [1, 3, 6], // Monday, Wednesday and Saturday
+        [1, 3, 5, 6], // Monday, Wednesday, Friday and Saturday
         12,
         0,
         0
