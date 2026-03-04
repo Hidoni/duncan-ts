@@ -14,6 +14,7 @@ const QUIRKY_RESPONSES = readFileSync('./quirky-responses.txt', 'utf8')
     .split('\n');
 const OUIJA_BOARD_CHANNEL = '809001007560392714';
 const NO_VOWELS_CHANNEL = '801726137058721792';
+const NERDROOM_CHANNEL = '483376494551236628';
 const OUIJA_BOARD_CHANCE = 1 / 50;
 const NO_VOWELS_CHANCE = 1 / 20;
 const CHANNEL_CHANCE_MAP = new Map([
@@ -81,6 +82,14 @@ async function getRandomResponse(client: Bot, message: Message) {
             /[aeiou]/gi,
             ''
         );
+    }
+    if (message.channelId === NERDROOM_CHANNEL) {
+        const randomIndex = Math.floor(Math.random() * (QUIRKY_RESPONSES.length + 1));
+        const response =
+            randomIndex === QUIRKY_RESPONSES.length
+                ? '🤓👆'
+                : QUIRKY_RESPONSES[randomIndex];
+        return formatResponse(client, message, response);
     }
     const randomIndex = Math.floor(Math.random() * QUIRKY_RESPONSES.length);
     return formatResponse(client, message, QUIRKY_RESPONSES[randomIndex]);
