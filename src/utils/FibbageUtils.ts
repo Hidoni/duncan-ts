@@ -5,13 +5,11 @@ import {
     ButtonStyle,
     GuildMember,
     MessageActionRowComponentBuilder,
-    ModalActionRowComponent,
     ModalActionRowComponentBuilder,
     ModalBuilder,
+    SendableChannels,
     Snowflake,
-    TextBasedChannel,
     TextInputBuilder,
-    TextInputComponent,
     TextInputStyle,
     User,
 } from 'discord.js';
@@ -456,7 +454,7 @@ async function fillMissingAnswersForQuestion(
 
 async function postNewQuestion(
     client: Bot,
-    channel: TextBasedChannel,
+    channel: SendableChannels,
     question: FibbageQuestion
 ) {
     const questionUser = await client.users.fetch(question.user);
@@ -490,7 +488,7 @@ export async function postNewQuestions(client: Bot) {
         return;
     }
     const channel = await client.channels.fetch(getChannel());
-    if (!channel || !channel.isTextBased()) {
+    if (!channel || !channel.isTextBased() || channel.isDMBased()) {
         return;
     }
     const amountOfQuestionsToPost = Math.min(

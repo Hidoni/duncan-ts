@@ -2,6 +2,7 @@ import {
     CommandInteraction,
     ContextMenuCommandInteraction,
     Guild,
+    InteractionEditReplyOptions,
     InteractionReplyOptions,
     MessageComponentInteraction,
     ModalSubmitInteraction,
@@ -70,7 +71,7 @@ export function getSafeReplyFunction(
         | MessageComponentInteraction
         | ModalSubmitInteraction
 ) {
-    return async (options: InteractionReplyOptions) => {
+    return async (options: InteractionReplyOptions & InteractionEditReplyOptions) => {
         try {
             await getReplyFunction(interaction)(options);
         } catch (error) {

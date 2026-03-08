@@ -126,7 +126,7 @@ export const handler: EventHandler = async (
                 : ''
         }`
     );
-    if (interaction.isCommand()) {
+    if (interaction.isCommand() && !interaction.isPrimaryEntryPointCommand()) {
         const command = client.getCommand(interaction.commandName);
         if (command) {
             if (await canRunCommand(client, interaction, command)) {
