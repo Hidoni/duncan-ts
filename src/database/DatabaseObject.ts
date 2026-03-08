@@ -21,6 +21,7 @@ import { MessageCount } from './models/MessageCount';
 import { CommandUsage } from './models/CommandUsage';
 import { Op, QueryTypes, TimeoutError } from 'sequelize';
 import { BrowniePoints } from './models/BrowniePoints';
+import { MapTapScore } from './models/MapTapScore';
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -409,5 +410,37 @@ export default class Database {
             return instance.count;
         }
         return 0;
+    }
+
+    public async getAllMapTapScores(): Promise<MapTapScore[]> {
+        return await MapTapScore.findAll({});
+    }
+
+    public async getMapTapScoresForUser(user: string): Promise<MapTapScore[]> {
+        return await MapTapScore.findAll({ where: { user: user } });
+    }
+
+    public async getMapTapScoresForDate(date: Date): Promise<MapTapScore[]> {
+        return await MapTapScore.findAll({ where: { date: date } });
+    }
+
+    public async insertMapTapScore(
+        user: Snowflake,
+        date: Date,
+        firstRound: number,
+        secondRound: number,
+        thirdRound: number,
+        fourthRound: number,
+        fifthRound: number
+    ): Promise<MapTapScore> {
+        return MapTapScore.create({
+            user: user,
+            date: date,
+            firstRound: firstRound,
+            secondRound: secondRound,
+            thirdRound: thirdRound,
+            fourthRound: fourthRound,
+            fifthRound: fifthRound,
+        });
     }
 }
