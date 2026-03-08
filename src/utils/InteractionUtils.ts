@@ -28,14 +28,19 @@ export async function getUserPreferredName(
 
 export async function getRandomUserToMentionInGuild(
     guild: Guild,
-    excluded: Snowflake[] | null
+    excluded: Snowflake[] | null,
+    fetchGuildMembers: boolean = true
 ) {
     const guildMembers = Array.from(
-        (await guild.members.fetch())
+        guild.members.cache
             .filter((member) => !excluded || excluded.indexOf(member.id) == -1)
             .values()
     );
     if (guildMembers.length === 0) {
+        if (fetchGuildMembers) {
+            await guild.members.fetch();
+            return getRandomUserToMentionInGuild(guild, excluded, false);
+        }
         throw Error('Server is too small to get another member!');
     }
     return guildMembers[Math.floor(Math.random() * guildMembers.length)];
