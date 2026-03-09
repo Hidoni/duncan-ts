@@ -26,7 +26,7 @@ export default class Bot extends Client {
         super({ intents: config.intents, partials: config.partials });
         this.config = config;
         this.logger = logger;
-        this.restAPI = new REST({ version: '9' }).setToken(config.token);
+        this.restAPI = new REST().setToken(config.token);
         this.database = new Database(config.database, logger);
 
         if (config.commandsFolder) {
