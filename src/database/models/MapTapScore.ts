@@ -45,9 +45,9 @@ export class MapTapScore extends Model {
         return (
             this.firstRound +
             this.secondRound +
-            this.thirdRound +
-            this.fourthRound +
-            this.fifthRound
+            this.thirdRound * 2 +
+            this.fourthRound * 3 +
+            this.fifthRound * 3
         );
     }
 }
