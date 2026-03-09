@@ -110,7 +110,15 @@ const COMMANDS: { [key: string]: CommandHandler } = {
             date = utcToday();
         }
         date = new Date(date.toISOString().replace("Z", "-12:00")); // Convert to latest timezone to make sure dates line up with cron invocation ones.
+        await interaction.deferReply({ ephemeral: true });
         await runMapTapJobForDate(client, date, dmChannel);
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content: `Sent the MapTap summary for ${date.toISOString().split('T')[0]} to your DMs!`,
+            ephemeral: true,
+        });
     },
 };
 
