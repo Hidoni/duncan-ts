@@ -332,6 +332,9 @@ async function generateMapTapSummaryImage(
                 date: formatDateForMapTap(date),
                 scores: scoresForTemplate,
             },
+            puppeteerArgs: {
+                args: ['--no-sandbox'],
+            },
             handlebarsHelpers: {
                 roundScoreToEmoji: (round: number, score: number) => {
                     // MapTap emoji selection logic taken from website JS
