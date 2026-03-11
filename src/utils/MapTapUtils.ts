@@ -229,7 +229,7 @@ async function parseAllMapTapMessagesForDate(
 }
 
 function getMapTapNumberForDate(date: Date): number {
-    return daysBetweenDates(MAP_TAP_FIRST_DATE, date) - 1;
+    return daysBetweenDates(MAP_TAP_FIRST_DATE, date);
 }
 
 function formatDateForMapTap(date: Date): string {
