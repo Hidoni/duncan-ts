@@ -54,6 +54,11 @@ export function getEnabled(): boolean {
     return typeof enabled === 'boolean' ? enabled : false;
 }
 
+export function getDebug(): boolean {
+    const debug = config.get('maptap.debug');
+    return typeof debug === 'boolean' ? debug : false;
+}
+
 function dateStringToDate(dateString: string, year: number): Date {
     const timestamp = Date.parse(`${dateString} ${year}`);
     if (isNaN(timestamp)) {
