@@ -339,9 +339,12 @@ async function generateMapTapSummaryImage(
                 roundScoreToEmoji: (round: number, score: number) => {
                     // MapTap emoji selection logic taken from website JS
                     const numEmojis = MAP_TAP_EMOJI.length;
-                    let index = Math.floor((score / 100) * numEmojis);
+                    let index = Math.min(
+                        numEmojis - 1,
+                        Math.floor((score / 100) * numEmojis)
+                    );
                     if (index === 0) {
-                        index += round + date.getUTCDate();
+                        index += (round + date.getUTCDate()) % 3;
                     }
                     return MAP_TAP_EMOJI[index] || '🤯';
                 },
