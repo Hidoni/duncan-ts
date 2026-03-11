@@ -28,7 +28,9 @@ export const handler: EventHandler = async (client: Bot) => {
     schedule.scheduleJob(rule, async (fireDate) => {
         const yesterday = addDaysToDate(fireDate, -1);
         client.logger?.info(
-            `Running the MapTap job for date ${yesterday.toISOString().split('T')[0]}`
+            `Running the MapTap job for date ${
+                yesterday.toISOString().split('T')[0]
+            }`
         );
 
         const mapTapChannelId = getChannel();
@@ -39,13 +41,22 @@ export const handler: EventHandler = async (client: Bot) => {
             return;
         }
         const mapTapChannel = await client.channels.fetch(mapTapChannelId);
-        if (!mapTapChannel || !mapTapChannel.isSendable()) {
+        if (
+            !mapTapChannel ||
+            !mapTapChannel.isSendable() ||
+            mapTapChannel.isDMBased()
+        ) {
             client.logger?.error(
-                `Could not fetch the MapTap channel with id ${mapTapChannelId} or it is not sendable!`
+                `Could not fetch the MapTap channel with id ${mapTapChannelId} or it is does not match requirements (sendable + not DM based)!`
             );
             return;
         }
-        await runMapTapJobForDate(client, yesterday, mapTapChannel);
+        await runMapTapJobForDate(
+            client,
+            yesterday,
+            mapTapChannel,
+            mapTapChannel.guild
+        );
     });
 };
 export const once: boolean = true;

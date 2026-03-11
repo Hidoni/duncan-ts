@@ -7,7 +7,7 @@ import {
     utcToday,
 } from './DateUtils';
 import Conf from 'conf';
-import { SendableChannels, AttachmentBuilder } from 'discord.js';
+import { SendableChannels, AttachmentBuilder, Guild } from 'discord.js';
 import { readFile } from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import { promisify } from 'util';
@@ -318,17 +318,18 @@ function getMapTapSummaryImageHeight(scoreCount: number): number {
 async function generateMapTapSummaryImage(
     client: Bot,
     allScores: MapTapScore[],
-    date: Date
+    date: Date,
+    guild: Guild
 ): Promise<Buffer | null> {
     const scoresForTemplate = await Promise.all(
         allScores.map(async (score) => ({
             avatar:
-                client.users.cache
+                guild.members.cache
                     .get(score.user)
                     ?.displayAvatarURL({ size: 128 }) ||
-                (await client.users
+                (await guild.members
                     .fetch(score.user)
-                    .then((user) => user.displayAvatarURL({ size: 128 }))),
+                    .then((member) => member.displayAvatarURL({ size: 128 }))),
             firstRound: score.firstRound,
             secondRound: score.secondRound,
             thirdRound: score.thirdRound,
@@ -379,7 +380,8 @@ async function generateMapTapSummaryImage(
 async function publishMapTapScoreSummaryForDate(
     client: Bot,
     date: Date,
-    mapTapChannel: SendableChannels
+    mapTapChannel: SendableChannels,
+    guild: Guild
 ) {
     const allScores = (await client.database.getMapTapScoresForDate(date)).sort(
         (a, b) => b.getFinalScore() - a.getFinalScore()
@@ -396,7 +398,8 @@ async function publishMapTapScoreSummaryForDate(
     const mapTapSummaryImage = await generateMapTapSummaryImage(
         client,
         allScores,
-        date
+        date,
+        guild
     );
     await mapTapChannel.send({
         content: summaryMessage,
@@ -414,12 +417,14 @@ async function publishMapTapScoreSummaryForDate(
 export async function runMapTapJobForDate(
     client: Bot,
     date: Date,
-    mapTapChannel: SendableChannels
+    mapTapChannel: SendableChannels,
+    guild: Guild
 ) {
     await parseAllMapTapMessagesForDate(client, mapTapChannel, date);
     await publishMapTapScoreSummaryForDate(
         client,
         midnightUTCDateForDate(date),
-        mapTapChannel
+        mapTapChannel,
+        guild
     );
 }

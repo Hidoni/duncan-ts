@@ -77,7 +77,10 @@ const COMMANDS: { [key: string]: CommandHandler } = {
                         new TextInputBuilder()
                             .setCustomId('score')
                             .setPlaceholder(
-                                `www.maptap.gg ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}\n100🎯 100🎯 100🎯 100🎯 100🎯\nFinal score: 1000`
+                                `www.maptap.gg ${new Date().toLocaleDateString(
+                                    'en-US',
+                                    { month: 'long', day: 'numeric' }
+                                )}\n100🎯 100🎯 100🎯 100🎯 100🎯\nFinal score: 1000`
                             )
                             .setStyle(TextInputStyle.Paragraph)
                             .setRequired(true)
@@ -100,7 +103,8 @@ const COMMANDS: { [key: string]: CommandHandler } = {
                     client,
                     interaction
                 )({
-                    content: "That doesn't look like a valid date!! Make sure to use YYYY-MM-DD format!",
+                    content:
+                        "That doesn't look like a valid date!! Make sure to use YYYY-MM-DD format!",
                     ephemeral: true,
                 });
                 return;
@@ -109,14 +113,16 @@ const COMMANDS: { [key: string]: CommandHandler } = {
         } else {
             date = utcToday();
         }
-        date = new Date(date.toISOString().replace("Z", "-12:00")); // Convert to latest timezone to make sure dates line up with cron invocation ones.
+        date = new Date(date.toISOString().replace('Z', '-12:00')); // Convert to latest timezone to make sure dates line up with cron invocation ones.
         await interaction.deferReply({ ephemeral: true });
-        await runMapTapJobForDate(client, date, dmChannel);
+        await runMapTapJobForDate(client, date, dmChannel, interaction.guild!);
         await getSafeReplyFunction(
             client,
             interaction
         )({
-            content: `Sent the MapTap summary for ${date.toISOString().split('T')[0]} to your DMs!`,
+            content: `Sent the MapTap summary for ${
+                date.toISOString().split('T')[0]
+            } to your DMs!`,
             ephemeral: true,
         });
     },
