@@ -2,7 +2,7 @@ const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 export function midnightUTCDateForDate(date: Date): Date {
     return new Date(
-        Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
     );
 }
 
