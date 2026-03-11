@@ -211,7 +211,11 @@ async function parseAllMapTapMessagesForDate(
                 parsedScore.fifthRound
             );
             client.logger?.info(
-                `Saving MapTap score for user ${message.author.username} (${message.author.id}) with score ${score.getFinalScore()} for date ${date.toISOString().split('T')[0]}`
+                `Saving MapTap score for user ${message.author.username} (${
+                    message.author.id
+                }) with score ${score.getFinalScore()} for date ${
+                    date.toISOString().split('T')[0]
+                }`
             );
         } catch (error) {
             if (
@@ -219,7 +223,11 @@ async function parseAllMapTapMessagesForDate(
                 error.name === 'SequelizeUniqueConstraintError'
             ) {
                 client.logger?.warn(
-                    `Score for user ${message.author.username} (${message.author.id}) for date ${date.toISOString().split('T')[0]} already exists in the database, skipping...`
+                    `Score for user ${message.author.username} (${
+                        message.author.id
+                    }) for date ${
+                        date.toISOString().split('T')[0]
+                    } already exists in the database, skipping...`
                 );
                 continue;
             }
@@ -257,14 +265,22 @@ function generateMapTapSummaryMessage(allScores: MapTapScore[], date: Date) {
         }
         scoreToBucket.get(bucket)!.push(score);
     }
-    const topScoreSummary = `👑 ${topScore}: ${topScorers.map((score) => `<@${score.user}>`).join(', ')}`;
+    const topScoreSummary = `👑 ${topScore}: ${topScorers
+        .map((score) => `<@${score.user}>`)
+        .join(', ')}`;
     const remainingScoresSummary = Array.from(scoreToBucket.entries())
         .map(
             ([bucket, scores]) =>
-                `${bucket}-${bucket + 99}: ${scores.map((score) => `<@${score.user}>`).join(', ')}`
+                `${bucket}-${bucket + 99}: ${scores
+                    .map((score) => `<@${score.user}>`)
+                    .join(', ')}`
         )
         .join('\n');
-    return `MapTap #${getMapTapNumberForDate(date)} scores (${formatDateForMapTap(date)}):\n${topScoreSummary}\n${remainingScoresSummary}`;
+    return `MapTap #${getMapTapNumberForDate(
+        date
+    )} scores (${formatDateForMapTap(
+        date
+    )}):\n${topScoreSummary}\n${remainingScoresSummary}`;
 }
 
 async function getMapTapSummaryTemplate(): Promise<string> {
@@ -370,7 +386,9 @@ async function publishMapTapScoreSummaryForDate(
     );
     if (allScores.length === 0) {
         client.logger?.info(
-            `No MapTap scores found for date ${date.toISOString().split('T')[0]}, skipping summary message...`
+            `No MapTap scores found for date ${
+                date.toISOString().split('T')[0]
+            }, skipping summary message...`
         );
         return;
     }
