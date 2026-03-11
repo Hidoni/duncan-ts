@@ -12,9 +12,8 @@
         {
             "label": "clear output folder",
             "type": "shell",
-            "command": "rm",
-            "args": ["-r", "${workspaceFolder}/bin/"],
-            "group": "build"
+            "command": "rm -r ${workspaceFolder}/bin/ || true",
+            "group": "build",
         }
     ]
 }
