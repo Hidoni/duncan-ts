@@ -16,6 +16,13 @@ import Bot from '../client/Bot';
 const MAPTAP_SCORE_REGEX =
     /www\.maptap\.gg\s+(\w+(?:\s+\d{1,2})?)\n(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+/;
 
+const MAP_TAP_FIRST_DATE = new Date(2024, 5, 21);
+const MAP_TAP_EMOJI = Array.from(
+    '🤮🤮😭😱🤢😝😵🤬🥺🧊😒❄😥🙈😪😴🥶😶😕😞😨😟🫣😔🤫🤨😑😐🫢🙃🙂😁😂🤗🌞👏✨🌟😁🎓🎉👑🏆🏅🔥🎯'
+);
+
+const BASE_IMAGE_SIZE = { width: 270, height: 270 };
+
 const TWO_DAYS_MILLISECONDS = 2 * 24 * 60 * 60 * 1000;
 const JANUARY = 0;
 const DECEMBER = 11;
@@ -170,13 +177,6 @@ export function getTotalScoresMap(scores: MapTapScore[]): Map<string, number> {
     }
     return scoresMap;
 }
-
-const MAP_TAP_FIRST_DATE = new Date(2024, 5, 21);
-const MAP_TAP_EMOJI = Array.from(
-    '🤮🤮😭😱🤢😝😵🤬🥺🧊😒❄😥🙈😪😴🥶😶😕😞😨😟🫣😔🤫🤨😑😐🫢🙃🙂😁😂🤗🌞👏✨🌟😁🎓🎉👑🏆🏅🔥🎯'
-);
-
-const BASE_IMAGE_SIZE = { width: 270, height: 270 };
 
 async function parseAllMapTapMessagesForDate(
     client: Bot,
