@@ -1,6 +1,7 @@
 import { MapTapScore } from '../database/models/MapTapScore';
 import {
     addDaysToDate,
+    dateAsLatestTimezone,
     dateToSnowflake,
     DAY_IN_MILLISECONDS,
     daysBetweenDates,
@@ -13,6 +14,11 @@ import { readFile } from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import { promisify } from 'util';
 import Bot from '../client/Bot';
+import {
+    EmbedAttributes,
+    DEFAULT_EMBED_COLOR,
+    LeaderboardMap,
+} from './LeaderboardUtils';
 
 const MAPTAP_SCORE_REGEX =
     /www\.maptap\.gg\s+(\w+(?:\s+\d{1,2})?)\n(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+/;
@@ -26,6 +32,13 @@ const BASE_IMAGE_SIZE = { width: 270, height: 270 };
 
 const JANUARY = 0;
 const DECEMBER = 11;
+
+export const leaderboardEmbedAttributes: EmbedAttributes = {
+    title: 'MapTap Leaderboard',
+    color: DEFAULT_EMBED_COLOR,
+    keyName: 'User',
+    valueName: 'Total score',
+};
 
 const config = new Conf();
 
@@ -453,4 +466,21 @@ export async function runMapTapJobForDate(
         mapTapChannel,
         guild
     );
+}
+
+export const leaderboardMappingFunction: LeaderboardMap<[string, number]> = (
+    value
+) => [`<@${value[0]}>`, value[1].toString()];
+
+export async function getAllScoresForLeaderboard(
+    client: Bot
+): Promise<MapTapScore[]> {
+    const now = new Date();
+    const midnight = midnightUTCDateForDate(now);
+    const jobInvocationTime = dateAsLatestTimezone(midnight);
+    const cutoffDate =
+        now.getTime() <= jobInvocationTime.getTime()
+            ? jobInvocationTime
+            : addDaysToDate(jobInvocationTime, -1);
+    return client.database.getAllMapTapScoresBeforeOrAtDate(cutoffDate);
 }

@@ -13,29 +13,19 @@ import Bot from '../../client/Bot';
 import { CommandHandler } from '../../interfaces/Command';
 import { getSafeReplyFunction } from '../../utils/InteractionUtils';
 import {
-    DEFAULT_EMBED_COLOR,
-    EmbedAttributes,
     generateLeaderboardComponentsRow,
-    LeaderboardMap,
     generateLeaderboardEmbed,
 } from '../../utils/LeaderboardUtils';
 import {
+    getAllScoresForLeaderboard,
     getDebug,
     getEnabled,
     getTotalScoresMap,
+    leaderboardEmbedAttributes,
+    leaderboardMappingFunction,
     runMapTapJobForDate,
 } from '../../utils/MapTapUtils';
-import { utcToday } from '../../utils/DateUtils';
-
-export const leaderboardEmbedAttributes: EmbedAttributes = {
-    title: 'MapTap Leaderboard',
-    color: DEFAULT_EMBED_COLOR,
-    keyName: 'User',
-    valueName: 'Points',
-};
-export const leaderboardMappingFunction: LeaderboardMap<[string, number]> = (
-    value
-) => [`<@${value[0]}>`, value[1].toString()];
+import { dateAsLatestTimezone, utcToday } from '../../utils/DateUtils';
 
 const COMMANDS: { [key: string]: CommandHandler } = {
     leaderboard: async function (
@@ -43,7 +33,7 @@ const COMMANDS: { [key: string]: CommandHandler } = {
         interaction: ChatInputCommandInteraction
     ): Promise<void> {
         const scores = getTotalScoresMap(
-            await client.database.getAllMapTapScores()
+            await getAllScoresForLeaderboard(client)
         );
         const leaderboardembed = generateLeaderboardEmbed(
             Array.from(scores.entries()),
@@ -114,7 +104,7 @@ const COMMANDS: { [key: string]: CommandHandler } = {
         } else {
             date = utcToday();
         }
-        date = new Date(date.toISOString().replace('Z', '-12:00')); // Convert to latest timezone to make sure dates line up with cron invocation ones.
+        date = dateAsLatestTimezone(date);
         await interaction.deferReply({ ephemeral: true });
         await runMapTapJobForDate(client, date, dmChannel, interaction.guild!);
         await getSafeReplyFunction(
@@ -159,7 +149,7 @@ export const builder = new SlashCommandBuilder()
         new SlashCommandSubcommandBuilder()
             .setName('submit')
             .setDescription('Manually submit your MapTap scores!')
-    )
+    );
 if (getDebug()) {
     builder.addSubcommand(
         new SlashCommandSubcommandBuilder()

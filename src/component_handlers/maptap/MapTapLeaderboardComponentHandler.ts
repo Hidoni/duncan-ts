@@ -6,11 +6,11 @@ import {
     generateLeaderboardEmbed,
     generateLeaderboardComponentsRow,
 } from '../../utils/LeaderboardUtils';
-import { getTotalScoresMap } from '../../utils/MapTapUtils';
 import {
+    getTotalScoresMap,
     leaderboardEmbedAttributes,
     leaderboardMappingFunction,
-} from '../../commands/maptap/MapTapCommand';
+} from '../../utils/MapTapUtils';
 
 async function updateMessageLeaderboard(
     scores: MapTapScore[],

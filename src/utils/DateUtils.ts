@@ -28,3 +28,7 @@ export function daysBetweenDates(first: Date, second: Date): number {
     const diffInMs = Math.abs(firstMidnight.getTime() - secondMidnight.getTime());
     return Math.floor(diffInMs / DAY_IN_MILLISECONDS);
 }
+
+export function dateAsLatestTimezone(date: Date): Date {
+    return new Date(date.toISOString().replace('Z', '-12:00'));
+}

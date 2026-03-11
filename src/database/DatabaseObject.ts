@@ -416,6 +416,12 @@ export default class Database {
         return await MapTapScore.findAll({});
     }
 
+    public async getAllMapTapScoresBeforeOrAtDate(
+        cutoffDate: Date
+    ): Promise<MapTapScore[]> {
+        return await MapTapScore.findAll({ where: { date: { [Op.lte]: cutoffDate } } });
+    }
+
     public async getMapTapScoresForUser(user: string): Promise<MapTapScore[]> {
         return await MapTapScore.findAll({ where: { user: user } });
     }
