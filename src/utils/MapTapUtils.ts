@@ -2,6 +2,7 @@ import { MapTapScore } from '../database/models/MapTapScore';
 import {
     addDaysToDate,
     dateToSnowflake,
+    DAY_IN_MILLISECONDS,
     daysBetweenDates,
     midnightUTCDateForDate,
     utcToday,
@@ -23,7 +24,6 @@ const MAP_TAP_EMOJI = Array.from(
 
 const BASE_IMAGE_SIZE = { width: 270, height: 270 };
 
-const TWO_DAYS_MILLISECONDS = 2 * 24 * 60 * 60 * 1000;
 const JANUARY = 0;
 const DECEMBER = 11;
 
@@ -57,6 +57,17 @@ export function getEnabled(): boolean {
 export function getDebug(): boolean {
     const debug = config.get('maptap.debug');
     return typeof debug === 'boolean' ? debug : false;
+}
+
+export function getDayRangeRestrictionForManualSubmission():
+    | number
+    | undefined {
+    const dayRangeRestrictionForManualSubmission = config.get(
+        'maptap.dayRangeRestrictionForManualSubmission'
+    );
+    return typeof dayRangeRestrictionForManualSubmission === 'number'
+        ? dayRangeRestrictionForManualSubmission
+        : undefined;
 }
 
 function dateStringToDate(dateString: string, year: number): Date {
@@ -124,9 +135,19 @@ function parseMapTapScoreInternal(
     return parsedScore;
 }
 
-function isWithinTwoDays(first: Date, second: Date): boolean {
+function isWithinAllowdManualSubmissionRange(
+    first: Date,
+    second: Date
+): boolean {
+    const dayRangeRestrictionForManualSubmission =
+        getDayRangeRestrictionForManualSubmission();
+    if (dayRangeRestrictionForManualSubmission === undefined) {
+        return true;
+    }
     const diffInMs = Math.abs(first.getTime() - second.getTime());
-    return diffInMs <= TWO_DAYS_MILLISECONDS;
+    return (
+        diffInMs <= DAY_IN_MILLISECONDS * dayRangeRestrictionForManualSubmission
+    );
 }
 
 export function isMapTapScoreString(scoreString: string): boolean {
@@ -145,7 +166,7 @@ export function parseMapTapScoreForManualSubmission(
 ): ParsedMapTapScore {
     const currentDate = utcToday();
     const score = parseMapTapScoreForDate(scoreString, currentDate);
-    if (isWithinTwoDays(score.date, currentDate)) {
+    if (isWithinAllowdManualSubmissionRange(score.date, currentDate)) {
         return score;
     }
     if (
@@ -153,7 +174,7 @@ export function parseMapTapScoreForManualSubmission(
         score.date.getMonth() === DECEMBER
     ) {
         score.date.setFullYear(score.date.getFullYear() - 1);
-        if (isWithinTwoDays(score.date, currentDate)) {
+        if (isWithinAllowdManualSubmissionRange(score.date, currentDate)) {
             return score;
         }
     } else if (
@@ -161,7 +182,7 @@ export function parseMapTapScoreForManualSubmission(
         score.date.getMonth() === JANUARY
     ) {
         score.date.setFullYear(score.date.getFullYear() + 1);
-        if (isWithinTwoDays(score.date, currentDate)) {
+        if (isWithinAllowdManualSubmissionRange(score.date, currentDate)) {
             return score;
         }
     }
