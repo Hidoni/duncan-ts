@@ -184,16 +184,9 @@ async function parseAllMapTapMessagesForDate(
     date: Date
 ) {
     const nextDay = addDaysToDate(date, 1);
-    const yesterdayMessages = await mapTapChannel.messages
-        .fetch({ after: dateToSnowflake(addDaysToDate(date, -1)) })
-        .then((messages) =>
-            messages.filter((message) => {
-                if (message.createdAt < date || message.createdAt >= nextDay) {
-                    return false;
-                }
-                return true;
-            })
-        );
+    const yesterdayMessages = await mapTapChannel.messages.fetch({
+        after: dateToSnowflake(addDaysToDate(date, -1)),
+    });
     for (const message of yesterdayMessages.values()) {
         if (!isMapTapScoreString(message.content)) {
             continue;
