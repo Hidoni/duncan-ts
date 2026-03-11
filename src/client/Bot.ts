@@ -1,11 +1,11 @@
 import { Logger } from 'log4js';
-import { Client, Collection } from 'discord.js';
+import { APIApplicationCommand, Client, Collection } from 'discord.js';
 import BotConfig from '../interfaces/BotConfig';
 import { Command, CommandBuilderType } from '../interfaces/Command';
 import { Event } from '../interfaces/Event';
 import path from 'path';
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 import glob from 'glob';
 import { ComponentHandler } from '../interfaces/ComponentHandler';
 import Database from '../database/DatabaseObject';
@@ -154,13 +154,7 @@ export default class Bot extends Client {
 
     public async run() {
         this.login(this.config.token);
-        if (await this.deleteAllCommands()) {
-            await this.registerCommands();
-        } else {
-            this.logger?.error(
-                `Failed to delete all commands, commands will not be registered!`
-            );
-        }
+        await this.registerCommands();
     }
 
     private registerEvent(eventName: string, event: Event): void {
@@ -208,38 +202,20 @@ export default class Bot extends Client {
             : Routes.applicationCommand(this.config.appId, commandId);
     }
 
-    private async deleteAllCommands(): Promise<boolean> {
-        let route = this.getCommandsRoute();
-        try {
-            const commands = await this.restAPI.get(route);
-            let promises: Promise<unknown>[] = [];
-            if (commands instanceof Array && commands.length > 0) {
-                for (const command of commands) {
-                    promises.push(
-                        this.restAPI.delete(this.getCommandRoute(command.id))
-                    );
-                }
-            }
-            await Promise.all(promises);
-            return true;
-        } catch (error) {
-            this.logger?.error(`Failed to delete all commands: ${error}`);
-        }
-        return false;
-    }
-
     private async registerCommands(): Promise<void> {
-        let route = this.getCommandsRoute();
+        const route = this.getCommandsRoute();
         try {
             const commandsJSON = this.commands.map((command) =>
                 command.builder.toJSON()
             );
-            await this.restAPI.put(route, { body: commandsJSON });
+            if (commandsJSON) {
+                await this.restAPI.put(route, { body: commandsJSON });
+            }
             this.logger?.info(
                 `Succesfully registered ${commandsJSON.length} commands`
             );
         } catch (error) {
-            this.logger?.error(`Error loading commands: ${error}`);
+            this.logger?.error(`Error registering commands: ${error}`);
         }
     }
 }
