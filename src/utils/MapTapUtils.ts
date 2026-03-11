@@ -191,7 +191,15 @@ async function parseAllMapTapMessagesForDate(
         if (!isMapTapScoreString(message.content)) {
             continue;
         }
-        const parsedScore = parseMapTapScoreForDate(message.content, date);
+        let parsedScore: ParsedMapTapScore;
+        try {
+            parsedScore = parseMapTapScoreForDate(message.content, date);
+        } catch (error) {
+            client.logger?.warn(
+                `Got error while parsing score for ${message.author.username} (${message.author.id}): ${error}`
+            );
+            continue;
+        }
         try {
             const score = await client.database.insertMapTapScore(
                 message.author.id,
