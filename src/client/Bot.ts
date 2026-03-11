@@ -153,8 +153,10 @@ export default class Bot extends Client {
     }
 
     public async run() {
-        this.login(this.config.token);
-        await this.registerCommands();
+        await Promise.all([
+            this.login(this.config.token),
+            this.registerCommands(),
+        ]);
     }
 
     private registerEvent(eventName: string, event: Event): void {
