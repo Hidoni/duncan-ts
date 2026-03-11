@@ -20,6 +20,7 @@ import {
     generateLeaderboardEmbed,
 } from '../../utils/LeaderboardUtils';
 import {
+    getDebug,
     getEnabled,
     getTotalScoresMap,
     runMapTapJobForDate,
@@ -159,7 +160,8 @@ export const builder = new SlashCommandBuilder()
             .setName('submit')
             .setDescription('Manually submit your MapTap scores!')
     )
-    .addSubcommand(
+if (getDebug()) {
+    builder.addSubcommand(
         new SlashCommandSubcommandBuilder()
             .setName('debug')
             .setDescription('Send a daily summary to your DMs!')
@@ -170,6 +172,7 @@ export const builder = new SlashCommandBuilder()
                     .setRequired(false)
             )
     );
+}
 
 export const guildOnly = (interaction: ChatInputCommandInteraction) => true;
 
