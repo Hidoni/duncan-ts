@@ -19,6 +19,7 @@ import {
     DEFAULT_EMBED_COLOR,
     LeaderboardMap,
 } from './LeaderboardUtils';
+import { getAllMessagesInChannel } from './MessageUtils';
 
 const MAPTAP_SCORE_REGEX =
     /www\.maptap\.gg\s+(\w+(?:\s+\d{1,2})?)\n(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+/;
@@ -223,10 +224,11 @@ async function parseAllMapTapMessagesForDate(
     date: Date
 ) {
     const nextDay = addDaysToDate(date, 1);
-    const yesterdayMessages = await mapTapChannel.messages.fetch({
-        after: dateToSnowflake(addDaysToDate(date, -1)),
-    });
-    for (const message of yesterdayMessages.values()) {
+    for await (const message of getAllMessagesInChannel(
+        mapTapChannel,
+        undefined,
+        dateToSnowflake(addDaysToDate(date, -1))
+    )) {
         if (!isMapTapScoreString(message.content)) {
             continue;
         }
