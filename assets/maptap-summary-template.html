@@ -75,6 +75,10 @@
             grid-row: 1;
         }
 
+        .score-card-round {
+            min-width: 6ch;
+        }
+
         .score-card-total {
             grid-column: 1 / -1;
             grid-row: 2;
@@ -97,11 +101,11 @@
                     src="{{avatar}}"
                 />
                 <div class="score-card-results">
-                    <span><span class="emoji">{{roundScoreToEmoji 1 firstRound}}</span> {{firstRound}}</span>
-                    <span><span class="emoji">{{roundScoreToEmoji 2 secondRound}}</span> {{secondRound}}</span>
-                    <span><span class="emoji">{{roundScoreToEmoji 3 thirdRound}}</span> {{thirdRound}}</span>
-                    <span><span class="emoji">{{roundScoreToEmoji 4 fourthRound}}</span> {{fourthRound}}</span>
-                    <span><span class="emoji">{{roundScoreToEmoji 5 fifthRound}}</span> {{fifthRound}}</span>
+                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 1 firstRound}}</span> {{firstRound}}</span>
+                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 2 secondRound}}</span> {{secondRound}}</span>
+                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 3 thirdRound}}</span> {{thirdRound}}</span>
+                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 4 fourthRound}}</span> {{fourthRound}}</span>
+                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 5 fifthRound}}</span> {{fifthRound}}</span>
                 </div>
                 <div class="score-card-total">Final score: {{finalScore}}</div>
             </div>
