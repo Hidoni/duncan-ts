@@ -255,7 +255,7 @@ async function parseAllMapTapMessagesForDate(
                 `Saving MapTap score for user ${message.author.username} (${
                     message.author.id
                 }) with score ${score.getFinalScore()} for date ${
-                    date.toISOString().split('T')[0]
+                    score.date.toISOString().split('T')[0]
                 }`
             );
         } catch (error) {
@@ -267,7 +267,7 @@ async function parseAllMapTapMessagesForDate(
                     `Score for user ${message.author.username} (${
                         message.author.id
                     }) for date ${
-                        date.toISOString().split('T')[0]
+                        parsedScore.date.toISOString().split('T')[0]
                     } already exists in the database, skipping...`
                 );
                 continue;
