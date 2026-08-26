@@ -96,16 +96,38 @@
         <div id="score-cards">
             {{#each scores}}
             <div class="score-card">
-                <img
-                    class="score-card-avatar"
-                    src="{{avatar}}"
-                />
+                <img class="score-card-avatar" src="{{avatar}}" />
                 <div class="score-card-results">
-                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 1 firstRound}}</span> {{firstRound}}</span>
-                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 2 secondRound}}</span> {{secondRound}}</span>
-                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 3 thirdRound}}</span> {{thirdRound}}</span>
-                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 4 fourthRound}}</span> {{fourthRound}}</span>
-                    <span class="score-card-round"><span class="emoji">{{roundScoreToEmoji 5 fifthRound}}</span> {{fifthRound}}</span>
+                    <span class="score-card-round"
+                        ><span class="emoji"
+                            >{{roundScoreToEmoji 1 firstRound}}</span
+                        >
+                        {{firstRound}}</span
+                    >
+                    <span class="score-card-round"
+                        ><span class="emoji"
+                            >{{roundScoreToEmoji 2 secondRound}}</span
+                        >
+                        {{secondRound}}</span
+                    >
+                    <span class="score-card-round"
+                        ><span class="emoji"
+                            >{{roundScoreToEmoji 3 thirdRound}}</span
+                        >
+                        {{thirdRound}}</span
+                    >
+                    <span class="score-card-round"
+                        ><span class="emoji"
+                            >{{roundScoreToEmoji 4 fourthRound}}</span
+                        >
+                        {{fourthRound}}</span
+                    >
+                    <span class="score-card-round"
+                        ><span class="emoji"
+                            >{{roundScoreToEmoji 5 fifthRound}}</span
+                        >
+                        {{fifthRound}}</span
+                    >
                 </div>
                 <div class="score-card-total">Final score: {{finalScore}}</div>
             </div>

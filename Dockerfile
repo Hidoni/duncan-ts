@@ -45,10 +45,8 @@ COPY package.json tsconfig.json ./
 RUN npm i
 
 COPY config ./config
+COPY scripts ./scripts
 COPY src ./src
-RUN npx tsc
-
-COPY assets ./assets
-COPY quirky-responses.txt prompts.json ./
+RUN npm run build
 
 ENTRYPOINT node -r dotenv/config /home/bot/bin/index.js

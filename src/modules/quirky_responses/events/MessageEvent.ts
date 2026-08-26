@@ -1,6 +1,7 @@
 import Conf from 'conf';
 import { Message, TextChannel } from 'discord.js';
 import { readFileSync } from 'fs';
+import path from 'path';
 import { setTimeout } from 'timers/promises';
 import Bot from '../../../client/Bot';
 import { EventHandler } from '../../../interfaces/Event';
@@ -37,7 +38,10 @@ const CHANNEL_CHANCE_MAP = new Map([
     [NO_VOWELS_CHANNEL, NO_VOWELS_CHANCE],
 ]);
 
-const QUIRKY_RESPONSES = readFileSync('./quirky-responses.txt', 'utf8')
+const QUIRKY_RESPONSES = readFileSync(
+    path.join(__dirname, '..', 'assets', 'quirky-responses.txt'),
+    'utf8'
+)
     .trim()
     .split('\n');
 

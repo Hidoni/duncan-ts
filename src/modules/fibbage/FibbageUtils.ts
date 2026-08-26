@@ -109,7 +109,7 @@ function convertCustomFibbagePromptsToRegularOnes(
 }
 
 export async function getFibbagePrompts(client: Bot): Promise<FibbagePrompts> {
-    const defaultPrompts = require('../../../prompts.json') as FibbagePrompts;
+    const defaultPrompts = require('./assets/prompts.json') as FibbagePrompts;
     const customPrompts = convertCustomFibbagePromptsToRegularOnes(
         await getAllCustomFibbagePrompts()
     );

@@ -12,6 +12,7 @@ import Conf from 'conf';
 import { SendableChannels, AttachmentBuilder, Guild } from 'discord.js';
 import { readFile } from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
+import path from 'path';
 import { promisify } from 'util';
 import Bot from '../../client/Bot';
 import {
@@ -330,7 +331,7 @@ function generateMapTapSummaryMessage(allScores: MapTapScore[], date: Date) {
 
 async function getMapTapSummaryTemplate(): Promise<string> {
     const template = await promisify(readFile)(
-        'assets/maptap-summary-template.html',
+        path.join(__dirname, 'assets', 'maptap-summary-template.html'),
         {
             encoding: 'utf-8',
         }

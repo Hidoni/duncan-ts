@@ -2,18 +2,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "typescript",
-            "tsconfig": "tsconfig.json",
+            "label": "build",
+            "type": "shell",
+            "command": "npm run build",
             "problemMatcher": ["$tsc"],
             "group": "build",
-            "label": "tsc: build - tsconfig.json",
             "dependsOn": ["clear output folder"]
         },
         {
             "label": "clear output folder",
             "type": "shell",
             "command": "rm -r ${workspaceFolder}/bin/ || true",
-            "group": "build",
+            "group": "build"
         }
     ]
 }
