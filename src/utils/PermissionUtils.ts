@@ -20,7 +20,10 @@ export function hasPermissions(
         return member.permissions.has(permissions, checkAdmin);
     }
     const userPermissions = BigInt(member.permissions);
-    return new PermissionsBitField(userPermissions).has(permissions, checkAdmin);
+    return new PermissionsBitField(userPermissions).has(
+        permissions,
+        checkAdmin
+    );
 }
 
 export function isUserAdmin(id: Snowflake) {

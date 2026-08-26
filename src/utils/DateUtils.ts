@@ -25,7 +25,9 @@ export function dateToSnowflake(date: Date): string {
 export function daysBetweenDates(first: Date, second: Date): number {
     const firstMidnight = midnightUTCDateForDate(first);
     const secondMidnight = midnightUTCDateForDate(second);
-    const diffInMs = Math.abs(firstMidnight.getTime() - secondMidnight.getTime());
+    const diffInMs = Math.abs(
+        firstMidnight.getTime() - secondMidnight.getTime()
+    );
     return Math.floor(diffInMs / DAY_IN_MILLISECONDS);
 }
 

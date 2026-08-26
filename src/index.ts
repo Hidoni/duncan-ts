@@ -1,5 +1,6 @@
 import log4js from 'log4js';
 import Bot from './client/Bot';
+import { discoverModules } from './client/ModuleManager';
 import path from 'path';
 import { IntentsBitField } from 'discord.js';
 
@@ -20,16 +21,18 @@ for (const envVar of REQUIRED_ENV_VARS) {
 
 const bot = new Bot(
     {
-        intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.GuildMembers, IntentsBitField.Flags.MessageContent],
+        intents: [
+            IntentsBitField.Flags.Guilds,
+            IntentsBitField.Flags.GuildMessages,
+            IntentsBitField.Flags.GuildMembers,
+            IntentsBitField.Flags.MessageContent,
+        ],
         partials: [],
         token: process.env.BOT_TOKEN!,
         appId: process.env.BOT_APPLICATION_ID!,
         database: process.env.DATABASE_PATH!,
         debugGuildId: process.env.DEBUG_GUILD_ID,
-        commandsFolder: path.join(__dirname, 'commands/'),
-        eventsFolder: path.join(__dirname, 'events/'),
-        componentHandlersFolder: path.join(__dirname, 'component_handlers/'),
-        modalHandlersFolder: path.join(__dirname, 'modal_handlers/'),
+        modules: discoverModules(path.join(__dirname, 'modules'), logger),
     },
     logger
 );

@@ -10,23 +10,6 @@ import {
 } from 'discord.js';
 import Bot from '../client/Bot';
 
-export async function getUserPreferredName(
-    client: Bot,
-    user: Snowflake,
-    guild: Guild
-) {
-    const name = await client.database.getName(user);
-    if (name) {
-        return name;
-    }
-    const guildUser = await guild.members.fetch(user);
-    const nickname = guildUser.nickname;
-    if (nickname) {
-        return nickname;
-    }
-    return guildUser.displayName;
-}
-
 export async function getRandomUserToMentionInGuild(
     guild: Guild,
     excluded: Snowflake[] | null,
@@ -71,7 +54,9 @@ export function getSafeReplyFunction(
         | MessageComponentInteraction
         | ModalSubmitInteraction
 ) {
-    return async (options: InteractionReplyOptions & InteractionEditReplyOptions) => {
+    return async (
+        options: InteractionReplyOptions & InteractionEditReplyOptions
+    ) => {
         try {
             await getReplyFunction(interaction)(options);
         } catch (error) {

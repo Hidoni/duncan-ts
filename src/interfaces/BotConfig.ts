@@ -1,3 +1,4 @@
+import { Module } from './Module';
 import { BitFieldResolvable, GatewayIntentsString, Partials } from 'discord.js';
 
 export default interface BotConfig {
@@ -7,8 +8,5 @@ export default interface BotConfig {
     database: string;
     debugGuildId?: string;
     partials: Partials[];
-    commandsFolder?: string;
-    eventsFolder?: string;
-    componentHandlersFolder?: string;
-    modalHandlersFolder?: string;
+    modules: Module[];
 }

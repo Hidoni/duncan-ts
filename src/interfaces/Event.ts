@@ -7,6 +7,6 @@ export interface EventHandler {
 
 export interface Event extends Loadable {
     name: string;
-    once: boolean;
+    once?: boolean;
     handler: EventHandler;
 }

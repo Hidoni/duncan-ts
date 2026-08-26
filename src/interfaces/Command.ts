@@ -1,6 +1,8 @@
 import {
     ContextMenuCommandBuilder,
     SlashCommandBuilder,
+    SlashCommandOptionsOnlyBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
 import {
     ChatInputCommandInteraction,
@@ -11,13 +13,16 @@ import {
 import Bot from '../client/Bot';
 import { Loadable } from './Loadable';
 
-export type CommandBuilderType =
+export type SlashCommandBuilderType =
     | SlashCommandBuilder
-    | ContextMenuCommandBuilder;
+    | SlashCommandOptionsOnlyBuilder
+    | SlashCommandSubcommandsOnlyBuilder;
+export type CommandBuilderType =
+    SlashCommandBuilderType | ContextMenuCommandBuilder;
 export type CommandInteractionType<Builder> =
-    Builder extends SlashCommandBuilder
-        ? ChatInputCommandInteraction
-        : ContextMenuCommandInteraction;
+    Builder extends ContextMenuCommandBuilder
+        ? ContextMenuCommandInteraction
+        : ChatInputCommandInteraction;
 
 export interface CommandHandler {
     (client: Bot, interaction: ChatInputCommandInteraction): Promise<void>;
@@ -27,14 +32,12 @@ export interface ContextMenuHandler {
 }
 
 export interface Command<Builder extends CommandBuilderType> extends Loadable {
-    handler: Builder extends SlashCommandBuilder
-        ? CommandHandler
-        : ContextMenuHandler;
+    handler: Builder extends ContextMenuCommandBuilder
+        ? ContextMenuHandler
+        : CommandHandler;
     builder: Builder;
-    guildOnly:
-        | ((interaction: CommandInteractionType<Builder>) => boolean)
-        | undefined;
-    permissions:
-        | ((interaction: CommandInteractionType<Builder>) => PermissionsString[])
-        | undefined;
+    guildOnly?: (interaction: CommandInteraction) => boolean | undefined;
+    permissions?: (
+        interaction: CommandInteraction
+    ) => PermissionsString[] | undefined;
 }

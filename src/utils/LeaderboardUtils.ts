@@ -1,4 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed, EmbedBuilder, MessageActionRowComponent, MessageActionRowComponentBuilder } from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    Embed,
+    EmbedBuilder,
+    MessageActionRowComponent,
+    MessageActionRowComponentBuilder,
+} from 'discord.js';
 
 export const DEFAULT_EMBED_COLOR: readonly [number, number, number] = [
     251, 177, 189,
