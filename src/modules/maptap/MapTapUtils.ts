@@ -10,7 +10,7 @@ import {
 } from '../../utils/DateUtils';
 import Conf from 'conf';
 import { SendableChannels, AttachmentBuilder, Guild } from 'discord.js';
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
 import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
 import { promisify } from 'util';
@@ -26,6 +26,8 @@ import {
     getMapTapScoresForDate,
     insertMapTapScore,
 } from './MapTapQueries';
+import { renderImageFromHtmlTemplate } from '../../utils/ImageUtils';
+import { formatDateAsLongMonthString } from '../../utils/StringUtils';
 
 const MAPTAP_SCORE_REGEX =
     /www\.maptap\.gg\s+(\w+(?:\s+\d{1,2})?)\n(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+\s+(\d{1,3})\S+/;
@@ -286,14 +288,6 @@ function getMapTapNumberForDate(date: Date): number {
     return daysBetweenDates(MAP_TAP_FIRST_DATE, date);
 }
 
-function formatDateForMapTap(date: Date): string {
-    return date.toLocaleString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-    });
-}
-
 function generateMapTapSummaryMessage(allScores: MapTapScore[], date: Date) {
     const topScore = allScores[0]?.getFinalScore() ?? 0;
     const topScorers = allScores.filter(
@@ -324,19 +318,18 @@ function generateMapTapSummaryMessage(allScores: MapTapScore[], date: Date) {
         .join('\n');
     return `MapTap #${getMapTapNumberForDate(
         date
-    )} scores (${formatDateForMapTap(
+    )} scores (${formatDateAsLongMonthString(
         date
     )}):\n${topScoreSummary}\n${remainingScoresSummary}`;
 }
 
 async function getMapTapSummaryTemplate(): Promise<string> {
-    const template = await promisify(readFile)(
+    return readFile(
         path.join(__dirname, 'assets', 'maptap-summary-template.html'),
         {
             encoding: 'utf-8',
         }
     );
-    return template;
 }
 
 function getMapTapSummaryImageWidth(scoreCount: number): number {
@@ -362,7 +355,6 @@ function getMapTapSummaryImageHeight(scoreCount: number): number {
 }
 
 async function generateMapTapSummaryImage(
-    client: Bot,
     allScores: MapTapScore[],
     date: Date,
     guild: Guild
@@ -385,42 +377,30 @@ async function generateMapTapSummaryImage(
         }))
     );
 
-    const image = await nodeHtmlToImage(
+    return renderImageFromHtmlTemplate(
+        await getMapTapSummaryTemplate(),
         {
-            html: await getMapTapSummaryTemplate(),
-            content: {
-                width: getMapTapSummaryImageWidth(scoresForTemplate.length),
-                height: getMapTapSummaryImageHeight(scoresForTemplate.length),
-                number: getMapTapNumberForDate(date),
-                date: formatDateForMapTap(date),
-                scores: scoresForTemplate,
+            width: getMapTapSummaryImageWidth(scoresForTemplate.length),
+            height: getMapTapSummaryImageHeight(scoresForTemplate.length),
+            number: getMapTapNumberForDate(date),
+            date: formatDateAsLongMonthString(date),
+            scores: scoresForTemplate,
+        },
+        {
+            roundScoreToEmoji: (round: number, score: number) => {
+                // MapTap emoji selection logic taken from website JS
+                const numEmojis = MAP_TAP_EMOJI.length;
+                let index = Math.min(
+                    numEmojis - 1,
+                    Math.floor((score / 100) * numEmojis)
+                );
+                if (index === 0) {
+                    index += (round + date.getUTCDate()) % 3;
+                }
+                return MAP_TAP_EMOJI[index] || '🤯';
             },
-            puppeteerArgs: {
-                args: ['--no-sandbox'],
-            },
-            handlebarsHelpers: {
-                roundScoreToEmoji: (round: number, score: number) => {
-                    // MapTap emoji selection logic taken from website JS
-                    const numEmojis = MAP_TAP_EMOJI.length;
-                    let index = Math.min(
-                        numEmojis - 1,
-                        Math.floor((score / 100) * numEmojis)
-                    );
-                    if (index === 0) {
-                        index += (round + date.getUTCDate()) % 3;
-                    }
-                    return MAP_TAP_EMOJI[index] || '🤯';
-                },
-            },
-        } as any // NOTE: node-html-to-image's typings are broken and don't support their own arguments, so we have to cast to any here
+        }
     );
-    if (!(image instanceof Buffer)) {
-        client.logger?.error(
-            'Failed to generate MapTap summary image, result is not a buffer??'
-        );
-        return null;
-    }
-    return image;
 }
 
 async function publishMapTapScoreSummaryForDate(
@@ -442,7 +422,6 @@ async function publishMapTapScoreSummaryForDate(
     }
     const summaryMessage = generateMapTapSummaryMessage(allScores, date);
     const mapTapSummaryImage = await generateMapTapSummaryImage(
-        client,
         allScores,
         date,
         guild

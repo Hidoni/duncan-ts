@@ -19,7 +19,10 @@ export async function* getAllMessagesInChannel(
         }
         messages = await channel.messages.fetch({
             limit: 100,
-            before: (before != null || after == null) ? messages.lastKey() : undefined,
+            before:
+                before != null || after == null
+                    ? messages.lastKey()
+                    : undefined,
             after: after != null ? messages.firstKey() : undefined,
         });
     }

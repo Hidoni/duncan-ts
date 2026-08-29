@@ -1,0 +1,409 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @font-face {
+            font-family: 'TwitterColorEmoji';
+            src: url('https://files.hidoni.com/Twemoji_COLRv1-17.0.2.ttf')
+                format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            font-display: block;
+            src: url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.3.0/files/inter-latin-400-normal.woff2') format('woff2');
+        }
+        
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 700;
+            font-display: block;
+            src: url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.3.0/files/inter-latin-700-normal.woff2') format('woff2');
+        }
+        
+        @font-face {
+            font-family: 'Inter';
+            font-style: italic;
+            font-weight: 400;
+            font-display: block;
+            src: url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.3.0/files/inter-latin-400-italic.woff2') format('woff2');
+        }
+
+        body {
+            --background-color: oklch(17.8% .014 295);
+            background-color: var(--background-color);
+            font-family: "Inter","Inter Fallback", sans-serif;
+            color: #f0f0f0;
+            width: {{width}}px;
+            height: {{height}}px;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #rngdle-scores {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #rngdle-title {
+            margin: 0;
+        }
+
+        #rngdle-date {
+            margin: 4px 0 16px 0;
+            opacity: 0.8;
+        }
+
+        #score-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            max-width: none;
+            margin: 0 auto;
+        }
+
+        .score-card {
+            border-radius: 30px;
+            padding: 24px;
+            box-shadow: 0 14px 34px -18px var(--glow);
+            background: radial-gradient(120% 140% at 50% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%), var(--background-color);
+            border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-transform: uppercase;
+            width: 580px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .score-card-top {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            grid-template-areas:
+                "avatar score"
+                "avatar stats"
+                "avatar poem";
+            column-gap: 30px;
+            row-gap: 0;
+            align-items: center;
+            justify-items: center;
+            width: 100%;
+        }
+
+        .avatar-container  { grid-area: avatar; }
+        .mini-card-num     { grid-area: score; justify-self: stretch; }
+        .score-card-poem   { grid-area: poem;  margin-top: 10px; }
+
+        .hero-stats {
+            grid-area: stats;
+            justify-self: stretch;
+            margin-top: 12px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .hero-rarity {
+            flex-shrink: 0;
+            font-size: 13px;
+            letter-spacing: .06em;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border-width: 2px;
+            min-width: 0;
+        }
+
+        .rank {
+            flex-shrink: 0;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: .04em;
+            color: #f0f0f0;
+            white-space: nowrap;
+        }
+
+        .score-card-avatar {
+            display: block;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            outline: #f0f0f0 3px solid;
+        }
+
+        .mini-card-num {
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: bold;
+            font-size: 32px;
+            text-align: center;
+            border: 3px solid color-mix(in srgb, var(--accent) 70%, var(--border));
+            box-shadow: 0 0 20px var(--glow);
+            background: radial-gradient(100% 100% at 50% 0%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 90%), var(--background-color);
+            color: var(--text-color);
+            text-shadow: 0 0 8px var(--text-color);
+            min-width: 220px;
+            line-height: 1;
+        }
+
+        .mini-card {
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-weight: bold;
+            font-size: 11px;
+            text-align: center;
+            border: 1.5px solid color-mix(in srgb, var(--accent) 60%, var(--border));
+            box-shadow: 0 0 8px var(--glow);
+            background: radial-gradient(100% 100% at 50% 0%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 80%), var(--background-color);
+            color: var(--text-color);
+            text-shadow: 0 0 3px rgba(0,0,0,0.5);
+            min-width: 60px;
+        }
+
+        .total-ep {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .total-ep-label {
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: .22em;
+            text-indent: .22em;
+            color: #f0f0f0;
+            opacity: .45;
+        }
+
+        .total-ep-value {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.1;
+            letter-spacing: -.01em;
+            color: #f0f0f0;
+            white-space: nowrap;
+        }
+
+        .score-card-poem {
+            font-style: italic;
+            font-size: 11px;
+            line-height: 1.4;
+            opacity: 0.7;
+            text-transform: none;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .score-card-poem::before { content: '\201C'; }
+        .score-card-poem::after  { content: '\201D'; }
+
+        .theme-mythic { --accent: #FF4D6D; --glow: rgba(255,77,109,.55); --text-color: oklch(96.7% .003 264.542); --border: #24262d; }
+        .theme-anomaly { --accent: #EA580C; --glow: rgba(234,88,12,.50); --text-color: oklch(75% .183 55.934); --border: #24262d; }
+        .theme-epic { --accent: #7C3AED; --glow: rgba(124,58,237,.50); --text-color: oklch(71.4% .203 305.504); --border: #24262d; }
+        .theme-rare { --accent: #2563EB; --glow: rgba(37,99,235,.45); --text-color: oklch(70.7% .165 254.624); --border: #24262d; }
+        .theme-uncommon { --accent: #059669; --glow: rgba(5,150,105,.40); --text-color: oklch(76.5% .177 163.223); --border: #24262d; }
+        .theme-common { --accent: #6B7280; --glow: rgba(107,114,128,.30); --text-color: oklch(92.8% .006 264.531); --border: #24262d; }
+        .theme-trash { --accent: #7C5A2E; --glow: rgba(124,90,46,.35); --text-color: oklch(87.9% .169 91.605); --border: #24262d; }
+
+        .score-card-results {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .result-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-sizing: border-box;
+        }
+
+        .result-top-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .emoji {
+            font-family: 'TwitterColorEmoji';
+            font-size: 28px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .result-name {
+            font-weight: bold;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ep-score {
+            --ep-gold: #FFB703;
+            --ep-ember: #F97316;
+
+            color: var(--ep-gold);
+            font-weight: bold;
+            font-size: 13px;
+            margin-left: auto;
+            flex-shrink: 0;
+
+            padding: 2.5px 8px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--ep-ember) 11%, var(--background-color));
+            border: 1.5px solid color-mix(in srgb, var(--ep-ember) 36%, var(--background-color));
+        }
+
+        .result-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            text-transform: none;
+        }
+
+        .emoji-only {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+        }
+
+        .more-text {
+            font-size: 11px;
+            font-weight: bold;
+            color: #f0f0f0;
+            opacity: 0.8;
+            margin-left: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .emoji-only .emoji {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div id="rngdle-scores">
+        <h1 id="rngdle-title">RNGdle</h1>
+        <h2 id="rngdle-date">{{date}}</h2>
+        <div id="score-cards">
+            {{#each scores}}
+            <div class="score-card theme-{{rarity}}">
+                <div class="score-card-top">
+                    <div class="avatar-container">
+                        <img class="score-card-avatar" src="{{avatar}}" alt="Avatar" />
+                    </div>
+
+                    <div class="mini-card-num">{{number}}</div>
+
+                    <div class="hero-stats">
+                        <div class="total-ep">
+                            <span class="total-ep-label">Total EP</span>
+                            <span class="total-ep-value number-format">{{totalEP}}</span>
+                        </div>
+
+                        <div class="mini-card hero-rarity">{{rarity}}</div>
+
+                        <div class="rank">{{percentile}}</div>
+                    </div>
+
+                    {{#if poem}}
+                    <div class="score-card-poem">{{poem}}</div>
+                    {{/if}}
+                </div>
+                
+                <div class="score-card-results">
+                    {{#each topBadges}}
+                    <div class="result-item">
+                        <div class="result-top-row">
+                            <span class="emoji">{{emoji}}</span>
+                            <span class="result-name">{{label}}</span>
+                            <span class="mini-card theme-{{rarity}}">{{rarity}}</span>
+                            <span class="ep-score">+<span class="number-format">{{ep}}</span> EP</span>
+                        </div>
+                        <div class="result-desc">{{desc}}</div>
+                    </div>
+                    {{/each}}
+                    <div class="result-item emoji-only">
+                        <span class="emoji emoji-container">{{remainingBadgeEmoji}}</span>
+                        <span class="more-text more-count"></span>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <script>
+    window.onload = function() {
+        document.querySelectorAll('.number-format').forEach(el => {
+            const rawNumber = parseFloat(el.innerText.replace(/[^0-9.-]+/g,""));
+            if (!isNaN(rawNumber)) {
+                el.innerText = rawNumber.toLocaleString();
+            }
+        });
+
+        document.querySelectorAll('.total-ep-value').forEach(el => {
+            let size = parseFloat(window.getComputedStyle(el).fontSize);
+            while (el.scrollWidth > el.clientWidth && size > 13) {
+                el.style.fontSize = (--size) + 'px';
+            }
+        });
+
+        document.querySelectorAll('.hero-stats').forEach(row => {
+            const val = row.querySelector('.total-ep-value');
+            if (!val) return;
+            let size = parseFloat(window.getComputedStyle(val).fontSize);
+            while (row.scrollWidth > row.clientWidth && size > 13) {
+                val.style.fontSize = (--size) + 'px';
+            }
+        });
+
+        document.querySelectorAll('.score-card').forEach((card) => {
+            const container = card.querySelector('.emoji-container');
+            const label = card.querySelector('.more-count');
+            if (!container || !label) return;
+
+            const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+            const emojis = [...segmenter.segment(container.textContent.trim())]
+                .map((entry) => entry.segment)
+                .filter((segment) => segment.trim());
+
+            container.replaceChildren(
+                ...emojis.map((emoji) => {
+                    const span = document.createElement('span');
+                    span.textContent = emoji;
+                    return span;
+                })
+            );
+
+            const row = container.parentElement;
+            let hidden = 0;
+            while (container.lastElementChild && row.scrollWidth > row.clientWidth) {
+                container.lastElementChild.remove();
+                hidden += 1;
+                label.textContent = `+${hidden} MORE`;
+            }
+        });
+    }
+    </script>
+</body>
+</html>
