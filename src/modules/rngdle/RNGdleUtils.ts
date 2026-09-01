@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { renderImageFromHtmlTemplate } from '../../utils/ImageUtils';
+import { fetchWithRetry } from '../../utils/FetchUtils';
 import { getAllRNGdleUsernames } from './RNGdleQueries';
 import { midnightUTCDateForDate } from '../../utils/DateUtils';
 import { formatDateAsLongMonthString } from '../../utils/StringUtils';
@@ -74,9 +75,11 @@ const config = new Conf();
 async function getRNGdleRollsForUserFromAPI(
     user: string
 ): Promise<RNGdleAPIResponse> {
-    const response = await fetch(`${RNGDLE_API_URL}/users/${user}/rolls`);
+    const response = await fetchWithRetry(
+        `${RNGDLE_API_URL}/users/${user}/rolls`
+    );
     if (!response.ok) {
-        throw new Error(`Failed to fetch RNGdle rolls: ${response.statusText}`);
+        throw new Error(`Failed to fetch RNGdle rolls: ${response.status}`);
     }
     return response.json();
 }
@@ -84,9 +87,9 @@ async function getRNGdleRollsForUserFromAPI(
 async function getRNGdleScoreFromAPI(
     score: number
 ): Promise<RNGdleScoreAPIResponse> {
-    const response = await fetch(`${RNGDLE_SCORE_API_URL}?n=${score}`);
+    const response = await fetchWithRetry(`${RNGDLE_SCORE_API_URL}?n=${score}`);
     if (!response.ok) {
-        throw new Error(`Failed to fetch RNGdle score: ${response.statusText}`);
+        throw new Error(`Failed to fetch RNGdle score: ${response.status}`);
     }
     return response.json();
 }
