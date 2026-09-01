@@ -113,7 +113,7 @@ function buildEmbed(
     const start = (page - 1) * context.pageSize;
     const pageEntries = entries.slice(start, start + context.pageSize);
     if (pageEntries.length === 0) {
-        return embed.setDescription('Nyo entries yet!');
+        return embed.setDescription('No entries yet!');
     }
     const keyLines: string[] = [];
     const valueLines: string[] = [];
@@ -173,13 +173,16 @@ function buildSwitcherRows(
         if (index % MAX_BUTTONS_PER_ROW === 0) {
             rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>());
         }
+        const isCurrent = board.key === currentKey;
         rows[rows.length - 1].addComponents(
             new ButtonBuilder()
                 .setLabel(board.label)
                 .setStyle(ButtonStyle.Secondary)
-                .setDisabled(board.key === currentKey)
+                .setDisabled(isCurrent)
                 .setCustomId(
-                    `${CUSTOM_ID_PREFIX}:${context.id}:${board.key}:${userId}:FIRST`
+                    isCurrent
+                        ? `${CUSTOM_ID_PREFIX}:${context.id}:${board.key}:${userId}:CURRENT` // Custom ID is required, but it would be duplicated if we used :FIRST so this is a dummy one
+                        : `${CUSTOM_ID_PREFIX}:${context.id}:${board.key}:${userId}:FIRST`
                 )
         );
     });

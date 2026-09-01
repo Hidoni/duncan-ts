@@ -5,13 +5,62 @@ import {
     SlashCommandBuilder,
     SlashCommandStringOption,
     SlashCommandSubcommandBuilder,
+    SlashCommandUserOption,
 } from 'discord.js';
 import Bot from '../../../client/Bot';
 import { CommandHandler } from '../../../interfaces/Command';
 import { getSafeReplyFunction } from '../../../utils/InteractionUtils';
 import { utcToday } from '../../../utils/DateUtils';
 import { getDebug, getEnabled, runRNGdleJobForDate } from '../RNGdleUtils';
-import { upsertRNGdleUsername } from '../RNGdleQueries';
+import { getAllRNGdleRolls, getAllRNGdleRollsForUser, getBottomRNGdleRollForEachUser, getTopRNGdleRollForEachUser, getTotalRNGdleEPForEachUser, TotalRNGdleEP, upsertRNGdleUsername } from '../RNGdleQueries';
+import { createLeaderboardGroup, defineBoard } from '../../../utils/LeaderboardUtils';
+import { RNGdleRoll } from '../models/RNGdleRoll';
+
+function formatRNGdleRoll(roll: RNGdleRoll): string {
+    return `${roll.number} (${roll.ep.toLocaleString()} EP)`;
+}
+
+export const leaderboard = createLeaderboardGroup(
+    { id: 'rngdle', title: 'RNGdle Leaderboard', defaultBoard: 'top' },
+    {
+        "top": defineBoard<RNGdleRoll>({
+            label: 'Highest EP Roll per User',
+            valueColumnName: 'Roll',
+            fetch: getTopRNGdleRollForEachUser,
+            mapEntry: (roll, rank) => [
+                `<@${roll.user}>`,
+                formatRNGdleRoll(roll),
+            ],
+        }),
+        "bottom": defineBoard<RNGdleRoll>({
+            label: 'Lowest EP Roll per User',
+            valueColumnName: 'Roll',
+            fetch: getBottomRNGdleRollForEachUser,
+            mapEntry: (roll, rank) => [
+                `<@${roll.user}>`,
+                formatRNGdleRoll(roll),
+            ],
+        }),
+        "lifetime": defineBoard<TotalRNGdleEP>({
+            label: 'Lifetime EP',
+            valueColumnName: 'EP',
+            fetch: getTotalRNGdleEPForEachUser,
+            mapEntry: (roll, rank) => [
+                `<@${roll.user}>`,
+                roll.totalEp.toString(),
+            ],
+        }),
+        "alltime": defineBoard<RNGdleRoll>({
+            label: 'All Rolls',
+            valueColumnName: 'Roll',
+            fetch: getAllRNGdleRolls,
+            mapEntry: (roll, rank) => [
+                `<@${roll.user}>`,
+                formatRNGdleRoll(roll),
+            ],
+        }),
+    }
+);
 
 const COMMANDS: { [key: string]: CommandHandler } = {
     username: async function (
@@ -30,6 +79,45 @@ const COMMANDS: { [key: string]: CommandHandler } = {
         client.logger?.info(
             `Set ${interaction.user.username}'s RNGdle username to ${username}`
         );
+    },
+    leaderboard: async function (
+        client: Bot,
+        interaction: ChatInputCommandInteraction
+    ): Promise<void> {
+        const board = interaction.options.getString('board') ?? undefined;
+        await leaderboard.reply(client, interaction, board);
+        client.logger?.debug(
+            `Generated initial RNGdle leaderboard for ${interaction.user.tag} (from command)`
+        );
+    },
+    stats: async function (
+        client: Bot,
+        interaction: ChatInputCommandInteraction
+    ): Promise<void> {
+        const user = interaction.options.getUser('user') ?? interaction.user;
+        const isSelf = user.id === interaction.user.id;
+        const rolls = await getAllRNGdleRollsForUser(user.id);
+        if (rolls.length === 0) {
+            await getSafeReplyFunction(
+                client,
+                interaction
+            )({
+                content: isSelf ? 'You have no RNGdle rolls yet!' : `<@${user.id}> has no RNGdle rolls yet!`,
+                ephemeral: true,
+            });
+            return;
+        }
+        const topRoll = rolls.reduce((prev, curr) => (curr.ep > prev.ep ? curr : prev));
+        const bottomRoll = rolls.reduce((prev, curr) => (curr.ep < prev.ep ? curr : prev));
+        const totalEp = rolls.reduce((sum, roll) => sum + roll.ep, 0);
+        const averageEp = totalEp / rolls.length;
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content: `Here are ${isSelf ? "your" : `<@${user.id}>'s`} RNGdle stats:\n\n- Total Rolls: ${rolls.length}\n- Top Roll: ${formatRNGdleRoll(topRoll)}\n- Bottom Roll: ${formatRNGdleRoll(bottomRoll)}\n- Total EP: ${totalEp.toLocaleString()}\n- Average EP per Roll: ${averageEp.toFixed(2)}`,
+            allowedMentions: { parse: [] }
+        });
     },
     debug: async function (
         client: Bot,
@@ -100,6 +188,37 @@ export const builder = new SlashCommandBuilder()
                     .setName('username')
                     .setDescription('Your RNGdle username')
                     .setRequired(true)
+            )
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
+            .setName('leaderboard')
+            .setDescription('View the RNGdle leaderboard!')
+            .addStringOption(
+                new SlashCommandStringOption()
+                    .setName('board')
+                    .setChoices(
+                        { name: 'Top Roll per User', value: 'top' },
+                        { name: 'Bottom Roll per User', value: 'bottom' },
+                        { name: 'Lifetime EP', value: 'lifetime' },
+                        { name: 'All Rolls', value: 'alltime' }
+
+                    )
+                    .setDescription(
+                        'The leaderboard board to view (default: top)'
+                    )
+                    .setRequired(false)
+            )
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
+            .setName('stats')
+            .setDescription('View a user\'s RNGdle stats!')
+            .addUserOption(
+                new SlashCommandUserOption()
+                    .setName('user')
+                    .setDescription('The user whose stats to view')
+                    .setRequired(false)
             )
     );
 if (getDebug()) {

@@ -6,7 +6,7 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { renderImageFromHtmlTemplate } from '../../utils/ImageUtils';
 import { fetchWithRetry } from '../../utils/FetchUtils';
-import { getAllRNGdleUsernames } from './RNGdleQueries';
+import { getAllRNGdleUsernames, insertRNGdleRoll } from './RNGdleQueries';
 import { midnightUTCDateForDate } from '../../utils/DateUtils';
 import { formatDateAsLongMonthString } from '../../utils/StringUtils';
 
@@ -155,6 +155,40 @@ function generateRNGdleSummaryMessage(allScores: RNGdleScore[], date: Date) {
     )}):\n${topScoreSummary}\n${remainingScoresSummary}`;
 }
 
+async function insertRNGdleRollForUserFromScore(
+    client: Bot,
+    id: string,
+    user: string,
+    date: Date,
+    score: RNGdleScore
+) {
+    try {
+        const roll = await insertRNGdleRoll(
+            user,
+            id,
+            date,
+            score.number,
+            score.score
+        );
+        client.logger?.info(
+            `Saving RNGdle roll for user ${user} with score ${roll.ep} for date ${roll.date.toISOString().split('T')[0]}`
+        );
+    } catch (error) {
+        if (
+            error instanceof Error &&
+            error.name === 'SequelizeUniqueConstraintError'
+        ) {
+            client.logger?.warn(
+                `Roll for user ${user} for date ${
+                    date.toISOString().split('T')[0]
+                } already exists in the database, skipping...`
+            );
+            return;
+        }
+        throw error;
+    }
+}
+
 async function getRNGdleScoresForDate(
     client: Bot,
     date: Date
@@ -177,6 +211,7 @@ async function getRNGdleScoresForDate(
                     user.user,
                     rollForDate
                 );
+                await insertRNGdleRollForUserFromScore(client, rollForDate.id, user.user, date, score);
                 allScores.push(score);
             }
         } catch (error) {
