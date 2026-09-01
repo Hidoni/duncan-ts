@@ -13,47 +13,36 @@ import {
 import Bot from '../../../client/Bot';
 import { CommandHandler } from '../../../interfaces/Command';
 import { getSafeReplyFunction } from '../../../utils/InteractionUtils';
-import {
-    generateLeaderboardComponentsRow,
-    generateLeaderboardEmbed,
-} from '../../../utils/LeaderboardUtils';
+import { createLeaderboard } from '../../../utils/LeaderboardUtils';
 import {
     getAllScoresForLeaderboard,
     getDebug,
     getEnabled,
     getTotalScoresMap,
-    leaderboardEmbedAttributes,
-    leaderboardMappingFunction,
     runMapTapJobForDate,
 } from '../MapTapUtils';
 import { dateAsLatestTimezone, utcToday } from '../../../utils/DateUtils';
+
+export const leaderboard = createLeaderboard(
+    { id: 'maptap', title: 'MapTap Leaderboard' },
+    {
+        valueColumnName: 'Total score',
+        fetch: async (client) =>
+            [
+                ...getTotalScoresMap(
+                    await getAllScoresForLeaderboard(client)
+                ).entries(),
+            ].sort(([, a], [, b]) => b - a),
+        mapEntry: ([user, total]) => [`<@${user}>`, total.toString()],
+    }
+);
 
 const COMMANDS: { [key: string]: CommandHandler } = {
     leaderboard: async function (
         client: Bot,
         interaction: ChatInputCommandInteraction
     ): Promise<void> {
-        const scores = getTotalScoresMap(
-            await getAllScoresForLeaderboard(client)
-        );
-        const leaderboardembed = generateLeaderboardEmbed(
-            Array.from(scores.entries()),
-            leaderboardMappingFunction,
-            1,
-            leaderboardEmbedAttributes
-        );
-        const leaderboardComponenetsRow = generateLeaderboardComponentsRow(
-            Array.from(scores.entries()),
-            1,
-            `map_tap_scores_leaderboard_${interaction.user.id}`
-        );
-        await getSafeReplyFunction(
-            client,
-            interaction
-        )({
-            embeds: [leaderboardembed],
-            components: [leaderboardComponenetsRow],
-        });
+        await leaderboard.reply(client, interaction);
     },
     submit: async function (
         client: Bot,
