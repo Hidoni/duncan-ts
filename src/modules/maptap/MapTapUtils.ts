@@ -15,11 +15,6 @@ import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
 import { promisify } from 'util';
 import Bot from '../../client/Bot';
-import {
-    EmbedAttributes,
-    DEFAULT_EMBED_COLOR,
-    LeaderboardMap,
-} from '../../utils/LeaderboardUtils';
 import { getAllMessagesInChannel } from '../../utils/MessageUtils';
 import {
     getAllMapTapScoresBeforeOrAtDate,
@@ -41,13 +36,6 @@ const BASE_IMAGE_SIZE = { width: 270, height: 270 };
 
 const JANUARY = 0;
 const DECEMBER = 11;
-
-export const leaderboardEmbedAttributes: EmbedAttributes = {
-    title: 'MapTap Leaderboard',
-    color: DEFAULT_EMBED_COLOR,
-    keyName: 'User',
-    valueName: 'Total score',
-};
 
 const config = new Conf();
 
@@ -453,10 +441,6 @@ export async function runMapTapJobForDate(
         guild
     );
 }
-
-export const leaderboardMappingFunction: LeaderboardMap<[string, number]> = (
-    value
-) => [`<@${value[0]}>`, value[1].toString()];
 
 export async function getAllScoresForLeaderboard(
     client: Bot

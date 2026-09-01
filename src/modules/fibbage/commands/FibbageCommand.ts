@@ -1,32 +1,18 @@
 import {
     SlashCommandBuilder,
     SlashCommandSubcommandBuilder,
-    SlashCommandSubcommandGroupBuilder,
 } from '@discordjs/builders';
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    ChatInputCommandInteraction,
-    CommandInteraction,
-    MessageActionRowComponentBuilder,
-    ModalActionRowComponentBuilder,
-    Snowflake,
-} from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import Bot from '../../../client/Bot';
 import { FibbageStats, FibbageStatsColumns } from '../models/FibbageStats';
 import { CommandHandler } from '../../../interfaces/Command';
 import { getEnabled, getRole } from '../FibbageUtils';
 import { getSafeReplyFunction } from '../../../utils/InteractionUtils';
 import {
-    DEFAULT_EMBED_COLOR,
-    generateLeaderboardComponentsRow,
-    generateLeaderboardEmbed,
-    LeaderboardMap,
+    createLeaderboardGroup,
+    defineBoard,
 } from '../../../utils/LeaderboardUtils';
 import { getFibbageStats, getFibbageStatsByColumn } from '../FibbageQueries';
-
-const MAX_COMPONENTS_PER_ROW = 5;
 
 interface LeaderboardSubcommandDetails {
     column: keyof FibbageStatsColumns;
@@ -80,99 +66,28 @@ const LEADERBOARD_SUBCOMMAND_TO_DETAILS: Record<
     },
 };
 
-function getLeaderboardEmbedAttributesForColumn(
-    subcommand: keyof typeof LEADERBOARD_SUBCOMMAND_TO_DETAILS
-) {
-    const subcommandDetails = LEADERBOARD_SUBCOMMAND_TO_DETAILS[subcommand];
-    return {
-        title: subcommandDetails.title,
-        color: DEFAULT_EMBED_COLOR,
-        keyName: 'User',
-        valueName: subcommandDetails.name,
-    };
-}
-
-function getLeaderboardMappingFunctionForColumn(
-    column: keyof FibbageStatsColumns
-): LeaderboardMap<FibbageStats> {
-    return (value: FibbageStats) => [
-        `<@${value.id}>`,
-        value[column].toString(),
-    ];
-}
-
-function getLeaderboardSwitcherActionRows(
-    currentSubcommand: keyof typeof LEADERBOARD_SUBCOMMAND_TO_DETAILS,
-    userId: Snowflake
-): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
-    const rows = [new ActionRowBuilder<MessageActionRowComponentBuilder>()];
-    let currentRow = rows[0];
-    for (const subcommand of Object.keys(LEADERBOARD_SUBCOMMAND_TO_DETAILS)) {
-        if (currentRow.components.length === MAX_COMPONENTS_PER_ROW) {
-            currentRow =
-                new ActionRowBuilder<MessageActionRowComponentBuilder>();
-            rows.push(currentRow);
-        }
-        const subcommandDetails = LEADERBOARD_SUBCOMMAND_TO_DETAILS[subcommand];
-        currentRow.addComponents(
-            new ButtonBuilder()
-                .setLabel(subcommandDetails.title)
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(subcommand === currentSubcommand)
-                .setCustomId(
-                    `fibbage_leaderboard_switcher_${subcommand}_${userId}_FIRST`
-                )
-        );
-    }
-    return rows;
-}
-
-export async function getLeaderboardFromSubcommand(
-    client: Bot,
-    subcommand: keyof typeof LEADERBOARD_SUBCOMMAND_TO_DETAILS,
-    userId: Snowflake,
-    page: number | 'FIRST' | 'LAST'
-) {
-    const columnOfInterest =
-        LEADERBOARD_SUBCOMMAND_TO_DETAILS[subcommand].column;
-    const stats = await getFibbageStatsByColumn(columnOfInterest);
-    if (page === 'FIRST') {
-        page = 1;
-    } else if (page === 'LAST') {
-        page = Math.ceil(stats.length / 10);
-    }
-    const leaderboardembed = generateLeaderboardEmbed(
-        stats,
-        getLeaderboardMappingFunctionForColumn(columnOfInterest),
-        page,
-        getLeaderboardEmbedAttributesForColumn(subcommand)
-    );
-    const leaderboardComponenetsRow = generateLeaderboardComponentsRow(
-        stats,
-        page,
-        `fibbage_leaderboard_${subcommand}_${userId}`
-    );
-    const outputActionRows = [leaderboardComponenetsRow].concat(
-        getLeaderboardSwitcherActionRows(subcommand, userId)
-    );
-    return { leaderboardembed, outputActionRows };
-}
+export const leaderboard = createLeaderboardGroup(
+    { id: 'fibbage', title: 'Fibbage', defaultBoard: 'points' },
+    Object.fromEntries(
+        Object.entries(LEADERBOARD_SUBCOMMAND_TO_DETAILS).map(
+            ([subcommand, details]) => [
+                subcommand,
+                defineBoard<FibbageStats>({
+                    label: details.title,
+                    valueColumnName: details.name,
+                    fetch: () => getFibbageStatsByColumn(details.column),
+                    mapEntry: (stats) => [
+                        `<@${stats.id}>`,
+                        stats[details.column].toString(),
+                    ],
+                }),
+            ]
+        )
+    )
+);
 
 async function handleLeaderboard(client: Bot, interaction: CommandInteraction) {
-    const { leaderboardembed, outputActionRows } =
-        await getLeaderboardFromSubcommand(
-            client,
-            'points',
-            interaction.user.id,
-            1
-        );
-    await getSafeReplyFunction(
-        client,
-        interaction
-    )({
-        embeds: [leaderboardembed],
-        components: outputActionRows,
-    });
+    await leaderboard.reply(client, interaction);
     client.logger?.debug(
         `Generated initial points leaderboard for ${interaction.user.tag} (from command)`
     );

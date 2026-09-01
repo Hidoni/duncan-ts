@@ -2,7 +2,6 @@ import { Module } from '../../interfaces/Module';
 import * as FibbageCommand from './commands/FibbageCommand';
 import * as FibbageAnswerButtonComponentHandler from './component_handlers/FibbageAnswerButtonComponentHandler';
 import * as FibbageDetailedResultsButtonComponentHandler from './component_handlers/FibbageDetailedResultsButtonComponentHandler';
-import * as FibbageLeaderboardComponentHandler from './component_handlers/FibbageLeaderboardComponentHandler';
 import * as FibbagePromptButtonComponentHandler from './component_handlers/FibbagePromptButtonComponentHandler';
 import * as FibbageQuestionButtonComponentHandler from './component_handlers/FibbageQuestionButtonComponentHandler';
 import * as FibbageSkipButtonComponentHandler from './component_handlers/FibbageSkipButtonComponentHandler';
@@ -24,7 +23,7 @@ const fibbageModule: Module = {
     componentHandlers: [
         FibbageAnswerButtonComponentHandler,
         FibbageDetailedResultsButtonComponentHandler,
-        FibbageLeaderboardComponentHandler,
+        FibbageCommand.leaderboard.componentHandler,
         FibbagePromptButtonComponentHandler,
         FibbageQuestionButtonComponentHandler,
         FibbageSkipButtonComponentHandler,
