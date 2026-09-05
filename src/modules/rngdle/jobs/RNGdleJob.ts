@@ -12,7 +12,7 @@ export const rule = new RecurrenceRule(
     undefined,
     undefined,
     0,
-    0,
+    30,
     0
 );
 rule.tz = 'Etc/UTC';
