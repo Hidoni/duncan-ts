@@ -48,10 +48,10 @@ interface RNGdleScoreAPIBadge {
 interface RNGdleScoreAPIResponse {
     number: number;
     totalEP: number;
+    rarity: Capitalize<RNGdleRarity>;
+    percentile: number;
     count: number;
     badges: RNGdleScoreAPIBadge[];
-    percentile: number;
-    tier: RNGdleRarity;
 }
 
 type RNGdleScoreBadge = Omit<RNGdleScoreAPIBadge, 'rarity'> & {
@@ -94,6 +94,10 @@ async function getRNGdleScoreFromAPI(
     return response.json();
 }
 
+function toRNGdleRarity(rarity: Capitalize<RNGdleRarity>): RNGdleRarity {
+    return rarity.toLowerCase() as RNGdleRarity;
+}
+
 async function getRNGdleScoreForAPIResponse(
     user: string,
     rngdleAPIResponse: RNGdleAPIRoll
@@ -109,16 +113,13 @@ async function getRNGdleScoreForAPIResponse(
         user: user,
         number: rngdleAPIResponse.number,
         score: rngdleAPIResponse.totalScore,
-        badges: scoreResponse.badges.map(
-            (badge) =>
-                ({
-                    ...badge,
-                    rarity: badge.rarity.toLowerCase(),
-                }) as RNGdleScoreBadge
-        ),
+        badges: scoreResponse.badges.map((badge) => ({
+            ...badge,
+            rarity: toRNGdleRarity(badge.rarity),
+        })),
         poem: rngdleAPIResponse.poem,
         percentile: scoreResponse.percentile,
-        rarity: scoreResponse.tier,
+        rarity: toRNGdleRarity(scoreResponse.rarity),
     };
 }
 
@@ -211,7 +212,13 @@ async function getRNGdleScoresForDate(
                     user.user,
                     rollForDate
                 );
-                await insertRNGdleRollForUserFromScore(client, rollForDate.id, user.user, date, score);
+                await insertRNGdleRollForUserFromScore(
+                    client,
+                    rollForDate.id,
+                    user.user,
+                    date,
+                    score
+                );
                 allScores.push(score);
             }
         } catch (error) {
