@@ -6,9 +6,14 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { renderImageFromHtmlTemplate } from '../../utils/ImageUtils';
 import { fetchWithRetry } from '../../utils/FetchUtils';
-import { getAllRNGdleUsernames, insertRNGdleRoll } from './RNGdleQueries';
+import {
+    getAllRNGdleUsernames,
+    getStoredRNGdleRollIdsByUser,
+    insertRNGdleRoll,
+} from './RNGdleQueries';
 import { midnightUTCDateForDate } from '../../utils/DateUtils';
 import { formatDateAsLongMonthString } from '../../utils/StringUtils';
+import { RNGdleUsername } from './models/RNGdleUsernames';
 
 const RNGDLE_API_URL = 'https://www.rngdle.com/api/';
 
@@ -25,6 +30,9 @@ interface RNGdleAPIRoll {
 
 interface RNGdleAPIResponse {
     rolls: RNGdleAPIRoll[];
+    limit: number;
+    offset: number;
+    hasMore: boolean;
 }
 
 const RNGDLE_SCORE_API_URL = process.env.RNGDLE_SCORE_API_URL;
@@ -73,10 +81,11 @@ const BASE_IMAGE_SIZE = { width: 620, height: 620 };
 const config = new Conf();
 
 async function getRNGdleRollsForUserFromAPI(
-    user: string
+    user: string,
+    offset: number = 0
 ): Promise<RNGdleAPIResponse> {
     const response = await fetchWithRetry(
-        `${RNGDLE_API_URL}/users/${user}/rolls`
+        `${RNGDLE_API_URL}/users/${user}/rolls?offset=${offset}`
     );
     if (!response.ok) {
         throw new Error(`Failed to fetch RNGdle rolls: ${response.status}`);
@@ -347,6 +356,68 @@ async function publishRNGdleScoreSummaryForDate(
         allowedMentions: { parse: [] },
     });
 }
+async function backfillRNGdleRollsForUser(
+    client: Bot,
+    user: RNGdleUsername,
+    storedRollIds: Set<string>
+): Promise<number> {
+    let insertedCount = 0;
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore) {
+        const page = await getRNGdleRollsForUserFromAPI(
+            user.rngdleUsername,
+            offset
+        );
+        const newRolls = page.rolls.filter(
+            (roll) => !storedRollIds.has(roll.id)
+        );
+        for (const roll of newRolls) {
+            try {
+                const score = await getRNGdleScoreForAPIResponse(
+                    user.user,
+                    roll
+                );
+                await insertRNGdleRollForUserFromScore(
+                    client,
+                    roll.id,
+                    user.user,
+                    midnightUTCDateForDate(new Date(roll.rolledAt)),
+                    score
+                );
+                insertedCount++;
+            } catch (error) {
+                client.logger?.error(
+                    `Error backfilling RNGdle roll ${roll.id} for user ${user.user}: ${error}`
+                );
+            }
+        }
+        hasMore = page.hasMore && page.rolls.length > 0;
+        offset += page.rolls.length;
+    }
+    return insertedCount;
+}
+
+export async function backfillRNGdleRolls(client: Bot): Promise<number> {
+    const storedRollIdsByUser = await getStoredRNGdleRollIdsByUser();
+    let insertedCount = 0;
+    for (const user of await getAllRNGdleUsernames()) {
+        try {
+            insertedCount += await backfillRNGdleRollsForUser(
+                client,
+                user,
+                storedRollIdsByUser.get(user.user) ?? new Set()
+            );
+        } catch (error) {
+            client.logger?.error(
+                `Error backfilling RNGdle rolls for user ${user.user}: ${error}`
+            );
+        }
+    }
+    client.logger?.info(`Backfilled ${insertedCount} RNGdle rolls`);
+    return insertedCount;
+}
+
 export function runRNGdleJobForDate(
     client: Bot,
     date: Date,

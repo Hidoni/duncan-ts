@@ -11,9 +11,25 @@ import Bot from '../../../client/Bot';
 import { CommandHandler } from '../../../interfaces/Command';
 import { getSafeReplyFunction } from '../../../utils/InteractionUtils';
 import { utcToday } from '../../../utils/DateUtils';
-import { getDebug, getEnabled, runRNGdleJobForDate } from '../RNGdleUtils';
-import { getAllRNGdleRolls, getAllRNGdleRollsForUser, getBottomRNGdleRollForEachUser, getTopRNGdleRollForEachUser, getTotalRNGdleEPForEachUser, TotalRNGdleEP, upsertRNGdleUsername } from '../RNGdleQueries';
-import { createLeaderboardGroup, defineBoard } from '../../../utils/LeaderboardUtils';
+import {
+    backfillRNGdleRolls,
+    getDebug,
+    getEnabled,
+    runRNGdleJobForDate,
+} from '../RNGdleUtils';
+import {
+    getAllRNGdleRolls,
+    getAllRNGdleRollsForUser,
+    getBottomRNGdleRollForEachUser,
+    getTopRNGdleRollForEachUser,
+    getTotalRNGdleEPForEachUser,
+    TotalRNGdleEP,
+    upsertRNGdleUsername,
+} from '../RNGdleQueries';
+import {
+    createLeaderboardGroup,
+    defineBoard,
+} from '../../../utils/LeaderboardUtils';
 import { RNGdleRoll } from '../models/RNGdleRoll';
 
 function formatRNGdleRoll(roll: RNGdleRoll): string {
@@ -23,7 +39,7 @@ function formatRNGdleRoll(roll: RNGdleRoll): string {
 export const leaderboard = createLeaderboardGroup(
     { id: 'rngdle', title: 'RNGdle Leaderboard', defaultBoard: 'top' },
     {
-        "top": defineBoard<RNGdleRoll>({
+        top: defineBoard<RNGdleRoll>({
             label: 'Highest EP Roll per User',
             valueColumnName: 'Roll',
             fetch: getTopRNGdleRollForEachUser,
@@ -32,7 +48,7 @@ export const leaderboard = createLeaderboardGroup(
                 formatRNGdleRoll(roll),
             ],
         }),
-        "bottom": defineBoard<RNGdleRoll>({
+        bottom: defineBoard<RNGdleRoll>({
             label: 'Lowest EP Roll per User',
             valueColumnName: 'Roll',
             fetch: getBottomRNGdleRollForEachUser,
@@ -41,7 +57,7 @@ export const leaderboard = createLeaderboardGroup(
                 formatRNGdleRoll(roll),
             ],
         }),
-        "lifetime": defineBoard<TotalRNGdleEP>({
+        lifetime: defineBoard<TotalRNGdleEP>({
             label: 'Lifetime EP',
             valueColumnName: 'EP',
             fetch: getTotalRNGdleEPForEachUser,
@@ -50,7 +66,7 @@ export const leaderboard = createLeaderboardGroup(
                 roll.totalEp.toString(),
             ],
         }),
-        "alltime": defineBoard<RNGdleRoll>({
+        alltime: defineBoard<RNGdleRoll>({
             label: 'All Rolls',
             valueColumnName: 'Roll',
             fetch: getAllRNGdleRolls,
@@ -102,21 +118,43 @@ const COMMANDS: { [key: string]: CommandHandler } = {
                 client,
                 interaction
             )({
-                content: isSelf ? 'You have no RNGdle rolls yet!' : `<@${user.id}> has no RNGdle rolls yet!`,
+                content: isSelf
+                    ? 'You have no RNGdle rolls yet!'
+                    : `<@${user.id}> has no RNGdle rolls yet!`,
                 ephemeral: true,
             });
             return;
         }
-        const topRoll = rolls.reduce((prev, curr) => (curr.ep > prev.ep ? curr : prev));
-        const bottomRoll = rolls.reduce((prev, curr) => (curr.ep < prev.ep ? curr : prev));
+        const topRoll = rolls.reduce((prev, curr) =>
+            curr.ep > prev.ep ? curr : prev
+        );
+        const bottomRoll = rolls.reduce((prev, curr) =>
+            curr.ep < prev.ep ? curr : prev
+        );
         const totalEp = rolls.reduce((sum, roll) => sum + roll.ep, 0);
         const averageEp = totalEp / rolls.length;
         await getSafeReplyFunction(
             client,
             interaction
         )({
-            content: `Here are ${isSelf ? "your" : `<@${user.id}>'s`} RNGdle stats:\n\n- Total Rolls: ${rolls.length}\n- Top Roll: ${formatRNGdleRoll(topRoll)}\n- Bottom Roll: ${formatRNGdleRoll(bottomRoll)}\n- Total EP: ${totalEp.toLocaleString()}\n- Average EP per Roll: ${averageEp.toFixed(2)}`,
-            allowedMentions: { parse: [] }
+            content: `Here are ${isSelf ? 'your' : `<@${user.id}>'s`} RNGdle stats:\n\n- Total Rolls: ${rolls.length}\n- Top Roll: ${formatRNGdleRoll(topRoll)}\n- Bottom Roll: ${formatRNGdleRoll(bottomRoll)}\n- Total EP: ${totalEp.toLocaleString()}\n- Average EP per Roll: ${averageEp.toFixed(2)}`,
+            allowedMentions: { parse: [] },
+        });
+    },
+    backfill: async function (
+        client: Bot,
+        interaction: ChatInputCommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+        const insertedCount = await backfillRNGdleRolls(client);
+        await getSafeReplyFunction(
+            client,
+            interaction
+        )({
+            content: `Backfilled ${insertedCount} missing RNGdle roll${
+                insertedCount === 1 ? '' : 's'
+            }!`,
+            ephemeral: true,
         });
     },
     debug: async function (
@@ -202,7 +240,6 @@ export const builder = new SlashCommandBuilder()
                         { name: 'Bottom Roll per User', value: 'bottom' },
                         { name: 'Lifetime EP', value: 'lifetime' },
                         { name: 'All Rolls', value: 'alltime' }
-
                     )
                     .setDescription(
                         'The leaderboard board to view (default: top)'
@@ -213,12 +250,19 @@ export const builder = new SlashCommandBuilder()
     .addSubcommand(
         new SlashCommandSubcommandBuilder()
             .setName('stats')
-            .setDescription('View a user\'s RNGdle stats!')
+            .setDescription("View a user's RNGdle stats!")
             .addUserOption(
                 new SlashCommandUserOption()
                     .setName('user')
                     .setDescription('The user whose stats to view')
                     .setRequired(false)
+            )
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
+            .setName('backfill')
+            .setDescription(
+                'Fetch and save any RNGdle rolls missing from the database'
             )
     );
 if (getDebug()) {
@@ -241,7 +285,9 @@ export const permissions = (
     interaction: CommandInteraction
 ): PermissionsString[] =>
     interaction.isChatInputCommand() &&
-    interaction.options.getSubcommand(false) === 'debug'
+    ['backfill', 'debug'].includes(
+        interaction.options.getSubcommand(false) ?? ''
+    )
         ? ['Administrator']
         : [];
 

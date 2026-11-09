@@ -30,7 +30,7 @@ export async function getAllRNGdleUsernames(): Promise<RNGdleUsername[]> {
 
 export async function getAllRNGdleRolls(): Promise<RNGdleRoll[]> {
     return RNGdleRoll.findAll({
-        order: [[col('ep'), 'DESC']]
+        order: [[col('ep'), 'DESC']],
     });
 }
 
@@ -52,9 +52,7 @@ export async function getBottomRNGdleRollForEachUser(): Promise<RNGdleRoll[]> {
 
 export type TotalRNGdleEP = { user: string; totalEp: number };
 
-export async function getTotalRNGdleEPForEachUser(): Promise<
-    TotalRNGdleEP[]
-> {
+export async function getTotalRNGdleEPForEachUser(): Promise<TotalRNGdleEP[]> {
     return RNGdleRoll.findAll({
         attributes: ['user', [fn('SUM', col('ep')), 'totalEp']],
         group: ['user'],
@@ -86,4 +84,18 @@ export async function insertRNGdleRoll(
         number: number,
         ep: ep,
     });
+}
+
+export async function getStoredRNGdleRollIdsByUser(): Promise<
+    Map<Snowflake, Set<string>>
+> {
+    const rolls = await RNGdleRoll.findAll({ attributes: ['user', 'id'] });
+    const idsByUser = new Map<Snowflake, Set<string>>();
+    for (const { user, id } of rolls) {
+        if (!idsByUser.has(user)) {
+            idsByUser.set(user, new Set());
+        }
+        idsByUser.get(user)!.add(id);
+    }
+    return idsByUser;
 }
